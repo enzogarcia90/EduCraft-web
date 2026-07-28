@@ -20,7 +20,7 @@ This separation keeps the public website easy to deploy while avoiding accidenta
 
 ## Deployment
 
-This folder is designed to be published as a static site with GitHub Pages.
+This repository is designed to be published as a static site with GitHub Pages.
 
 Suggested public routes:
 
@@ -29,3 +29,7 @@ Suggested public routes:
 - `/dashboard/` dashboard shell.
 
 Dynamic data, authentication, telemetry and Minecraft servers must run outside GitHub Pages on private infrastructure.
+
+## GitHub Pages Setup
+
+In the GitHub repository settings, set Pages to deploy from GitHub Actions. After that, every push to `main` publishes the static site automatically.
