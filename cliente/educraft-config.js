@@ -1,0 +1,1 @@
+window.EDUCRAFT_API_BASE_URL = "http://100.100.44.92:18081";
