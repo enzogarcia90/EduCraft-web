@@ -30,6 +30,18 @@ Suggested public routes:
 
 Dynamic data, authentication, telemetry and Minecraft servers must run outside GitHub Pages on private infrastructure.
 
+## What Deploys Where
+
+- `EduCraft-web`: public static website, `/cliente/` static client files and `/dashboard/` public shell. Deploys to GitHub Pages.
+- `EduCraft`: private source repository for backend, client source, plugins, docs and internal infrastructure. Do not publish this repository as the public website.
+- Go backend API: deploys to the Windows server under `C:\EduCraftBackend`, runs as scheduled task `EduCraftAPI`, listens internally on `127.0.0.1:18080`.
+- Public API domain: `https://educraftes.duckdns.org`, served by the separated IIS site `EduCraft API` with Let's Encrypt certificate from win-acme.
+- Client API config: `cliente/educraft-config.js` must point to `https://educraftes.duckdns.org`.
+- Discord bot/setup: runs separately with its own `.env`; do not put Discord tokens in this repository.
+- Paper and Velocity servers are separate and are not deployed as part of this static web repo.
+
+Do not deploy EduCraft backend code, private `.env` files, server binaries or ICServices files to this repository.
+
 ## GitHub Pages Setup
 
 In the GitHub repository settings, set Pages to deploy from GitHub Actions. After that, every push to `main` publishes the static site automatically.
