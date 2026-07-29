@@ -2,11 +2,13 @@ const canvas = document.getElementById("heroScene");
 
 if (canvas) {
 	const ctx = canvas.getContext("2d");
-	const palette = ["#1fa477", "#326ee8", "#e2b942", "#bd634b", "#7461cc", "#17201d"];
+	const palette = ["#15986f", "#286fe3", "#d5a92f", "#bd6149", "#6557c8", "#16211d"];
+	const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 	let width = 0;
 	let height = 0;
 	let blocks = [];
-	let links = [];
+	let nodes = [];
+	let lastFrame = 0;
 
 	function resize() {
 		const ratio = window.devicePixelRatio || 1;
@@ -16,84 +18,136 @@ if (canvas) {
 		canvas.height = Math.floor(height * ratio);
 		ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 		blocks = createBlocks();
-		links = createLinks();
+		nodes = createNodes();
+		draw(0);
 	}
 
 	function createBlocks() {
 		const list = [];
-		const startX = width < 720 ? width * 0.12 : width * 0.48;
-		const cols = Math.max(5, Math.ceil((width - startX) / 118));
-		const rows = Math.max(5, Math.ceil(height / 98));
+		const startX = width < 720 ? width * 0.18 : width * 0.47;
+		const cols = Math.max(5, Math.ceil((width - startX) / 108));
+		const rows = Math.max(6, Math.ceil(height / 88));
+
 		for (let y = 0; y < rows; y += 1) {
 			for (let x = 0; x < cols; x += 1) {
-				if ((x + y) % 3 === 1) {
+				if ((x * 2 + y) % 5 === 2) {
 					continue;
 				}
+
 				list.push({
-					x: startX + x * 118 + ((y % 2) * 34),
-					y: y * 98 + 26,
-					size: 24 + ((x + y) % 5) * 7,
+					x: startX + x * 108 + ((y % 2) * 36),
+					y: y * 88 + 18,
+					size: 22 + ((x + y) % 5) * 7,
 					color: palette[(x * 2 + y) % palette.length],
-					speed: 0.16 + ((x + y) % 5) * 0.03,
-					offset: (x + y) * 0.68
+					speed: 0.12 + ((x + y) % 5) * 0.028,
+					offset: (x * 1.7 + y * 0.9),
+					tilt: ((x + y) % 4) - 1.5
 				});
 			}
 		}
+
 		return list;
 	}
 
-	function createLinks() {
+	function createNodes() {
 		const list = [];
-		const startX = width < 720 ? width * 0.18 : width * 0.55;
-		const count = Math.max(6, Math.floor((width - startX) / 110));
+		const startX = width < 720 ? width * 0.1 : width * 0.52;
+		const count = Math.max(9, Math.floor((width - startX) / 82));
+
 		for (let i = 0; i < count; i += 1) {
 			list.push({
-				x: startX + i * 112,
-				y: height * (0.2 + ((i * 29) % 52) / 100),
-				offset: i * 0.8
+				x: startX + i * 82,
+				y: height * (0.18 + ((i * 23) % 58) / 100),
+				radius: 3 + (i % 3),
+				offset: i * 0.74
 			});
 		}
+
 		return list;
 	}
 
 	function draw(time) {
 		const base = ctx.createLinearGradient(0, 0, width, height);
 		base.addColorStop(0, "#f8f7ef");
-		base.addColorStop(0.5, "#eef7f1");
-		base.addColorStop(1, "#e9eefc");
+		base.addColorStop(0.46, "#edf6ef");
+		base.addColorStop(1, "#dfeefe");
 		ctx.fillStyle = base;
 		ctx.fillRect(0, 0, width, height);
 
+		drawGrid(time);
 		drawNetwork(time);
+
 		for (const block of blocks) {
-			const lift = Math.sin(time * block.speed + block.offset) * 7;
-			drawBlock(block.x, block.y + lift, block.size, block.color);
+			const lift = Math.sin(time * block.speed + block.offset) * (reduceMotion.matches ? 0 : 7);
+			drawBlock(block.x, block.y + lift, block.size, block.color, block.tilt);
 		}
+	}
+
+	function drawGrid(time) {
+		ctx.save();
+		ctx.globalAlpha = 0.26;
+		ctx.strokeStyle = "#16211d";
+		ctx.lineWidth = 1;
+		const drift = reduceMotion.matches ? 0 : (time * 8) % 52;
+
+		for (let x = width * 0.43 - drift; x < width + 80; x += 52) {
+			ctx.beginPath();
+			ctx.moveTo(x, 0);
+			ctx.lineTo(x - height * 0.32, height);
+			ctx.stroke();
+		}
+
+		for (let y = -80 + drift; y < height + 80; y += 52) {
+			ctx.beginPath();
+			ctx.moveTo(width * 0.43, y);
+			ctx.lineTo(width, y + (width * 0.22));
+			ctx.stroke();
+		}
+
+		ctx.restore();
 	}
 
 	function drawNetwork(time) {
 		ctx.save();
-		ctx.globalAlpha = 0.32;
-		ctx.strokeStyle = "#17201d";
-		ctx.lineWidth = 1.4;
-		for (let i = 0; i < links.length - 1; i += 1) {
-			const a = links[i];
-			const b = links[i + 1];
-			const ay = a.y + Math.sin(time * 0.28 + a.offset) * 9;
-			const by = b.y + Math.sin(time * 0.28 + b.offset) * 9;
+		ctx.globalAlpha = 0.36;
+		ctx.strokeStyle = "#16211d";
+		ctx.lineWidth = 1.35;
+
+		for (let i = 0; i < nodes.length - 1; i += 1) {
+			const a = nodes[i];
+			const b = nodes[i + 1];
+			const ay = nodeY(a, time);
+			const by = nodeY(b, time);
 			ctx.beginPath();
 			ctx.moveTo(a.x, ay);
 			ctx.lineTo(b.x, by);
 			ctx.stroke();
 		}
+
+		for (const node of nodes) {
+			ctx.fillStyle = palette[Math.floor(node.offset * 10) % palette.length];
+			ctx.beginPath();
+			ctx.arc(node.x, nodeY(node, time), node.radius, 0, Math.PI * 2);
+			ctx.fill();
+		}
+
 		ctx.restore();
 	}
 
-	function drawBlock(x, y, size, color) {
+	function nodeY(node, time) {
+		return node.y + Math.sin(time * 0.28 + node.offset) * (reduceMotion.matches ? 0 : 10);
+	}
+
+	function drawBlock(x, y, size, color, tilt) {
 		const depth = size * 0.42;
 		ctx.save();
 		ctx.translate(x, y);
-		ctx.fillStyle = shade(color, 25);
+		ctx.rotate((tilt * Math.PI) / 180);
+		ctx.shadowColor = "rgba(22, 33, 29, 0.16)";
+		ctx.shadowBlur = 16;
+		ctx.shadowOffsetY = 12;
+
+		ctx.fillStyle = shade(color, 24);
 		ctx.beginPath();
 		ctx.moveTo(0, depth);
 		ctx.lineTo(size, 0);
@@ -102,6 +156,7 @@ if (canvas) {
 		ctx.closePath();
 		ctx.fill();
 
+		ctx.shadowColor = "transparent";
 		ctx.fillStyle = color;
 		ctx.beginPath();
 		ctx.moveTo(0, depth);
@@ -119,6 +174,10 @@ if (canvas) {
 		ctx.lineTo(depth, size + depth * 1.55);
 		ctx.closePath();
 		ctx.fill();
+
+		ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+		ctx.lineWidth = 1;
+		ctx.strokeRect(2, depth + 2, Math.max(4, size - 4), Math.max(4, size - 4));
 		ctx.restore();
 	}
 
@@ -135,11 +194,16 @@ if (canvas) {
 	}
 
 	function animate(ms) {
-		draw(ms / 1000);
+		const seconds = ms / 1000;
+		if (seconds - lastFrame > 1 / 45) {
+			draw(seconds);
+			lastFrame = seconds;
+		}
 		requestAnimationFrame(animate);
 	}
 
 	window.addEventListener("resize", resize);
+	reduceMotion.addEventListener("change", resize);
 	resize();
 	requestAnimationFrame(animate);
 }
