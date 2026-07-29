@@ -1,1 +1,1 @@
-window.EDUCRAFT_API_BASE_URL = "https://100.100.44.92:334";
+window.EDUCRAFT_API_BASE_URL = "https://educraftes.duckdns.org";
