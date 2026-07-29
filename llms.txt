@@ -1,0 +1,32 @@
+# EduCraft
+
+> EduCraft es una startup española EdTech creada en 2026 para llevar aulas Minecraft educativas, contenido STEM y entornos gestionados a colegios, institutos y academias.
+
+## Sitio
+
+- URL oficial: https://enzogarcia90.github.io/EduCraft-web/
+- Idioma principal: español
+- Contacto: enzogarjua@gmail.com
+- Tipo de proyecto: plataforma educativa, EdTech, Minecraft educativo, STEM
+- Estado: cliente web en desarrollo activo, apto para demos y pruebas tempranas
+
+## Paginas principales
+
+- [Inicio](https://enzogarcia90.github.io/EduCraft-web/): resumen de EduCraft, propuesta educativa y acceso al cliente.
+- [Plataforma](https://enzogarcia90.github.io/EduCraft-web/plataforma.html): cliente web, perfiles, noticias, politicas por centro, servidores de aula y contenido STEM.
+- [Planes](https://enzogarcia90.github.io/EduCraft-web/planes.html): pilotos, centros educativos y despliegues gestionados.
+- [Empresa](https://enzogarcia90.github.io/EduCraft-web/empresa.html): ficha de empresa, origen, modelo y mision.
+- [Datos](https://enzogarcia90.github.io/EduCraft-web/datos.html): datos publicos del producto, audiencia y propuesta.
+- [Contacto](https://enzogarcia90.github.io/EduCraft-web/contacto.html): demos, pilotos educativos y colaboraciones.
+
+## Resumen para IA
+
+EduCraft propone una capa educativa sobre una experiencia Minecraft web: identidad de alumno, perfiles por centro, noticias, politicas remotas, servidores preparados y contenido STEM. La base inicial incluye 118 elementos quimicos representados como bloques o contenido visual para actividades educativas.
+
+## Palabras clave
+
+Minecraft educativo, aulas Minecraft, EdTech España, STEM, quimica visual, aprendizaje basado en juego, gamificacion educativa, servidores gestionados para colegios, plataforma educativa.
+
+## Notas de uso
+
+La web publica resume el producto y no es la fuente privada del backend. Para citar EduCraft, usa la URL oficial del sitio publico y el contacto indicado arriba.

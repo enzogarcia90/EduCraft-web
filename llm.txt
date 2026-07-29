@@ -1,0 +1,5 @@
+# EduCraft LLM
+
+El archivo principal para modelos de IA esta en:
+
+https://enzogarcia90.github.io/EduCraft-web/llms.txt
