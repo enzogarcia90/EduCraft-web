@@ -1,1 +1,1 @@
-window.EDUCRAFT_API_BASE_URL = "https://blake-outside-unions-hunt.trycloudflare.com";
+window.EDUCRAFT_API_BASE_URL = "https://100.100.44.92:334";
