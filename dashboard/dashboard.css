@@ -250,6 +250,10 @@ body.portal-app * {
 	width: min(860px, 100%);
 }
 
+.register-card .auth-links {
+	margin-top: 24px;
+}
+
 .register-progress {
 	display: grid;
 	gap: 10px;
@@ -309,19 +313,8 @@ body.portal-app * {
 
 .portal-form .register-step.is-active {
 	display: grid;
-	animation: registerStepIn 180ms ease both;
-}
-
-@keyframes registerStepIn {
-	from {
-		opacity: 0;
-		transform: translateY(6px);
-	}
-
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
+	position: relative;
+	z-index: 1;
 }
 
 .portal-form legend {
@@ -374,15 +367,19 @@ body.portal-app * {
 }
 
 .register-nav {
-	display: grid;
-	grid-template-columns: minmax(120px, auto) minmax(0, 1fr);
+	display: flex;
+	position: relative;
+	z-index: 2;
+	flex-wrap: wrap;
 	gap: 12px;
 	align-items: center;
-	margin-top: 2px;
+	justify-content: space-between;
+	margin-top: 18px;
+	padding-top: 16px;
+	border-top: 1px solid var(--portal-line);
 }
 
 .register-nav .button.primary {
-	justify-self: end;
 	min-width: 180px;
 }
 
@@ -395,6 +392,10 @@ body.portal-app * {
 	opacity: 0.45;
 	cursor: not-allowed;
 	transform: none;
+}
+
+.register-card .portal-message {
+	margin-top: 16px;
 }
 
 .portal-form label span,
@@ -978,6 +979,17 @@ body.portal-app * {
 
 	.portal-form fieldset {
 		grid-template-columns: 1fr;
+	}
+
+	.register-nav {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.register-nav .button.primary,
+	.register-nav .portal-ghost {
+		width: 100%;
+		min-width: 0;
 	}
 
 	.portal-metrics,
