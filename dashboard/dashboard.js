@@ -54,8 +54,10 @@ const actionCategories = [
 	["estado", "Estado"],
 	["avisos", "Avisos"]
 ];
+const chartColors = ["#15986f", "#1d6ce3", "#b8652d", "#6f5bc6", "#c84f6a", "#257b84"];
 
 const $ = (selector) => document.querySelector(selector);
+const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
 
 init().catch((error) => {
 	const node = $("#authMessage") || $("#registerMessage") || $("#studentMessage") || $("#actionMessage");
@@ -379,7 +381,7 @@ function renderMetrics(metrics) {
 		"activeSessions",
 		"queuedActions"
 	];
-	const entries = preferred.filter((key) => Object.hasOwn(metrics, key)).map((key) => [key, metrics[key]]);
+	const entries = preferred.filter((key) => hasOwn(metrics, key)).map((key) => [key, metrics[key]]);
 	$("#metricsGrid").innerHTML = entries.length ? entries.map(([key, value]) => `
 		<article><strong>${escapeHtml(String(value))}</strong><span>${escapeHtml(labels[key] || key)}</span></article>
 	`).join("") : `<article><strong>-</strong><span>Sin metricas para este rol</span></article>`;
@@ -521,34 +523,44 @@ function renderTeachers() {
 
 function renderDashboardCharts() {
 	const metrics = state.summary?.metrics || {};
-	renderDonutChart("#roleChart", [
+	safeChart("#roleChart", () => renderDonutChart("#roleChart", [
 		{ label: "Alumnos", value: metrics.students || 0, color: "#15986f" },
 		{ label: "Profesores", value: metrics.teachers || 0, color: "#1d6ce3" },
 		{ label: "Otros usuarios", value: otherUsersCount(metrics), color: "#b8652d" }
-	]);
-	renderStackedChart("#institutionChart", [
+	]));
+	safeChart("#institutionChart", () => renderStackedChart("#institutionChart", [
 		{ label: "Activos", value: metrics.activeInstitutions || 0, color: "#15986f" },
 		{ label: "No activos", value: inactiveInstitutionsCount(metrics), color: "#8b9a95" }
-	]);
-	renderBarChart("#licenseChart", Object.entries(state.summary?.licenses || {}).map(([label, value], index) => ({
+	]));
+	safeChart("#licenseChart", () => renderBarChart("#licenseChart", Object.entries(state.summary?.licenses || {}).map(([label, value], index) => ({
 		label,
 		value,
 		color: chartColors[index % chartColors.length]
-	})));
-	renderDonutChart("#peopleChart", [
+	}))));
+	safeChart("#peopleChart", () => renderDonutChart("#peopleChart", [
 		{ label: "Alumnos", value: metrics.students || state.students.length || 0, color: "#15986f" },
 		{ label: "Profesores", value: metrics.teachers || state.teachers.length || 0, color: "#1d6ce3" }
-	]);
-	renderDonutChart("#studentStatusChart", statusSegments(state.students));
-	renderBarChart("#operationsChart", [
+	]));
+	safeChart("#studentStatusChart", () => renderDonutChart("#studentStatusChart", statusSegments(state.students)));
+	safeChart("#operationsChart", () => renderBarChart("#operationsChart", [
 		{ label: "Sesiones activas", value: metrics.activeSessions || 0, color: "#15986f" },
 		{ label: "Acciones en cola", value: metrics.queuedActions || 0, color: "#b8652d" },
 		{ label: "Alumnos activos", value: metrics.activeStudents || activeStudentsCount(), color: "#1d6ce3" }
-	]);
-	renderStackedChart("#teacherActionChart", actionCategorySegments());
+	]));
+	safeChart("#teacherActionChart", () => renderStackedChart("#teacherActionChart", actionCategorySegments()));
 }
 
-const chartColors = ["#15986f", "#1d6ce3", "#b8652d", "#6f5bc6", "#c84f6a", "#257b84"];
+function safeChart(selector, render) {
+	const node = $(selector);
+	if (!node) {
+		return;
+	}
+	try {
+		render();
+	} catch (_) {
+		renderEmptyChart(node);
+	}
+}
 
 function renderDonutChart(selector, segments) {
 	const node = $(selector);
@@ -661,14 +673,14 @@ function actionCategorySegments() {
 }
 
 function otherUsersCount(metrics) {
-	if (!Object.hasOwn(metrics, "users")) {
+	if (!hasOwn(metrics, "users")) {
 		return 0;
 	}
 	return Math.max(0, (metrics.users || 0) - (metrics.students || 0) - (metrics.teachers || 0));
 }
 
 function inactiveInstitutionsCount(metrics) {
-	if (!Object.hasOwn(metrics, "institutions")) {
+	if (!hasOwn(metrics, "institutions")) {
 		return 0;
 	}
 	return Math.max(0, (metrics.institutions || 0) - (metrics.activeInstitutions || 0));
