@@ -23,6 +23,11 @@
 			</aside>
 			<section class="portal-main">
 				<section id="metricsGrid" class="portal-metrics"></section>
+				<section class="portal-grid three">
+					<article><h2>Politica cliente</h2><div id="policyRack" class="signal-list"></div></article>
+					<article><h2>Ruta Minecraft</h2><div id="routeRack" class="signal-list"></div></article>
+					<article><h2>Estado del centro</h2><div id="institutionRack" class="signal-list"></div></article>
+				</section>
 				<section class="portal-grid two">
 					<form id="studentForm" class="portal-panel portal-form">
 						<h2>Crear alumno</h2>
@@ -34,8 +39,13 @@
 					</form>
 					<section class="portal-panel">
 						<div class="table-head"><h2>Alumnos</h2><button id="reloadStudents" class="portal-ghost" type="button">Actualizar</button></div>
+						<div id="studentBreakdown" class="compact-rack"></div>
 						<table class="portal-table"><thead><tr><th>Email</th><th>Estado</th><th>Centro</th><th></th></tr></thead><tbody id="studentTableBody"></tbody></table>
 					</section>
+				</section>
+				<section class="portal-grid two">
+					<article><h2>Noticias del centro</h2><div id="newsRack" class="signal-list"></div></article>
+					<article><h2>Acciones pendientes</h2><div id="actionOpsRack" class="signal-list"></div></article>
 				</section>
 			</section>
 		</main>

@@ -8,7 +8,14 @@ const state = {
 	refreshToken: localStorage.getItem(STORAGE_KEYS.refresh) || "",
 	me: null,
 	summary: null,
-	students: []
+	students: [],
+	profile: null,
+	policy: null,
+	livePolicy: null,
+	route: null,
+	news: null,
+	actionFilter: "all",
+	actionQuery: ""
 };
 
 const apiBase = (window.EDUCRAFT_API_BASE_URL || "http://127.0.0.1:8080").replace(/\/+$/, "");
@@ -16,48 +23,37 @@ const currentPage = document.body.dataset.dashboardPage || "login";
 const companyRoles = new Set(["owner", "lead_developer", "developer", "support"]);
 const ticRoles = new Set(["institution_administrator", "institution_admin", "director"]);
 const teacherActions = [
-	["alert_student", "Alertar alumno", "Envia un aviso visible al alumno."],
-	["clear_inventory", "Limpiar inventario", "Vacia el inventario del alumno."],
-	["freeze_student", "Congelar alumno", "Bloquea movimiento temporalmente."],
-	["unfreeze_student", "Descongelar alumno", "Restaura movimiento."],
-	["teleport_to_teacher", "Traer al profesor", "Teleporta alumno a tu posicion."],
-	["teleport_teacher_to_student", "Ir al alumno", "Teleporta al docente al alumno."],
-	["return_to_spawn", "Enviar a spawn", "Devuelve al punto seguro."],
-	["mute_chat", "Silenciar chat", "Evita mensajes del alumno."],
-	["unmute_chat", "Activar chat", "Restaura permiso de chat."],
-	["private_message", "Mensaje privado", "Manda aviso individual."],
-	["assign_mission", "Asignar mision", "Vincula reto educativo."],
-	["pause_mission", "Pausar mision", "Congela progreso de reto."],
-	["resume_mission", "Reanudar mision", "Continua el reto."],
-	["reset_mission", "Reiniciar mision", "Reinicia progreso del alumno."],
-	["give_lab_kit", "Dar kit laboratorio", "Entrega materiales STEM."],
-	["remove_lab_kit", "Quitar kit laboratorio", "Retira materiales del kit."],
-	["open_element_guide", "Abrir guia elementos", "Muestra apoyo de quimica."],
-	["lock_singleplayer", "Bloquear mundos locales", "Cierra entrada singleplayer."],
-	["unlock_singleplayer", "Permitir mundos locales", "Activa permiso temporal."],
-	["enable_resource_pack", "Activar recursos", "Fuerza recursos educativos."],
-	["disable_resource_pack", "Desactivar recursos", "Quita recursos obligatorios."],
-	["set_group", "Asignar grupo", "Mueve al alumno a grupo."],
-	["remove_from_group", "Quitar de grupo", "Saca de grupo actual."],
-	["mark_attendance", "Marcar asistencia", "Registra presencia en clase."],
-	["flag_support", "Pedir soporte TIC", "Escala una incidencia tecnica."],
-	["request_screenshot", "Pedir captura", "Solicita evidencia visual."],
-	["start_focus_mode", "Modo enfoque", "Reduce distracciones del cliente."],
-	["stop_focus_mode", "Quitar enfoque", "Restaura interfaz normal."],
-	["limit_chat", "Limitar chat", "Solo mensajes educativos."],
-	["restore_chat", "Restaurar chat", "Quita limite de chat."],
-	["grant_build", "Permitir construir", "Da permiso de construccion."],
-	["revoke_build", "Bloquear construccion", "Revoca construccion."],
-	["grant_interact", "Permitir interactuar", "Activa uso de bloques."],
-	["revoke_interact", "Bloquear interaccion", "Revoca uso de bloques."],
-	["clear_effects", "Limpiar efectos", "Quita estados alterados."],
-	["heal_student", "Curar alumno", "Restaura salud."],
-	["feed_student", "Restaurar hambre", "Rellena comida."],
-	["set_gamemode_adventure", "Modo aventura", "Evita roturas accidentales."],
-	["set_gamemode_survival", "Modo supervivencia", "Vuelve a supervivencia."],
-	["export_progress_note", "Nota de progreso", "Guarda observacion docente."],
-	["send_class_announcement", "Anuncio de clase", "Mensaje para todo el aula."],
-	["close_session", "Cerrar sesion", "Finaliza entrada del alumno."]
+	{ key: "alert_student", category: "avisos", label: "Alertar alumno", description: "Envia un aviso visible al alumno." },
+	{ key: "private_message", category: "avisos", label: "Mensaje privado", description: "Manda un aviso individual." },
+	{ key: "send_class_announcement", category: "avisos", label: "Anuncio de clase", description: "Mensaje para toda la clase." },
+	{ key: "mute_chat", category: "chat", label: "Silenciar chat", description: "Evita mensajes del alumno." },
+	{ key: "unmute_chat", category: "chat", label: "Activar chat", description: "Restaura permiso de chat." },
+	{ key: "limit_chat", category: "chat", label: "Limitar chat", description: "Solo mensajes esenciales." },
+	{ key: "restore_chat", category: "chat", label: "Restaurar chat", description: "Quita el limite de chat." },
+	{ key: "freeze_student", category: "moderacion", label: "Congelar alumno", description: "Bloquea movimiento temporalmente." },
+	{ key: "unfreeze_student", category: "moderacion", label: "Descongelar alumno", description: "Restaura movimiento." },
+	{ key: "clear_inventory", category: "moderacion", label: "Limpiar inventario", description: "Vacia el inventario del alumno." },
+	{ key: "clear_effects", category: "moderacion", label: "Limpiar efectos", description: "Quita estados alterados." },
+	{ key: "teleport_to_teacher", category: "posicion", label: "Traer al profesor", description: "Teleporta alumno a tu posicion." },
+	{ key: "teleport_teacher_to_student", category: "posicion", label: "Ir al alumno", description: "Teleporta al docente al alumno." },
+	{ key: "return_to_spawn", category: "posicion", label: "Enviar a spawn", description: "Devuelve al punto seguro." },
+	{ key: "grant_build", category: "permisos", label: "Permitir construir", description: "Da permiso de construccion." },
+	{ key: "revoke_build", category: "permisos", label: "Bloquear construccion", description: "Revoca construccion." },
+	{ key: "grant_interact", category: "permisos", label: "Permitir interactuar", description: "Activa uso de bloques." },
+	{ key: "revoke_interact", category: "permisos", label: "Bloquear interaccion", description: "Revoca uso de bloques." },
+	{ key: "heal_student", category: "estado", label: "Curar alumno", description: "Restaura salud." },
+	{ key: "feed_student", category: "estado", label: "Restaurar hambre", description: "Rellena comida." },
+	{ key: "set_gamemode_adventure", category: "estado", label: "Modo aventura", description: "Evita roturas accidentales." },
+	{ key: "set_gamemode_survival", category: "estado", label: "Modo supervivencia", description: "Vuelve a supervivencia." }
+];
+const actionCategories = [
+	["all", "Todas"],
+	["moderacion", "Moderacion"],
+	["chat", "Chat"],
+	["posicion", "Posicion"],
+	["permisos", "Permisos"],
+	["estado", "Estado"],
+	["avisos", "Avisos"]
 ];
 
 const $ = (selector) => document.querySelector(selector);
@@ -143,6 +139,11 @@ function bindDashboard() {
 		}
 	});
 	$("#reloadStudents")?.addEventListener("click", loadStudents);
+	$("#actionSearch")?.addEventListener("input", (event) => {
+		state.actionQuery = event.target.value.trim().toLowerCase();
+		renderTeacherActions();
+	});
+	renderActionFilters();
 	renderTeacherActions();
 }
 
@@ -193,7 +194,7 @@ async function requireDashboardSession() {
 			return;
 		}
 		renderIdentity();
-		await loadSummary();
+		await Promise.all([loadSummary(), loadPortalContext()]);
 		if (currentPage === "tic" || currentPage === "profesor") {
 			await loadStudents();
 		}
@@ -206,6 +207,30 @@ async function loadSummary() {
 	state.summary = await request("/dashboard/summary");
 	renderMetrics(state.summary.metrics || {});
 	renderSignals();
+	renderOperations();
+}
+
+async function loadPortalContext() {
+	const optional = async (path) => {
+		try {
+			return await request(path);
+		} catch (_) {
+			return null;
+		}
+	};
+	const [profile, policy, livePolicy, route, news] = await Promise.all([
+		optional("/client/profile"),
+		optional("/client/policy"),
+		optional("/client/live-policy"),
+		optional("/minecraft/session-route"),
+		optional("/client/news")
+	]);
+	state.profile = profile;
+	state.policy = policy;
+	state.livePolicy = livePolicy;
+	state.route = route;
+	state.news = news;
+	renderContextPanels();
 }
 
 async function loadStudents() {
@@ -216,6 +241,7 @@ async function loadStudents() {
 		const response = await request("/dashboard/students");
 		state.students = response.items || [];
 		renderStudents();
+		renderContextPanels();
 	} catch (error) {
 		setMessage($("#studentMessage") || $("#actionMessage"), error.message, "error");
 	}
@@ -314,6 +340,91 @@ function renderSignals() {
 	renderSignalList("#activityRack", state.summary?.activity || [], "Actividad");
 }
 
+function renderOperations() {
+	renderSignalList("#operationsRack", [
+		{ label: "Alcance", value: readableScope(state.summary?.scope) },
+		{ label: "Generado", value: formatDateTime(state.summary?.generatedAt) },
+		{ label: "Acciones docentes", value: `${state.summary?.metrics?.queuedActions || 0} en cola` },
+		{ label: "Sesiones", value: `${state.summary?.metrics?.activeSessions || 0} activas` }
+	], "Operacion");
+	renderSignalList("#capabilitiesRack", [
+		{ label: "Usuarios", value: "alumnos y sesiones" },
+		{ label: "Cliente", value: "perfil, politica y ruta" },
+		{ label: "Aula", value: "moderacion en cola" },
+		{ label: "Noticias", value: "feed por rol" }
+	], "Capacidades");
+}
+
+function renderContextPanels() {
+	renderPolicyPanel();
+	renderRoutePanel();
+	renderInstitutionPanel();
+	renderNewsPanel();
+	renderActionOpsPanel();
+	renderClassPanel();
+	renderStudentBreakdown();
+}
+
+function renderPolicyPanel() {
+	const policy = state.policy || {};
+	const live = state.livePolicy || {};
+	const resourcePack = policy.resourcePack || {};
+	const skin = policy.skin || {};
+	renderSignalList("#policyRack", [
+		{ label: "Mundos locales", value: boolLabel(live.allowSingleplayerWorlds ?? policy.allowSingleplayerWorlds) },
+		{ label: "Fin permiso local", value: live.localWorldsExpiresAt ? formatDateTime(live.localWorldsExpiresAt) : "sin permiso temporal" },
+		{ label: "Resource pack", value: resourcePack.enabled ? (resourcePack.required ? "obligatorio" : "activo") : "inactivo" },
+		{ label: "Skin", value: skin.forceCommon ? `comun ${skin.mode || ""}`.trim() : "libre" }
+	], "Politica");
+}
+
+function renderRoutePanel() {
+	renderSignalList("#routeRack", [
+		{ label: "Servidor asignado", value: state.route?.serverName || "sin ruta" },
+		{ label: "Centro", value: shortId(state.route?.institutionId || state.me?.institutionId) },
+		{ label: "Cliente web", value: "disponible" },
+		{ label: "Conexion", value: "por parametro server" }
+	], "Ruta");
+}
+
+function renderInstitutionPanel() {
+	const profile = state.profile || {};
+	renderSignalList("#institutionRack", [
+		{ label: "Centro", value: profile.school || shortId(state.me?.institutionId) },
+		{ label: "Usuario", value: profile.displayName || state.me?.email || "-" },
+		{ label: "Curso", value: profile.course || "-" },
+		{ label: "Grupo", value: profile.classGroup || "-" }
+	], "Centro");
+}
+
+function renderNewsPanel() {
+	const items = state.news?.items || [];
+	renderSignalList("#newsRack", items.slice(0, 4).map((item) => ({
+		label: item.category || "aviso",
+		value: item.title || item.summary || "-"
+	})), "Noticias");
+}
+
+function renderActionOpsPanel() {
+	const queued = state.summary?.metrics?.queuedActions || 0;
+	renderSignalList("#actionOpsRack", [
+		{ label: "Pendientes", value: String(queued) },
+		{ label: "Moderacion", value: `${teacherActions.length} acciones disponibles` },
+		{ label: "Objetivo", value: "alumno o clase" },
+		{ label: "Auditoria", value: "motivo registrado" }
+	], "Acciones");
+}
+
+function renderClassPanel() {
+	const metrics = state.summary?.metrics || {};
+	renderSignalList("#classRack", [
+		{ label: "Alumnos visibles", value: String(state.students.length || metrics.students || 0) },
+		{ label: "Activos", value: String(metrics.activeStudents || activeStudentsCount()) },
+		{ label: "Sesiones", value: String(metrics.activeSessions || 0) },
+		{ label: "Acciones en cola", value: String(metrics.queuedActions || 0) }
+	], "Clase");
+}
+
 function renderSignalList(selector, items, fallback) {
 	const node = $(selector);
 	if (!node) {
@@ -339,10 +450,53 @@ function renderStudents() {
 		}
 	}
 
+	if ($("#teacherStudentTableBody")) {
+		$("#teacherStudentTableBody").innerHTML = state.students.length ? state.students.slice(0, 12).map((student) => `
+			<tr>
+				<td>${escapeHtml(student.email)}</td>
+				<td>${escapeHtml(readableStatus(student.status))}</td>
+			</tr>
+		`).join("") : `<tr><td colspan="2">Sin alumnos visibles.</td></tr>`;
+	}
+
 	if ($("#targetStudent")) {
 		$("#targetStudent").innerHTML = `<option value="">Toda la clase</option>` + state.students.map((student) => `
 			<option value="${escapeHtml(student.id)}">${escapeHtml(student.email)}</option>
 		`).join("");
+	}
+	renderStudentBreakdown();
+}
+
+function renderStudentBreakdown() {
+	const node = $("#studentBreakdown");
+	if (!node) {
+		return;
+	}
+	const total = state.students.length;
+	const active = state.students.filter((student) => student.status === "active").length;
+	const disabled = state.students.filter((student) => student.status === "disabled").length;
+	node.innerHTML = `
+		<span>Total <strong>${escapeHtml(String(total))}</strong></span>
+		<span>Activos <strong>${escapeHtml(String(active))}</strong></span>
+		<span>Desactivados <strong>${escapeHtml(String(disabled))}</strong></span>
+		<span>Centro <strong>${escapeHtml(shortId(state.me?.institutionId))}</strong></span>
+	`;
+}
+
+function renderActionFilters() {
+	const node = $("#actionFilters");
+	if (!node) {
+		return;
+	}
+	node.innerHTML = actionCategories.map(([key, label]) => `
+		<button type="button" class="${key === state.actionFilter ? "is-active" : ""}" data-action-filter="${key}">${escapeHtml(label)}</button>
+	`).join("");
+	for (const button of document.querySelectorAll("[data-action-filter]")) {
+		button.addEventListener("click", () => {
+			state.actionFilter = button.dataset.actionFilter || "all";
+			renderActionFilters();
+			renderTeacherActions();
+		});
 	}
 }
 
@@ -350,12 +504,19 @@ function renderTeacherActions() {
 	if (!$("#teacherActions")) {
 		return;
 	}
-	$("#teacherActions").innerHTML = teacherActions.map(([key, label, description]) => `
-		<button type="button" data-action-key="${key}">
-			<strong>${escapeHtml(label)}</strong>
-			<small>${escapeHtml(description)}</small>
+	const query = state.actionQuery;
+	const filtered = teacherActions.filter((action) => {
+		const inCategory = state.actionFilter === "all" || action.category === state.actionFilter;
+		const haystack = `${action.label} ${action.description} ${action.category}`.toLowerCase();
+		return inCategory && (!query || haystack.includes(query));
+	});
+	$("#teacherActions").innerHTML = filtered.length ? filtered.map((action) => `
+		<button type="button" data-action-key="${escapeHtml(action.key)}">
+			<strong>${escapeHtml(action.label)}</strong>
+			<small>${escapeHtml(action.description)}</small>
+			<em>${escapeHtml(readableCategory(action.category))}</em>
 		</button>
-	`).join("");
+	`).join("") : `<div class="empty-actions">Sin acciones para ese filtro.</div>`;
 	for (const button of document.querySelectorAll("[data-action-key]")) {
 		button.addEventListener("click", () => queueAction(button.dataset.actionKey));
 	}
@@ -427,6 +588,11 @@ function clearSession() {
 	state.me = null;
 	state.summary = null;
 	state.students = [];
+	state.profile = null;
+	state.policy = null;
+	state.livePolicy = null;
+	state.route = null;
+	state.news = null;
 	localStorage.removeItem(STORAGE_KEYS.access);
 	localStorage.removeItem(STORAGE_KEYS.refresh);
 }
@@ -458,6 +624,48 @@ function readableRole(role) {
 		student: "Alumno"
 	};
 	return labels[role] || role || "-";
+}
+
+function readableScope(scope) {
+	return scope === "company" ? "global" : "centro";
+}
+
+function readableStatus(status) {
+	const labels = {
+		active: "activo",
+		disabled: "desactivado",
+		queued: "en cola"
+	};
+	return labels[status] || status || "-";
+}
+
+function readableCategory(category) {
+	const labels = Object.fromEntries(actionCategories);
+	return labels[category] || category || "-";
+}
+
+function boolLabel(value) {
+	return value ? "permitido" : "bloqueado";
+}
+
+function activeStudentsCount() {
+	return state.students.filter((student) => student.status === "active").length;
+}
+
+function formatDateTime(value) {
+	if (!value) {
+		return "-";
+	}
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) {
+		return "-";
+	}
+	return date.toLocaleString("es-ES", {
+		day: "2-digit",
+		month: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit"
+	});
 }
 
 function shortId(value) {

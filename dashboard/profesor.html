@@ -23,14 +23,25 @@
 			</aside>
 			<section class="portal-main">
 				<section id="metricsGrid" class="portal-metrics"></section>
+				<section class="portal-grid three">
+					<article><h2>Estado de clase</h2><div id="classRack" class="signal-list"></div></article>
+					<article><h2>Politica del cliente</h2><div id="policyRack" class="signal-list"></div></article>
+					<article><h2>Ruta Minecraft</h2><div id="routeRack" class="signal-list"></div></article>
+				</section>
 				<section class="portal-grid teacher">
 					<div class="portal-panel portal-form">
 						<h2>Accion de aula</h2>
 						<label><span>Alumno objetivo</span><select id="targetStudent"></select></label>
 						<label><span>Motivo</span><input id="actionReason" type="text" placeholder="Incidencia, fin de actividad, soporte..."></label>
+						<label><span>Buscar accion</span><input id="actionSearch" type="search" placeholder="chat, congelar, inventario..."></label>
+						<div id="actionFilters" class="segmented-filters"></div>
 						<p id="actionMessage" class="portal-message"></p>
 					</div>
 					<div id="teacherActions" class="teacher-actions"></div>
+				</section>
+				<section class="portal-grid two">
+					<article><h2>Alumnos visibles</h2><div id="studentBreakdown" class="compact-rack"></div><table class="portal-table compact-table"><thead><tr><th>Email</th><th>Estado</th></tr></thead><tbody id="teacherStudentTableBody"></tbody></table></article>
+					<article><h2>Noticias</h2><div id="newsRack" class="signal-list"></div></article>
 				</section>
 			</section>
 		</main>

@@ -380,6 +380,55 @@ body.portal-app * {
 	font-size: 15px;
 }
 
+.compact-rack {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0 0 14px;
+}
+
+.compact-rack span,
+.segmented-filters button {
+	display: inline-flex;
+	align-items: center;
+	min-height: 34px;
+	border: 1px solid var(--portal-line);
+	border-radius: 8px;
+	background: #fbfcfb;
+	color: var(--portal-muted);
+	font-size: 12px;
+	font-weight: 900;
+}
+
+.compact-rack span {
+	gap: 7px;
+	padding: 0 10px;
+}
+
+.compact-rack strong {
+	color: var(--portal-ink);
+}
+
+.segmented-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.segmented-filters button {
+	padding: 0 11px;
+	cursor: pointer;
+	transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.segmented-filters button:hover,
+.segmented-filters button.is-active {
+	border-color: rgba(21, 152, 111, 0.55);
+	background: rgba(21, 152, 111, 0.08);
+	color: var(--portal-accent-dark);
+	transform: translateY(-1px);
+}
+
 .identity-list dl {
 	margin: 0;
 }
@@ -425,9 +474,14 @@ body.portal-app * {
 	text-align: right;
 }
 
+.compact-table th,
+.compact-table td {
+	padding: 10px 8px;
+}
+
 .teacher-actions {
 	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 10px;
 }
 
@@ -460,6 +514,27 @@ body.portal-app * {
 	color: var(--portal-muted);
 	font-size: 12px;
 	line-height: 1.35;
+}
+
+.teacher-actions em {
+	display: block;
+	margin-top: 10px;
+	color: var(--portal-accent-dark);
+	font-size: 11px;
+	font-style: normal;
+	font-weight: 950;
+	text-transform: uppercase;
+}
+
+.empty-actions {
+	display: grid;
+	min-height: 112px;
+	place-items: center;
+	padding: 18px;
+	border: 1px dashed var(--portal-line);
+	border-radius: 8px;
+	color: var(--portal-muted);
+	font-weight: 850;
 }
 
 @media (max-width: 1180px) {
