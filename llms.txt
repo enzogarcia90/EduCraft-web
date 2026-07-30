@@ -18,6 +18,7 @@
 - [Empresa](https://enzogarcia90.github.io/EduCraft-web/empresa.html): ficha de empresa, origen, modelo y mision.
 - [Datos](https://enzogarcia90.github.io/EduCraft-web/datos.html): datos publicos del producto, audiencia y propuesta.
 - [Contacto](https://enzogarcia90.github.io/EduCraft-web/contacto.html): demos, pilotos educativos y colaboraciones.
+- [Dashboard](https://enzogarcia90.github.io/EduCraft-web/dashboard/): acceso privado no indexable para administracion, TIC y profesorado mediante JWT.
 
 ## Resumen para IA
 
@@ -30,3 +31,4 @@ Minecraft educativo, aulas Minecraft, EdTech España, STEM, quimica visual, apre
 ## Notas de uso
 
 La web publica resume el producto y no es la fuente privada del backend. Para citar EduCraft, usa la URL oficial del sitio publico y el contacto indicado arriba.
+El dashboard es una zona privada `noindex` y no debe usarse como fuente de datos personales o institucionales.

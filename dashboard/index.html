@@ -3,54 +3,163 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<meta name="description" content="Dashboard público de EduCraft en desarrollo para demos educativas.">
-		<meta name="robots" content="noindex,follow">
+		<meta name="description" content="Dashboard privado de EduCraft para administracion, TIC y profesorado con acceso JWT.">
+		<meta name="robots" content="noindex,nofollow">
 		<meta name="theme-color" content="#15986f">
 		<link rel="canonical" href="https://enzogarcia90.github.io/EduCraft-web/dashboard/">
 		<meta property="og:type" content="website">
 		<meta property="og:locale" content="es_ES">
 		<meta property="og:site_name" content="EduCraft">
-		<meta property="og:title" content="Dashboard EduCraft | Panel docente en preparación">
-		<meta property="og:description" content="Vista pública del panel docente EduCraft en desarrollo para sesiones, políticas, noticias y actividad educativa.">
+		<meta property="og:title" content="Dashboard EduCraft">
+		<meta property="og:description" content="Panel privado EduCraft para direccion, TIC y profesorado.">
 		<meta property="og:url" content="https://enzogarcia90.github.io/EduCraft-web/dashboard/">
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:title" content="Dashboard EduCraft">
-		<meta name="twitter:description" content="Panel docente EduCraft en preparación para aulas Minecraft educativas.">
 		<title>Dashboard | EduCraft</title>
 		<link rel="stylesheet" href="../styles.css">
+		<link rel="stylesheet" href="dashboard.css">
 	</head>
-	<body data-page="contacto">
-		<header class="site-header">
-			<a class="brand" href="../index.html" aria-label="EduCraft"><span class="brand-mark" aria-hidden="true">E</span><span><strong>EduCraft</strong><small>España 2026</small></span></a>
-			<nav class="nav" aria-label="Principal">
-				<a data-nav="inicio" href="../index.html">Inicio</a><a data-nav="empresa" href="../empresa.html">Empresa</a><a data-nav="plataforma" href="../plataforma.html">Plataforma</a><a data-nav="datos" href="../datos.html">Datos</a><a data-nav="planes" href="../planes.html">Planes</a><a data-nav="contacto" href="../contacto.html">Contacto</a>
+	<body class="dashboard-app" data-page="contacto">
+		<header class="dash-shell-header">
+			<a class="dash-brand" href="../index.html" aria-label="EduCraft">
+				<span class="brand-mark" aria-hidden="true">E</span>
+				<span><strong>EduCraft</strong><small>Control privado</small></span>
+			</a>
+			<nav class="dash-topnav" aria-label="Paneles">
+				<button class="dash-tab is-active" type="button" data-view="administracion">Administracion</button>
+				<button class="dash-tab" type="button" data-view="tic">TIC</button>
+				<button class="dash-tab" type="button" data-view="profesor">Profesor</button>
 			</nav>
-			<a class="header-action" href="../cliente/index.html">Abrir cliente</a>
+			<div class="dash-session">
+				<span id="sessionLabel">Sin sesion</span>
+				<button id="logoutButton" class="icon-button" type="button" title="Cerrar sesion" hidden>Salir</button>
+			</div>
 		</header>
 
-		<main>
-			<section class="page-hero compact">
-				<p class="eyebrow">Dashboard</p>
-				<h1>Panel docente en preparación</h1>
-				<p>Esta zona está reservada para el futuro dashboard de EduCraft: sesiones, aulas, actividad, avisos y señales educativas. De momento es una vista pública de estado, sin datos privados.</p>
-			</section>
+		<main class="dash-layout">
+			<aside class="dash-sidebar" aria-label="Estado">
+				<section class="login-panel" id="loginPanel">
+					<p class="eyebrow">Acceso JWT</p>
+					<h1>Entrar al panel</h1>
+					<form id="loginForm" class="auth-form">
+						<label>
+							<span>Email</span>
+							<input id="emailInput" name="email" type="email" autocomplete="username" value="owner@educraft.dev" required>
+						</label>
+						<label>
+							<span>Contrasena</span>
+							<input id="passwordInput" name="password" type="password" autocomplete="current-password" value="1234" required>
+						</label>
+						<button class="button primary" type="submit">Iniciar sesion</button>
+					</form>
+					<p id="authMessage" class="dash-message" role="status"></p>
+				</section>
 
-			<section class="notice-band">
-				<strong>En desarrollo</strong>
-				<span>El dashboard todavía no muestra datos reales. Cuando esté conectado, la información vendrá de la API privada y requerirá permisos de centro.</span>
-			</section>
+				<section class="identity-panel" id="identityPanel" hidden>
+					<p class="eyebrow">Identidad</p>
+					<h2 id="identityRole">-</h2>
+					<dl>
+						<div><dt>Email</dt><dd id="identityEmail">-</dd></div>
+						<div><dt>Centro</dt><dd id="identityInstitution">-</dd></div>
+						<div><dt>Sesion</dt><dd id="identitySession">-</dd></div>
+					</dl>
+				</section>
 
-			<section class="section feature-grid">
-				<article><span>01</span><h2>Sesiones en vivo</h2><p>Vista prevista para saber qué alumnos están conectados y en qué actividad trabajan.</p></article>
-				<article><span>02</span><h2>Actividad educativa</h2><p>Resumen futuro de progreso, retos, elementos usados y colaboración dentro del aula.</p></article>
-				<article><span>03</span><h2>Alertas suaves</h2><p>Señales para detectar problemas técnicos, clientes raros o comportamientos que convenga revisar.</p></article>
-				<article><span>04</span><h2>Noticias</h2><p>Gestión futura de avisos y mensajes visibles para alumnos antes de entrar al mundo.</p></article>
-				<article><span>05</span><h2>Políticas</h2><p>Panel previsto para cambiar reglas del centro sin tocar la experiencia manualmente.</p></article>
-				<article><span>06</span><h2>Clases</h2><p>Organización futura por centro, aula, docente, grupo y tipo de actividad.</p></article>
+				<section class="scope-panel">
+					<p class="eyebrow">Diseno aplicado</p>
+					<ul>
+						<li>KPIs accionables arriba.</li>
+						<li>Vistas separadas por rol.</li>
+						<li>Tablas compactas y legibles.</li>
+						<li>Acciones docentes agrupadas por riesgo.</li>
+					</ul>
+				</section>
+			</aside>
+
+			<section class="dash-content">
+				<div class="dash-status-row">
+					<div>
+						<p class="eyebrow">Panel activo</p>
+						<h1 id="viewTitle">Administracion</h1>
+					</div>
+					<div class="api-pill" id="apiPill">API: pendiente</div>
+				</div>
+
+				<section class="metrics-grid" id="metricsGrid" aria-label="Metricas principales"></section>
+
+				<section class="dash-view is-active" data-view-panel="administracion">
+					<div class="view-header">
+						<div>
+							<h2>Direccion de empresa</h2>
+							<p>Vista fuera de las instituciones para ti y el equipo directivo: centros, licencias, sesiones y salud global.</p>
+						</div>
+					</div>
+					<div class="ops-grid">
+						<article>
+							<h3>Centros y negocio</h3>
+							<div id="licenseRack" class="mini-rack"></div>
+						</article>
+						<article>
+							<h3>Salud operativa</h3>
+							<div id="healthRack" class="signal-list"></div>
+						</article>
+						<article>
+							<h3>Actividad reciente</h3>
+							<div id="activityRack" class="signal-list"></div>
+						</article>
+					</div>
+				</section>
+
+				<section class="dash-view" data-view-panel="tic">
+					<div class="view-header">
+						<div>
+							<h2>Panel TIC</h2>
+							<p>Gestion de alumnado, licencias, sesiones y estado general del centro.</p>
+						</div>
+					</div>
+
+					<div class="tic-grid">
+						<form id="studentForm" class="student-form">
+							<h3>Crear cuenta de alumno</h3>
+							<label><span>Email del alumno</span><input id="studentEmail" type="email" placeholder="alumno@centro.edu" required></label>
+							<label><span>Contrasena inicial</span><input id="studentPassword" type="text" placeholder="minimo 4 caracteres" required></label>
+							<label><span>ID de institucion opcional</span><input id="studentInstitution" type="text" placeholder="solo direccion/global"></label>
+							<button class="button primary" type="submit">Crear alumno</button>
+							<p id="studentMessage" class="dash-message" role="status"></p>
+						</form>
+
+						<div class="student-table-wrap">
+							<div class="table-toolbar">
+								<h3>Alumnos</h3>
+								<button id="reloadStudents" class="button secondary" type="button">Actualizar</button>
+							</div>
+							<table class="student-table">
+								<thead><tr><th>Email</th><th>Estado</th><th>Centro</th><th></th></tr></thead>
+								<tbody id="studentTableBody"></tbody>
+							</table>
+						</div>
+					</div>
+				</section>
+
+				<section class="dash-view" data-view-panel="profesor">
+					<div class="view-header">
+						<div>
+							<h2>Panel del profesor</h2>
+							<p>Controles de aula, metricas de seguimiento y acciones rapidas sobre alumnos conectados.</p>
+						</div>
+					</div>
+
+					<div class="teacher-workbench">
+						<div class="action-composer">
+							<label><span>Alumno objetivo</span><select id="targetStudent"></select></label>
+							<label><span>Motivo visible en auditoria</span><input id="actionReason" type="text" placeholder="Ej. actividad terminada, incidencia, soporte"></label>
+							<p id="actionMessage" class="dash-message" role="status"></p>
+						</div>
+						<div class="teacher-actions" id="teacherActions"></div>
+					</div>
+				</section>
 			</section>
 		</main>
 
-		<footer class="footer"><span>EduCraft</span><span>Dashboard público en desarrollo.</span></footer>
-		<script src="../app.js"></script>
+		<script src="../cliente/educraft-config.js"></script>
+		<script src="dashboard.js"></script>
 	</body>
 </html>

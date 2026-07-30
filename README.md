@@ -6,7 +6,7 @@ Public website, static client build and dashboard shell for EduCraft, a Spanish 
 
 - Public company website.
 - Static EduCraft client build.
-- Public dashboard shell for future teacher tools.
+- Private dashboard shell with JWT login for company administration, TIC and teacher controls.
 - Product pages for platform, plans, data and contact.
 
 ## Why This Repository Exists
@@ -26,9 +26,9 @@ Suggested public routes:
 
 - `/` public website.
 - `/cliente/` EduCraft client.
-- `/dashboard/` dashboard shell.
+- `/dashboard/` private dashboard shell for administration, TIC and teachers.
 
-Dynamic data, authentication, telemetry and Minecraft servers must run outside GitHub Pages on private infrastructure.
+Dynamic data, authentication, telemetry and Minecraft servers run outside GitHub Pages on private infrastructure. The dashboard calls the Go API configured by `cliente/educraft-config.js`.
 
 ## What Deploys Where
 
