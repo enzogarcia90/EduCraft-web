@@ -217,6 +217,7 @@ async function requireDashboardSession() {
 async function loadSummary() {
 	state.summary = await request("/dashboard/summary");
 	renderMetrics(state.summary.metrics || {});
+	renderDashboardCharts();
 	renderSignals();
 	renderOperations();
 }
@@ -496,6 +497,7 @@ function renderStudents() {
 		`).join("");
 	}
 	renderStudentBreakdown();
+	renderDashboardCharts();
 }
 
 function renderTeachers() {
@@ -514,6 +516,162 @@ function renderTeachers() {
 		button.addEventListener("click", () => disableTeacher(button.dataset.disableTeacher));
 	}
 	renderTeacherBreakdown();
+	renderDashboardCharts();
+}
+
+function renderDashboardCharts() {
+	const metrics = state.summary?.metrics || {};
+	renderDonutChart("#roleChart", [
+		{ label: "Alumnos", value: metrics.students || 0, color: "#15986f" },
+		{ label: "Profesores", value: metrics.teachers || 0, color: "#1d6ce3" },
+		{ label: "Otros usuarios", value: otherUsersCount(metrics), color: "#b8652d" }
+	]);
+	renderStackedChart("#institutionChart", [
+		{ label: "Activos", value: metrics.activeInstitutions || 0, color: "#15986f" },
+		{ label: "No activos", value: inactiveInstitutionsCount(metrics), color: "#8b9a95" }
+	]);
+	renderBarChart("#licenseChart", Object.entries(state.summary?.licenses || {}).map(([label, value], index) => ({
+		label,
+		value,
+		color: chartColors[index % chartColors.length]
+	})));
+	renderDonutChart("#peopleChart", [
+		{ label: "Alumnos", value: metrics.students || state.students.length || 0, color: "#15986f" },
+		{ label: "Profesores", value: metrics.teachers || state.teachers.length || 0, color: "#1d6ce3" }
+	]);
+	renderDonutChart("#studentStatusChart", statusSegments(state.students));
+	renderBarChart("#operationsChart", [
+		{ label: "Sesiones activas", value: metrics.activeSessions || 0, color: "#15986f" },
+		{ label: "Acciones en cola", value: metrics.queuedActions || 0, color: "#b8652d" },
+		{ label: "Alumnos activos", value: metrics.activeStudents || activeStudentsCount(), color: "#1d6ce3" }
+	]);
+	renderStackedChart("#teacherActionChart", actionCategorySegments());
+}
+
+const chartColors = ["#15986f", "#1d6ce3", "#b8652d", "#6f5bc6", "#c84f6a", "#257b84"];
+
+function renderDonutChart(selector, segments) {
+	const node = $(selector);
+	if (!node) {
+		return;
+	}
+	const clean = cleanSegments(segments);
+	const total = clean.reduce((sum, item) => sum + item.value, 0);
+	if (!total) {
+		renderEmptyChart(node);
+		return;
+	}
+	let cursor = 0;
+	const stops = clean.map((item) => {
+		const start = cursor;
+		const end = cursor + (item.value / total) * 100;
+		cursor = end;
+		return `${item.color} ${start}% ${end}%`;
+	}).join(", ");
+	node.innerHTML = `
+		<div class="donut-chart" style="background: conic-gradient(${stops});"><strong>${escapeHtml(String(total))}</strong></div>
+		${renderChartLegend(clean, total)}
+	`;
+}
+
+function renderStackedChart(selector, segments) {
+	const node = $(selector);
+	if (!node) {
+		return;
+	}
+	const clean = cleanSegments(segments);
+	const total = clean.reduce((sum, item) => sum + item.value, 0);
+	if (!total) {
+		renderEmptyChart(node);
+		return;
+	}
+	node.innerHTML = `
+		<div class="stack-chart">${clean.map((item) => `
+			<span style="--chart-color: ${item.color}; --chart-size: ${(item.value / total) * 100}%"></span>
+		`).join("")}</div>
+		${renderChartLegend(clean, total)}
+	`;
+}
+
+function renderBarChart(selector, segments) {
+	const node = $(selector);
+	if (!node) {
+		return;
+	}
+	const clean = cleanSegments(segments);
+	const max = Math.max(...clean.map((item) => item.value), 0);
+	if (!max) {
+		renderEmptyChart(node);
+		return;
+	}
+	node.innerHTML = `
+		<div class="bar-chart">
+			${clean.map((item) => `
+				<div class="bar-row">
+					<span>${escapeHtml(item.label)}</span>
+					<div><i style="--chart-color: ${item.color}; --chart-size: ${(item.value / max) * 100}%"></i></div>
+					<strong>${escapeHtml(String(item.value))}</strong>
+				</div>
+			`).join("")}
+		</div>
+	`;
+}
+
+function renderChartLegend(segments, total) {
+	return `<div class="chart-legend">${segments.map((item) => `
+		<span><i style="background:${item.color}"></i>${escapeHtml(item.label)} <strong>${escapeHtml(String(item.value))}</strong><em>${Math.round((item.value / total) * 100)}%</em></span>
+	`).join("")}</div>`;
+}
+
+function renderEmptyChart(node) {
+	node.innerHTML = `<div class="chart-empty">Sin datos reales disponibles.</div>`;
+}
+
+function cleanSegments(segments) {
+	return segments
+		.map((item, index) => ({
+			label: item.label,
+			value: Math.max(0, Number(item.value) || 0),
+			color: item.color || chartColors[index % chartColors.length]
+		}))
+		.filter((item) => item.value > 0);
+}
+
+function statusSegments(users) {
+	const active = users.filter((user) => user.status === "active").length;
+	const disabled = users.filter((user) => user.status === "disabled").length;
+	const other = Math.max(0, users.length - active - disabled);
+	return [
+		{ label: "Activos", value: active, color: "#15986f" },
+		{ label: "Desactivados", value: disabled, color: "#b8652d" },
+		{ label: "Otros estados", value: other, color: "#8b9a95" }
+	];
+}
+
+function actionCategorySegments() {
+	const totals = new Map();
+	for (const action of teacherActions) {
+		totals.set(action.category, (totals.get(action.category) || 0) + 1);
+	}
+	return Array.from(totals.entries()).map(([category, value], index) => ({
+		label: readableCategory(category),
+		value,
+		color: chartColors[index % chartColors.length]
+	}));
+}
+
+function otherUsersCount(metrics) {
+	if (!Object.hasOwn(metrics, "users")) {
+		return 0;
+	}
+	return Math.max(0, (metrics.users || 0) - (metrics.students || 0) - (metrics.teachers || 0));
+}
+
+function inactiveInstitutionsCount(metrics) {
+	if (!Object.hasOwn(metrics, "institutions")) {
+		return 0;
+	}
+	return Math.max(0, (metrics.institutions || 0) - (metrics.activeInstitutions || 0));
 }
 
 function renderStudentBreakdown() {
