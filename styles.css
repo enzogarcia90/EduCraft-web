@@ -17,6 +17,8 @@
 	--dark: #151f1b;
 	--shadow: 0 18px 42px rgba(22, 33, 29, 0.11);
 	--shadow-soft: 0 10px 28px rgba(22, 33, 29, 0.08);
+	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+	--ease-snap: cubic-bezier(0.22, 1, 0.36, 1);
 	font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -32,6 +34,7 @@ body {
 	margin: 0;
 	background: var(--paper);
 	color: var(--ink);
+	animation: pageEnter 520ms var(--ease-out) both;
 }
 
 body::selection {
@@ -55,6 +58,13 @@ a {
 	background: rgba(245, 244, 236, 0.88);
 	border-bottom: 1px solid rgba(221, 228, 220, 0.86);
 	backdrop-filter: blur(18px);
+	transition: background 220ms ease, border-color 220ms ease, box-shadow 220ms ease, transform 260ms var(--ease-out);
+}
+
+.site-header.is-scrolled {
+	background: rgba(245, 244, 236, 0.94);
+	border-bottom-color: rgba(22, 33, 29, 0.1);
+	box-shadow: 0 12px 30px rgba(22, 33, 29, 0.08);
 }
 
 .brand {
@@ -63,6 +73,11 @@ a {
 	gap: 11px;
 	min-width: 174px;
 	font-weight: 950;
+	transition: transform 180ms var(--ease-snap);
+}
+
+.brand:hover {
+	transform: translateY(-1px);
 }
 
 .brand > span:last-child {
@@ -88,6 +103,12 @@ a {
 	border-radius: 8px;
 	box-shadow: var(--shadow-soft);
 	font-weight: 950;
+	transition: transform 420ms var(--ease-snap), box-shadow 220ms ease;
+}
+
+.brand:hover .brand-mark {
+	transform: rotate(-5deg) scale(1.04);
+	box-shadow: 0 14px 32px rgba(22, 33, 29, 0.16);
 }
 
 .nav {
@@ -103,6 +124,22 @@ a {
 	color: var(--muted);
 	font-size: 14px;
 	font-weight: 850;
+	transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms var(--ease-snap);
+}
+
+.nav a::after {
+	content: "";
+	position: absolute;
+	left: 12px;
+	right: 12px;
+	bottom: 6px;
+	height: 2px;
+	background: currentColor;
+	border-radius: 999px;
+	opacity: 0;
+	transform: scaleX(0.4);
+	transform-origin: center;
+	transition: opacity 180ms ease, transform 180ms var(--ease-snap);
 }
 
 body[data-page="inicio"] .nav a[data-nav="inicio"],
@@ -117,8 +154,24 @@ body[data-page="contacto"] .nav a[data-nav="contacto"],
 	box-shadow: var(--shadow-soft);
 }
 
+.nav a:hover {
+	transform: translateY(-1px);
+}
+
+body[data-page="inicio"] .nav a[data-nav="inicio"]::after,
+body[data-page="empresa"] .nav a[data-nav="empresa"]::after,
+body[data-page="plataforma"] .nav a[data-nav="plataforma"]::after,
+body[data-page="datos"] .nav a[data-nav="datos"]::after,
+body[data-page="planes"] .nav a[data-nav="planes"]::after,
+body[data-page="contacto"] .nav a[data-nav="contacto"]::after,
+.nav a:hover::after {
+	opacity: 0.6;
+	transform: scaleX(1);
+}
+
 .header-action,
 .button {
+	position: relative;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -128,13 +181,34 @@ body[data-page="contacto"] .nav a[data-nav="contacto"],
 	border-radius: 8px;
 	font-weight: 950;
 	white-space: nowrap;
-	transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+	overflow: hidden;
+	transition: transform 180ms var(--ease-snap), box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+
+.header-action::before,
+.button::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+	transform: translateX(-125%);
+	transition: transform 520ms var(--ease-out);
 }
 
 .header-action:hover,
 .button:hover {
 	transform: translateY(-2px);
 	box-shadow: var(--shadow-soft);
+}
+
+.header-action:hover::before,
+.button:hover::before {
+	transform: translateX(125%);
+}
+
+.header-action:active,
+.button:active {
+	transform: translateY(0) scale(0.98);
 }
 
 .header-action,
@@ -181,6 +255,7 @@ body[data-page="contacto"] .nav a[data-nav="contacto"],
 	width: min(760px, calc(100% - 36px));
 	margin-left: clamp(18px, 6vw, 86px);
 	padding: 56px 0 92px;
+	animation: heroCopyEnter 680ms var(--ease-out) 80ms both;
 }
 
 .eyebrow,
@@ -249,6 +324,7 @@ article p,
 	background: var(--warm);
 	border-bottom: 1px solid #dfc878;
 	color: var(--ink);
+	animation: slideUpSoft 560ms var(--ease-out) 180ms both;
 }
 
 .notice-band strong {
@@ -274,6 +350,13 @@ article p,
 	padding: 26px clamp(18px, 4vw, 42px);
 	background: white;
 	overflow: hidden;
+	transition: transform 220ms var(--ease-snap), box-shadow 220ms ease;
+}
+
+.stats-band div:hover {
+	z-index: 2;
+	transform: translateY(-4px);
+	box-shadow: var(--shadow-soft);
 }
 
 .stats-band div::after {
@@ -322,6 +405,7 @@ article p,
 		linear-gradient(135deg, rgba(237, 245, 239, 0.94), rgba(255, 246, 216, 0.9) 58%, rgba(223, 238, 254, 0.95)),
 		radial-gradient(circle at 88% 22%, rgba(21, 152, 111, 0.18), transparent 28%);
 	border-bottom: 1px solid var(--line);
+	animation: pageHeroEnter 620ms var(--ease-out) both;
 }
 
 .page-hero::after {
@@ -411,6 +495,7 @@ article p,
 	border: 1px solid var(--line);
 	border-radius: 8px;
 	box-shadow: var(--shadow);
+	transition: transform 220ms var(--ease-snap), border-color 220ms ease, box-shadow 220ms ease;
 }
 
 .highlight-list a {
@@ -423,9 +508,14 @@ article p,
 .highlight-list a:hover,
 .feature-grid article:hover,
 .value-grid article:hover,
-.plans article:hover {
+.plans article:hover,
+.cards-4 article:hover,
+.timeline article:hover,
+.contact-card:hover,
+.metric-card:hover {
 	border-color: rgba(21, 152, 111, 0.45);
 	transform: translateY(-3px);
+	box-shadow: 0 20px 48px rgba(22, 33, 29, 0.14);
 }
 
 .highlight-list strong,
@@ -551,6 +641,7 @@ article p,
 	background: var(--mint);
 	border-radius: 50%;
 	box-shadow: 0 0 0 5px rgba(21, 152, 111, 0.14);
+	animation: pulseDot 1800ms ease-in-out infinite;
 }
 
 .demo-pill {
@@ -569,6 +660,12 @@ article p,
 	background: white;
 	border: 1px solid var(--line);
 	border-radius: 8px;
+	transition: transform 180ms var(--ease-snap), border-color 180ms ease;
+}
+
+.demo-row:hover {
+	border-color: rgba(40, 111, 227, 0.28);
+	transform: translateX(4px);
 }
 
 .demo-cube {
@@ -649,6 +746,12 @@ article p,
 	height: 100%;
 	background: linear-gradient(90deg, var(--mint), var(--blue));
 	border-radius: inherit;
+	transform-origin: left;
+	transition: transform 900ms var(--ease-out);
+}
+
+.reveal:not(.is-visible) .control-bar span {
+	transform: scaleX(0.08);
 }
 
 .fact-panel,
@@ -730,6 +833,10 @@ article p,
 	background: var(--warm);
 	border-color: #c3a139;
 	transform: translateY(-12px);
+}
+
+.plans article.featured:hover {
+	transform: translateY(-15px);
 }
 
 .plans ul {
@@ -836,6 +943,78 @@ article p,
 	font-size: 14px;
 }
 
+.reveal {
+	opacity: 0;
+	transform: translateY(26px);
+	transition: opacity 620ms var(--ease-out), transform 620ms var(--ease-out);
+	transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal.is-visible {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.page-exit .site-header,
+.page-exit main,
+.page-exit .footer {
+	opacity: 0;
+	transform: translateY(10px);
+	transition: opacity 180ms ease, transform 180ms ease;
+}
+
+@keyframes pageEnter {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes heroCopyEnter {
+	from {
+		opacity: 0;
+		transform: translateY(26px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes pageHeroEnter {
+	from {
+		opacity: 0;
+		transform: translateY(18px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideUpSoft {
+	from {
+		opacity: 0;
+		transform: translateY(16px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes pulseDot {
+	0%,
+	100% {
+		box-shadow: 0 0 0 5px rgba(21, 152, 111, 0.14);
+	}
+	50% {
+		box-shadow: 0 0 0 9px rgba(21, 152, 111, 0.06);
+	}
+}
+
 .footer span:first-child {
 	color: white;
 	font-weight: 950;
@@ -843,8 +1022,15 @@ article p,
 
 @media (prefers-reduced-motion: reduce) {
 	* {
+		animation-duration: 1ms !important;
+		animation-iteration-count: 1 !important;
 		scroll-behavior: auto;
 		transition: none !important;
+	}
+
+	.reveal {
+		opacity: 1;
+		transform: none;
 	}
 }
 
