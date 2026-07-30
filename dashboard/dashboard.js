@@ -58,6 +58,7 @@ const chartColors = ["#15986f", "#1d6ce3", "#b8652d", "#6f5bc6", "#c84f6a", "#25
 
 const $ = (selector) => document.querySelector(selector);
 const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
+const registerStepState = { index: 0 };
 
 init().catch((error) => {
 	const node = $("#authMessage") || $("#registerMessage") || $("#studentMessage") || $("#actionMessage");
@@ -104,6 +105,7 @@ function bindLogin() {
 }
 
 function bindRegister() {
+	initRegisterStepper();
 	$("#registerForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const message = $("#registerMessage");
@@ -128,6 +130,60 @@ function bindRegister() {
 			setMessage(message, friendlyLoginError(error), "error");
 		}
 	});
+}
+
+function initRegisterStepper() {
+	const steps = registerSteps();
+	if (!steps.length) {
+		return;
+	}
+	$("#registerPrev")?.addEventListener("click", () => setRegisterStep(registerStepState.index - 1));
+	$("#registerNext")?.addEventListener("click", () => {
+		if (validateRegisterStep(registerStepState.index)) {
+			setRegisterStep(registerStepState.index + 1);
+		}
+	});
+	setRegisterStep(0);
+}
+
+function registerSteps() {
+	return Array.from(document.querySelectorAll("[data-register-step]"));
+}
+
+function setRegisterStep(index) {
+	const steps = registerSteps();
+	if (!steps.length) {
+		return;
+	}
+	registerStepState.index = Math.min(Math.max(index, 0), steps.length - 1);
+	steps.forEach((step, stepIndex) => {
+		const active = stepIndex === registerStepState.index;
+		step.classList.toggle("is-active", active);
+		for (const field of step.querySelectorAll("input, select")) {
+			field.disabled = !active;
+		}
+	});
+	const current = registerStepState.index + 1;
+	$("#registerStepText").textContent = `Paso ${current}/${steps.length}`;
+	$("#registerProgressBar").style.width = `${(current / steps.length) * 100}%`;
+	$("#registerPrev").disabled = registerStepState.index === 0;
+	$("#registerNext").hidden = registerStepState.index === steps.length - 1;
+	$("#registerSubmit").hidden = registerStepState.index !== steps.length - 1;
+	setMessage($("#registerMessage"), "", "");
+}
+
+function validateRegisterStep(index) {
+	const step = registerSteps()[index];
+	if (!step) {
+		return true;
+	}
+	for (const field of step.querySelectorAll("input, select")) {
+		if (!field.checkValidity()) {
+			field.reportValidity();
+			return false;
+		}
+	}
+	return true;
 }
 
 function registerPayload(email, password) {

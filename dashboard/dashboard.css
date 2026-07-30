@@ -250,6 +250,35 @@ body.portal-app * {
 	width: min(860px, 100%);
 }
 
+.register-progress {
+	display: grid;
+	gap: 10px;
+	margin: 0 0 18px;
+}
+
+.register-progress span {
+	color: var(--portal-muted);
+	font-size: 13px;
+	font-weight: 950;
+	text-transform: uppercase;
+}
+
+.register-progress div {
+	overflow: hidden;
+	height: 9px;
+	border-radius: 999px;
+	background: #eef2ef;
+}
+
+.register-progress i {
+	display: block;
+	width: 20%;
+	height: 100%;
+	border-radius: inherit;
+	background: linear-gradient(90deg, var(--portal-accent), #1d6ce3);
+	transition: width 220ms ease;
+}
+
 .auth-card h2,
 .portal-panel h2,
 .portal-grid article h2 {
@@ -272,6 +301,27 @@ body.portal-app * {
 	border: 1px solid var(--portal-line);
 	border-radius: 8px;
 	background: #fbfcfb;
+}
+
+.portal-form .register-step {
+	display: none;
+}
+
+.portal-form .register-step.is-active {
+	display: grid;
+	animation: registerStepIn 180ms ease both;
+}
+
+@keyframes registerStepIn {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 .portal-form legend {
@@ -306,6 +356,45 @@ body.portal-app * {
 	font-weight: 800;
 	line-height: 1.35;
 	text-transform: none;
+}
+
+.portal-form .confirmations .password-row {
+	display: block;
+	padding-top: 10px;
+	border-top: 1px solid var(--portal-line);
+}
+
+.portal-form .confirmations .password-row span {
+	display: block;
+	margin-bottom: 7px;
+	color: var(--portal-muted);
+	font-size: 12px;
+	font-weight: 900;
+	text-transform: uppercase;
+}
+
+.register-nav {
+	display: grid;
+	grid-template-columns: minmax(120px, auto) minmax(0, 1fr);
+	gap: 12px;
+	align-items: center;
+	margin-top: 2px;
+}
+
+.register-nav .button.primary {
+	justify-self: end;
+	min-width: 180px;
+}
+
+.register-nav .button.primary[hidden],
+.register-nav .portal-ghost[hidden] {
+	display: none;
+}
+
+.register-nav .portal-ghost:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+	transform: none;
 }
 
 .portal-form label span,

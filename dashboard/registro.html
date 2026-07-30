@@ -23,8 +23,12 @@
 			<section class="auth-card register-card">
 				<p class="eyebrow">Nueva institucion</p>
 				<h2>Datos de alta</h2>
+				<div class="register-progress" aria-live="polite">
+					<span id="registerStepText">Paso 1/5</span>
+					<div><i id="registerProgressBar"></i></div>
+				</div>
 				<form id="registerForm" class="portal-form">
-					<fieldset>
+					<fieldset class="register-step is-active" data-register-step="0">
 						<legend>Centro</legend>
 						<label><span>Nombre publico del centro</span><input id="registerInstitution" type="text" autocomplete="organization" required></label>
 						<label><span>Nombre legal completo</span><input id="registerLegalName" type="text" required></label>
@@ -33,7 +37,7 @@
 						<label><span>Web oficial</span><input id="registerWebsite" type="url" placeholder="https://centro.edu" required></label>
 						<label><span>Dominio educativo</span><input id="registerDomain" type="text" placeholder="centro.edu" required></label>
 					</fieldset>
-					<fieldset>
+					<fieldset class="register-step" data-register-step="1">
 						<legend>Ubicacion</legend>
 						<label><span>Pais</span><input id="registerCountry" type="text" value="ES" required></label>
 						<label><span>Provincia o region</span><input id="registerRegion" type="text" required></label>
@@ -42,7 +46,7 @@
 						<label><span>Direccion completa</span><input id="registerAddress" type="text" autocomplete="street-address" required></label>
 						<label><span>Zona horaria</span><input id="registerTimezone" type="text" value="Europe/Madrid" required></label>
 					</fieldset>
-					<fieldset>
+					<fieldset class="register-step" data-register-step="2">
 						<legend>Responsables</legend>
 						<label><span>Nombre del responsable</span><input id="registerName" type="text" autocomplete="name" required></label>
 						<label><span>Cargo del responsable</span><input id="registerContactTitle" type="text" placeholder="Direccion, TIC, coordinacion..." required></label>
@@ -52,7 +56,7 @@
 						<label><span>Responsable proteccion de datos</span><input id="registerDataProtectionName" type="text" required></label>
 						<label><span>Email proteccion de datos</span><input id="registerDataProtectionEmail" type="email" required></label>
 					</fieldset>
-					<fieldset>
+					<fieldset class="register-step" data-register-step="3">
 						<legend>Uso educativo</legend>
 						<label><span>Numero de alumnos</span><input id="registerStudentCount" type="number" min="1" step="1" required></label>
 						<label><span>Numero de profesores</span><input id="registerTeacherCount" type="number" min="1" step="1" required></label>
@@ -60,7 +64,7 @@
 						<label><span>SIS o gestion academica</span><input id="registerSIS" type="text" placeholder="Alexia, Educamos, Google Classroom..." required></label>
 						<label><span>SSO previsto</span><input id="registerSSO" type="text" placeholder="Google, Microsoft, LDAP, ninguno..." required></label>
 					</fieldset>
-					<fieldset class="confirmations">
+					<fieldset class="register-step confirmations" data-register-step="4">
 						<legend>Confirmaciones obligatorias</legend>
 						<label><input id="registerAuthority" type="checkbox" required><span>Tengo autorizacion del centro para solicitar el alta.</span></label>
 						<label><input id="registerDomainOwnership" type="checkbox" required><span>El centro controla el dominio y los emails indicados.</span></label>
@@ -68,9 +72,13 @@
 						<label><input id="registerTerms" type="checkbox" required><span>Acepto las condiciones del servicio.</span></label>
 						<label><input id="registerPrivacy" type="checkbox" required><span>Acepto la politica de privacidad.</span></label>
 						<label><input id="registerDPA" type="checkbox" required><span>Acepto el acuerdo de tratamiento de datos.</span></label>
+						<label class="password-row"><span>Contrasena</span><input id="registerPassword" type="password" autocomplete="new-password" minlength="10" required></label>
 					</fieldset>
-					<label><span>Contrasena</span><input id="registerPassword" type="password" autocomplete="new-password" minlength="10" required></label>
-					<button class="button primary" type="submit">Crear cuenta</button>
+					<div class="register-nav">
+						<button id="registerPrev" class="portal-ghost" type="button">Anterior</button>
+						<button id="registerNext" class="button primary" type="button">Siguiente</button>
+						<button id="registerSubmit" class="button primary" type="submit" hidden>Crear cuenta</button>
+					</div>
 				</form>
 				<p id="registerMessage" class="portal-message" role="status"></p>
 				<div class="auth-links"><a href="login.html">Ya tengo cuenta</a><a href="../index.html">Volver a la web</a></div>
