@@ -20,14 +20,56 @@
 					<p>Completa los datos para solicitar acceso.</p>
 				</div>
 			</section>
-			<section class="auth-card">
+			<section class="auth-card register-card">
 				<p class="eyebrow">Nueva institucion</p>
 				<h2>Datos de alta</h2>
 				<form id="registerForm" class="portal-form">
-					<label><span>Centro educativo</span><input id="registerInstitution" type="text" autocomplete="organization" required></label>
-					<label><span>Nombre de contacto</span><input id="registerName" type="text" autocomplete="name"></label>
-					<label><span>Email TIC</span><input id="registerEmail" type="email" autocomplete="username" required></label>
-					<label><span>Contrasena</span><input id="registerPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+					<fieldset>
+						<legend>Centro</legend>
+						<label><span>Nombre publico del centro</span><input id="registerInstitution" type="text" autocomplete="organization" required></label>
+						<label><span>Nombre legal completo</span><input id="registerLegalName" type="text" required></label>
+						<label><span>Tipo de institucion</span><select id="registerInstitutionType" required><option value="">Seleccionar</option><option value="colegio">Colegio</option><option value="instituto">Instituto</option><option value="formacion_profesional">Formacion profesional</option><option value="universidad">Universidad</option><option value="academia">Academia</option><option value="otro">Otro centro educativo</option></select></label>
+						<label><span>CIF/NIF o identificador fiscal</span><input id="registerTaxId" type="text" required></label>
+						<label><span>Web oficial</span><input id="registerWebsite" type="url" placeholder="https://centro.edu" required></label>
+						<label><span>Dominio educativo</span><input id="registerDomain" type="text" placeholder="centro.edu" required></label>
+					</fieldset>
+					<fieldset>
+						<legend>Ubicacion</legend>
+						<label><span>Pais</span><input id="registerCountry" type="text" value="ES" required></label>
+						<label><span>Provincia o region</span><input id="registerRegion" type="text" required></label>
+						<label><span>Ciudad</span><input id="registerCity" type="text" required></label>
+						<label><span>Codigo postal</span><input id="registerPostalCode" type="text" required></label>
+						<label><span>Direccion completa</span><input id="registerAddress" type="text" autocomplete="street-address" required></label>
+						<label><span>Zona horaria</span><input id="registerTimezone" type="text" value="Europe/Madrid" required></label>
+					</fieldset>
+					<fieldset>
+						<legend>Responsables</legend>
+						<label><span>Nombre del responsable</span><input id="registerName" type="text" autocomplete="name" required></label>
+						<label><span>Cargo del responsable</span><input id="registerContactTitle" type="text" placeholder="Direccion, TIC, coordinacion..." required></label>
+						<label><span>Telefono del centro</span><input id="registerContactPhone" type="tel" autocomplete="tel" required></label>
+						<label><span>Email institucional TIC</span><input id="registerEmail" type="email" autocomplete="username" required></label>
+						<label><span>Email tecnico</span><input id="registerTechnicalEmail" type="email" required></label>
+						<label><span>Responsable proteccion de datos</span><input id="registerDataProtectionName" type="text" required></label>
+						<label><span>Email proteccion de datos</span><input id="registerDataProtectionEmail" type="email" required></label>
+					</fieldset>
+					<fieldset>
+						<legend>Uso educativo</legend>
+						<label><span>Numero de alumnos</span><input id="registerStudentCount" type="number" min="1" step="1" required></label>
+						<label><span>Numero de profesores</span><input id="registerTeacherCount" type="number" min="1" step="1" required></label>
+						<label><span>Etapas o cursos</span><input id="registerGrades" type="text" placeholder="ESO, Bachillerato, FP..." required></label>
+						<label><span>SIS o gestion academica</span><input id="registerSIS" type="text" placeholder="Alexia, Educamos, Google Classroom..." required></label>
+						<label><span>SSO previsto</span><input id="registerSSO" type="text" placeholder="Google, Microsoft, LDAP, ninguno..." required></label>
+					</fieldset>
+					<fieldset class="confirmations">
+						<legend>Confirmaciones obligatorias</legend>
+						<label><input id="registerAuthority" type="checkbox" required><span>Tengo autorizacion del centro para solicitar el alta.</span></label>
+						<label><input id="registerDomainOwnership" type="checkbox" required><span>El centro controla el dominio y los emails indicados.</span></label>
+						<label><input id="registerMinors" type="checkbox" required><span>El centro puede tratar datos de menores conforme a su politica educativa.</span></label>
+						<label><input id="registerTerms" type="checkbox" required><span>Acepto las condiciones del servicio.</span></label>
+						<label><input id="registerPrivacy" type="checkbox" required><span>Acepto la politica de privacidad.</span></label>
+						<label><input id="registerDPA" type="checkbox" required><span>Acepto el acuerdo de tratamiento de datos.</span></label>
+					</fieldset>
+					<label><span>Contrasena</span><input id="registerPassword" type="password" autocomplete="new-password" minlength="10" required></label>
 					<button class="button primary" type="submit">Crear cuenta</button>
 				</form>
 				<p id="registerMessage" class="portal-message" role="status"></p>

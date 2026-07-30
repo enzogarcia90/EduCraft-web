@@ -109,17 +109,18 @@ function bindRegister() {
 		const message = $("#registerMessage");
 		const email = $("#registerEmail").value.trim();
 		const password = $("#registerPassword").value;
+		const payload = registerPayload(email, password);
+		const validation = validateRegisterPayload(payload);
+		if (validation) {
+			setMessage(message, validation, "error");
+			return;
+		}
 		setMessage(message, "Creando centro...", "");
 		try {
 			await request("/register", {
 				method: "POST",
 				auth: false,
-				body: {
-					institutionName: $("#registerInstitution").value,
-					contactName: $("#registerName").value,
-					email,
-					password
-				}
+				body: payload
 			});
 			setMessage(message, "Registro completado. Continuando...", "ok");
 			await login(email, password, message);
@@ -127,6 +128,68 @@ function bindRegister() {
 			setMessage(message, friendlyLoginError(error), "error");
 		}
 	});
+}
+
+function registerPayload(email, password) {
+	return {
+		institutionName: $("#registerInstitution").value,
+		legalName: $("#registerLegalName").value,
+		institutionType: $("#registerInstitutionType").value,
+		taxId: $("#registerTaxId").value,
+		website: $("#registerWebsite").value,
+		domain: $("#registerDomain").value,
+		country: $("#registerCountry").value,
+		region: $("#registerRegion").value,
+		city: $("#registerCity").value,
+		postalCode: $("#registerPostalCode").value,
+		addressLine: $("#registerAddress").value,
+		timezone: $("#registerTimezone").value,
+		studentCount: Number($("#registerStudentCount").value),
+		teacherCount: Number($("#registerTeacherCount").value),
+		grades: $("#registerGrades").value,
+		contactName: $("#registerName").value,
+		contactTitle: $("#registerContactTitle").value,
+		contactPhone: $("#registerContactPhone").value,
+		email,
+		technicalEmail: $("#registerTechnicalEmail").value,
+		dataProtectionName: $("#registerDataProtectionName").value,
+		dataProtectionEmail: $("#registerDataProtectionEmail").value,
+		sisProvider: $("#registerSIS").value,
+		ssoProvider: $("#registerSSO").value,
+		authorityConfirmed: $("#registerAuthority").checked,
+		domainOwnershipConfirmed: $("#registerDomainOwnership").checked,
+		minorsConfirmed: $("#registerMinors").checked,
+		termsAccepted: $("#registerTerms").checked,
+		privacyAccepted: $("#registerPrivacy").checked,
+		dpaAccepted: $("#registerDPA").checked,
+		password
+	};
+}
+
+function validateRegisterPayload(payload) {
+	const required = [
+		"institutionName", "legalName", "institutionType", "taxId", "website", "domain", "country", "region", "city",
+		"postalCode", "addressLine", "timezone", "grades", "contactName", "contactTitle", "contactPhone", "email",
+		"technicalEmail", "dataProtectionName", "dataProtectionEmail", "sisProvider", "ssoProvider", "password"
+	];
+	for (const field of required) {
+		if (!String(payload[field] || "").trim()) {
+			return "Faltan campos obligatorios.";
+		}
+	}
+	if (!payload.email.endsWith(`@${payload.domain.replace(/^@/, "").toLowerCase()}`)) {
+		return "El email TIC debe pertenecer al dominio del centro.";
+	}
+	if (payload.studentCount < 1 || payload.teacherCount < 1) {
+		return "Indica alumnos y profesores mayores que cero.";
+	}
+	if (payload.password.length < 10 || !/[a-z]/.test(payload.password) || !/[A-Z]/.test(payload.password) || !/[0-9]/.test(payload.password)) {
+		return "La contrasena necesita 10 caracteres, mayuscula, minuscula y numero.";
+	}
+	if (!payload.authorityConfirmed || !payload.domainOwnershipConfirmed || !payload.minorsConfirmed || !payload.termsAccepted || !payload.privacyAccepted || !payload.dpaAccepted) {
+		return "Acepta todas las confirmaciones obligatorias.";
+	}
+	return "";
 }
 
 function bindDashboard() {

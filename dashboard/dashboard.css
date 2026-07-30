@@ -138,6 +138,10 @@ body.portal-app * {
 	padding: clamp(22px, 4vw, 34px);
 }
 
+.register-card {
+	width: min(860px, 100%);
+}
+
 .auth-card h2,
 .portal-panel h2,
 .portal-grid article h2 {
@@ -149,6 +153,51 @@ body.portal-app * {
 .portal-form {
 	display: grid;
 	gap: 14px;
+}
+
+.portal-form fieldset {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
+	margin: 0;
+	padding: 16px;
+	border: 1px solid var(--portal-line);
+	border-radius: 8px;
+	background: #fbfcfb;
+}
+
+.portal-form legend {
+	padding: 0 6px;
+	color: var(--portal-accent-dark);
+	font-size: 12px;
+	font-weight: 950;
+	text-transform: uppercase;
+}
+
+.portal-form .confirmations {
+	grid-template-columns: 1fr;
+}
+
+.portal-form .confirmations label {
+	display: grid;
+	grid-template-columns: 18px minmax(0, 1fr);
+	gap: 10px;
+	align-items: start;
+}
+
+.portal-form .confirmations input {
+	width: 18px;
+	min-height: 18px;
+	margin: 1px 0 0;
+}
+
+.portal-form .confirmations label span {
+	margin: 0;
+	color: var(--portal-ink);
+	font-size: 14px;
+	font-weight: 800;
+	line-height: 1.35;
+	text-transform: none;
 }
 
 .portal-form label span,
@@ -675,6 +724,10 @@ body.portal-app * {
 }
 
 @media (max-width: 1180px) {
+	.auth-layout {
+		grid-template-columns: 1fr;
+	}
+
 	.portal-metrics,
 	.portal-grid.three,
 	.portal-grid.charts-grid,
@@ -718,6 +771,10 @@ body.portal-app * {
 	.table-head {
 		align-items: stretch;
 		flex-direction: column;
+	}
+
+	.portal-form fieldset {
+		grid-template-columns: 1fr;
 	}
 
 	.portal-metrics,
