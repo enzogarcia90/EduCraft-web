@@ -336,7 +336,7 @@ body.portal-app * {
 	align-items: start;
 }
 
-.portal-form .confirmations input {
+.portal-form .confirmations input[type="checkbox"] {
 	width: 18px;
 	min-height: 18px;
 	margin: 1px 0 0;
@@ -364,6 +364,12 @@ body.portal-app * {
 	font-size: 12px;
 	font-weight: 900;
 	text-transform: uppercase;
+}
+
+.portal-form .confirmations .password-row input {
+	width: 100%;
+	min-height: 44px;
+	margin: 0;
 }
 
 .register-nav {
