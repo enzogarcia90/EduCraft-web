@@ -9,11 +9,10 @@ const state = {
 	me: null,
 	summary: null,
 	students: [],
-	profile: null,
+	teachers: [],
 	policy: null,
 	livePolicy: null,
 	route: null,
-	news: null,
 	actionFilter: "all",
 	actionQuery: ""
 };
@@ -139,6 +138,15 @@ function bindDashboard() {
 		}
 	});
 	$("#reloadStudents")?.addEventListener("click", loadStudents);
+	$("#teacherForm")?.addEventListener("submit", async (event) => {
+		event.preventDefault();
+		try {
+			await createTeacher();
+		} catch (error) {
+			setMessage($("#teacherMessage"), error.message, "error");
+		}
+	});
+	$("#reloadTeachers")?.addEventListener("click", loadTeachers);
 	$("#actionSearch")?.addEventListener("input", (event) => {
 		state.actionQuery = event.target.value.trim().toLowerCase();
 		renderTeacherActions();
@@ -198,6 +206,9 @@ async function requireDashboardSession() {
 		if (currentPage === "tic" || currentPage === "profesor") {
 			await loadStudents();
 		}
+		if (currentPage === "tic") {
+			await loadTeachers();
+		}
 	} catch (_) {
 		logout();
 	}
@@ -218,18 +229,14 @@ async function loadPortalContext() {
 			return null;
 		}
 	};
-	const [profile, policy, livePolicy, route, news] = await Promise.all([
-		optional("/client/profile"),
+	const [policy, livePolicy, route] = await Promise.all([
 		optional("/client/policy"),
 		optional("/client/live-policy"),
-		optional("/minecraft/session-route"),
-		optional("/client/news")
+		optional("/minecraft/session-route")
 	]);
-	state.profile = profile;
 	state.policy = policy;
 	state.livePolicy = livePolicy;
 	state.route = route;
-	state.news = news;
 	renderContextPanels();
 }
 
@@ -244,6 +251,20 @@ async function loadStudents() {
 		renderContextPanels();
 	} catch (error) {
 		setMessage($("#studentMessage") || $("#actionMessage"), error.message, "error");
+	}
+}
+
+async function loadTeachers() {
+	if (!$("#teacherTableBody")) {
+		return;
+	}
+	try {
+		const response = await request("/dashboard/teachers");
+		state.teachers = response.items || [];
+		renderTeachers();
+		renderContextPanels();
+	} catch (error) {
+		setMessage($("#teacherMessage"), error.message, "error");
 	}
 }
 
@@ -267,12 +288,41 @@ async function createStudent() {
 	}
 }
 
+async function createTeacher() {
+	const message = $("#teacherMessage");
+	setMessage(message, "Creando profesor...", "");
+	try {
+		await request("/dashboard/teachers", {
+			method: "POST",
+			body: {
+				email: $("#teacherEmail").value,
+				password: $("#teacherPassword").value,
+				institutionId: $("#teacherInstitution").value
+			}
+		});
+		$("#teacherForm").reset();
+		setMessage(message, "Profesor creado.", "ok");
+		await Promise.all([loadSummary(), loadTeachers()]);
+	} catch (error) {
+		setMessage(message, error.message, "error");
+	}
+}
+
 async function disableStudent(id) {
 	try {
 		await request(`/dashboard/students/${encodeURIComponent(id)}`, { method: "DELETE" });
 		await Promise.all([loadSummary(), loadStudents()]);
 	} catch (error) {
 		setMessage($("#studentMessage"), error.message, "error");
+	}
+}
+
+async function disableTeacher(id) {
+	try {
+		await request(`/dashboard/teachers/${encodeURIComponent(id)}`, { method: "DELETE" });
+		await Promise.all([loadSummary(), loadTeachers()]);
+	} catch (error) {
+		setMessage($("#teacherMessage"), error.message, "error");
 	}
 }
 
@@ -336,8 +386,6 @@ function renderMetrics(metrics) {
 
 function renderSignals() {
 	renderSignalList("#licenseRack", Object.entries(state.summary?.licenses || {}).map(([label, value]) => ({ label, value })), "Licencias");
-	renderSignalList("#healthRack", state.summary?.health || [], "Salud");
-	renderSignalList("#activityRack", state.summary?.activity || [], "Actividad");
 }
 
 function renderOperations() {
@@ -347,22 +395,16 @@ function renderOperations() {
 		{ label: "Acciones docentes", value: `${state.summary?.metrics?.queuedActions || 0} en cola` },
 		{ label: "Sesiones", value: `${state.summary?.metrics?.activeSessions || 0} activas` }
 	], "Operacion");
-	renderSignalList("#capabilitiesRack", [
-		{ label: "Usuarios", value: "alumnos y sesiones" },
-		{ label: "Cliente", value: "perfil, politica y ruta" },
-		{ label: "Aula", value: "moderacion en cola" },
-		{ label: "Noticias", value: "feed por rol" }
-	], "Capacidades");
 }
 
 function renderContextPanels() {
 	renderPolicyPanel();
 	renderRoutePanel();
 	renderInstitutionPanel();
-	renderNewsPanel();
 	renderActionOpsPanel();
 	renderClassPanel();
 	renderStudentBreakdown();
+	renderTeacherBreakdown();
 }
 
 function renderPolicyPanel() {
@@ -381,35 +423,24 @@ function renderPolicyPanel() {
 function renderRoutePanel() {
 	renderSignalList("#routeRack", [
 		{ label: "Servidor asignado", value: state.route?.serverName || "sin ruta" },
-		{ label: "Centro", value: shortId(state.route?.institutionId || state.me?.institutionId) },
-		{ label: "Cliente web", value: "disponible" },
-		{ label: "Conexion", value: "por parametro server" }
+		{ label: "Centro", value: shortId(state.route?.institutionId || state.me?.institutionId) }
 	], "Ruta");
 }
 
 function renderInstitutionPanel() {
-	const profile = state.profile || {};
 	renderSignalList("#institutionRack", [
-		{ label: "Centro", value: profile.school || shortId(state.me?.institutionId) },
-		{ label: "Usuario", value: profile.displayName || state.me?.email || "-" },
-		{ label: "Curso", value: profile.course || "-" },
-		{ label: "Grupo", value: profile.classGroup || "-" }
+		{ label: "Centro", value: shortId(state.me?.institutionId) },
+		{ label: "Alumnos", value: String(state.summary?.metrics?.students || state.students.length || 0) },
+		{ label: "Profesores", value: String(state.summary?.metrics?.teachers || state.teachers.length || 0) },
+		{ label: "Sesiones", value: String(state.summary?.metrics?.activeSessions || 0) }
 	], "Centro");
-}
-
-function renderNewsPanel() {
-	const items = state.news?.items || [];
-	renderSignalList("#newsRack", items.slice(0, 4).map((item) => ({
-		label: item.category || "aviso",
-		value: item.title || item.summary || "-"
-	})), "Noticias");
 }
 
 function renderActionOpsPanel() {
 	const queued = state.summary?.metrics?.queuedActions || 0;
 	renderSignalList("#actionOpsRack", [
 		{ label: "Pendientes", value: String(queued) },
-		{ label: "Moderacion", value: `${teacherActions.length} acciones disponibles` },
+		{ label: "Moderacion", value: `${teacherActions.length} acciones soportadas` },
 		{ label: "Objetivo", value: "alumno o clase" },
 		{ label: "Auditoria", value: "motivo registrado" }
 	], "Acciones");
@@ -467,6 +498,24 @@ function renderStudents() {
 	renderStudentBreakdown();
 }
 
+function renderTeachers() {
+	if (!$("#teacherTableBody")) {
+		return;
+	}
+	$("#teacherTableBody").innerHTML = state.teachers.length ? state.teachers.map((teacher) => `
+		<tr>
+			<td>${escapeHtml(teacher.email)}</td>
+			<td>${escapeHtml(readableStatus(teacher.status))}</td>
+			<td>${escapeHtml(shortId(teacher.institutionId))}</td>
+			<td><button type="button" data-disable-teacher="${escapeHtml(teacher.id)}">Desactivar</button></td>
+		</tr>
+	`).join("") : `<tr><td colspan="4">Sin profesores visibles para este rol.</td></tr>`;
+	for (const button of document.querySelectorAll("[data-disable-teacher]")) {
+		button.addEventListener("click", () => disableTeacher(button.dataset.disableTeacher));
+	}
+	renderTeacherBreakdown();
+}
+
 function renderStudentBreakdown() {
 	const node = $("#studentBreakdown");
 	if (!node) {
@@ -475,6 +524,22 @@ function renderStudentBreakdown() {
 	const total = state.students.length;
 	const active = state.students.filter((student) => student.status === "active").length;
 	const disabled = state.students.filter((student) => student.status === "disabled").length;
+	node.innerHTML = `
+		<span>Total <strong>${escapeHtml(String(total))}</strong></span>
+		<span>Activos <strong>${escapeHtml(String(active))}</strong></span>
+		<span>Desactivados <strong>${escapeHtml(String(disabled))}</strong></span>
+		<span>Centro <strong>${escapeHtml(shortId(state.me?.institutionId))}</strong></span>
+	`;
+}
+
+function renderTeacherBreakdown() {
+	const node = $("#teacherBreakdown");
+	if (!node) {
+		return;
+	}
+	const total = state.teachers.length;
+	const active = state.teachers.filter((teacher) => teacher.status === "active").length;
+	const disabled = state.teachers.filter((teacher) => teacher.status === "disabled").length;
 	node.innerHTML = `
 		<span>Total <strong>${escapeHtml(String(total))}</strong></span>
 		<span>Activos <strong>${escapeHtml(String(active))}</strong></span>
@@ -588,11 +653,10 @@ function clearSession() {
 	state.me = null;
 	state.summary = null;
 	state.students = [];
-	state.profile = null;
+	state.teachers = [];
 	state.policy = null;
 	state.livePolicy = null;
 	state.route = null;
-	state.news = null;
 	localStorage.removeItem(STORAGE_KEYS.access);
 	localStorage.removeItem(STORAGE_KEYS.refresh);
 }

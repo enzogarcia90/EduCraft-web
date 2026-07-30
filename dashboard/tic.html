@@ -44,7 +44,21 @@
 					</section>
 				</section>
 				<section class="portal-grid two">
-					<article><h2>Noticias del centro</h2><div id="newsRack" class="signal-list"></div></article>
+					<form id="teacherForm" class="portal-panel portal-form">
+						<h2>Crear profesor</h2>
+						<label><span>Email</span><input id="teacherEmail" type="email" placeholder="profesor@centro.edu" required></label>
+						<label><span>Contrasena inicial</span><input id="teacherPassword" type="text" minlength="4" required></label>
+						<label><span>ID institucion opcional</span><input id="teacherInstitution" type="text" placeholder="solo equipos EduCraft"></label>
+						<button class="button primary" type="submit">Crear profesor</button>
+						<p id="teacherMessage" class="portal-message"></p>
+					</form>
+					<section class="portal-panel">
+						<div class="table-head"><h2>Profesores</h2><button id="reloadTeachers" class="portal-ghost" type="button">Actualizar</button></div>
+						<div id="teacherBreakdown" class="compact-rack"></div>
+						<table class="portal-table"><thead><tr><th>Email</th><th>Estado</th><th>Centro</th><th></th></tr></thead><tbody id="teacherTableBody"></tbody></table>
+					</section>
+				</section>
+				<section class="portal-grid two">
 					<article><h2>Acciones pendientes</h2><div id="actionOpsRack" class="signal-list"></div></article>
 				</section>
 			</section>
