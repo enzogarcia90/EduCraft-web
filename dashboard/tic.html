@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="robots" content="noindex,nofollow">
+		<meta name="theme-color" content="#15986f">
+		<title>TIC | EduCraft</title>
+		<link rel="stylesheet" href="../styles.css">
+		<link rel="stylesheet" href="dashboard.css">
+	</head>
+	<body class="portal-app" data-dashboard-page="tic">
+		<header class="portal-header">
+			<a class="portal-brand" href="../index.html"><span class="brand-mark">E</span><span><strong>EduCraft</strong><small>Panel TIC</small></span></a>
+			<div class="portal-session"><span id="sessionLabel">Validando sesion</span><button id="logoutButton" class="portal-ghost" type="button">Salir</button></div>
+		</header>
+		<main class="portal-layout">
+			<aside class="portal-sidebar">
+				<p class="eyebrow">Institucion</p>
+				<h1 class="portal-title">Control TIC</h1>
+				<p>Gestion de alumnos, licencias, sesiones activas y estado general del centro.</p>
+				<div id="identityPanel" class="identity-list"></div>
+			</aside>
+			<section class="portal-main">
+				<section id="metricsGrid" class="portal-metrics"></section>
+				<section class="portal-grid two">
+					<form id="studentForm" class="portal-panel portal-form">
+						<h2>Crear alumno</h2>
+						<label><span>Email</span><input id="studentEmail" type="email" placeholder="alumno@centro.edu" required></label>
+						<label><span>Contrasena inicial</span><input id="studentPassword" type="text" minlength="4" required></label>
+						<label><span>ID institucion opcional</span><input id="studentInstitution" type="text" placeholder="solo equipos EduCraft"></label>
+						<button class="button primary" type="submit">Crear alumno</button>
+						<p id="studentMessage" class="portal-message"></p>
+					</form>
+					<section class="portal-panel">
+						<div class="table-head"><h2>Alumnos</h2><button id="reloadStudents" class="portal-ghost" type="button">Actualizar</button></div>
+						<table class="portal-table"><thead><tr><th>Email</th><th>Estado</th><th>Centro</th><th></th></tr></thead><tbody id="studentTableBody"></tbody></table>
+					</section>
+				</section>
+			</section>
+		</main>
+		<script src="../cliente/educraft-config.js"></script>
+		<script src="dashboard.js"></script>
+	</body>
+</html>

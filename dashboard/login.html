@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="Acceso privado EduCraft con redireccion automatica por rol.">
+		<meta name="robots" content="noindex,nofollow">
+		<meta name="theme-color" content="#15986f">
+		<title>Login | EduCraft</title>
+		<link rel="stylesheet" href="../styles.css">
+		<link rel="stylesheet" href="dashboard.css">
+	</head>
+	<body class="portal-auth" data-dashboard-page="login">
+		<main class="auth-layout">
+			<section class="auth-visual">
+				<a class="portal-brand" href="../index.html"><span class="brand-mark">E</span><span><strong>EduCraft</strong><small>Portal privado</small></span></a>
+				<div>
+					<p class="eyebrow">Acceso seguro</p>
+					<h1 class="auth-title">Entra una vez. EduCraft te lleva a tu panel.</h1>
+					<p>El rol no se elige en la interfaz. El backend valida tus credenciales, emite JWT y abre administracion, TIC o profesor segun permisos.</p>
+				</div>
+			</section>
+			<section class="auth-card">
+				<p class="eyebrow">Login</p>
+				<h2>Credenciales EduCraft</h2>
+				<form id="loginForm" class="portal-form">
+					<label><span>Email</span><input id="emailInput" type="email" autocomplete="username" required></label>
+					<label><span>Contrasena</span><input id="passwordInput" type="password" autocomplete="current-password" required></label>
+					<button class="button primary" type="submit">Entrar</button>
+				</form>
+				<p id="authMessage" class="portal-message" role="status"></p>
+				<div class="auth-links"><a href="registro.html">Crear cuenta de centro</a><a href="../index.html">Volver a la web</a></div>
+			</section>
+		</main>
+		<script src="../cliente/educraft-config.js"></script>
+		<script src="dashboard.js"></script>
+	</body>
+</html>

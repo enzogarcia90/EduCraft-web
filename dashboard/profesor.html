@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="robots" content="noindex,nofollow">
+		<meta name="theme-color" content="#15986f">
+		<title>Profesor | EduCraft</title>
+		<link rel="stylesheet" href="../styles.css">
+		<link rel="stylesheet" href="dashboard.css">
+	</head>
+	<body class="portal-app" data-dashboard-page="profesor">
+		<header class="portal-header">
+			<a class="portal-brand" href="../index.html"><span class="brand-mark">E</span><span><strong>EduCraft</strong><small>Profesor</small></span></a>
+			<div class="portal-session"><span id="sessionLabel">Validando sesion</span><button id="logoutButton" class="portal-ghost" type="button">Salir</button></div>
+		</header>
+		<main class="portal-layout">
+			<aside class="portal-sidebar">
+				<p class="eyebrow">Aula</p>
+				<h1 class="portal-title">Panel del profesor</h1>
+				<p>Acciones de clase y seguimiento de alumnos. Las acciones quedan auditadas y en cola para integracion Minecraft.</p>
+				<div id="identityPanel" class="identity-list"></div>
+			</aside>
+			<section class="portal-main">
+				<section id="metricsGrid" class="portal-metrics"></section>
+				<section class="portal-grid teacher">
+					<div class="portal-panel portal-form">
+						<h2>Accion de aula</h2>
+						<label><span>Alumno objetivo</span><select id="targetStudent"></select></label>
+						<label><span>Motivo</span><input id="actionReason" type="text" placeholder="Incidencia, fin de actividad, soporte..."></label>
+						<p id="actionMessage" class="portal-message"></p>
+					</div>
+					<div id="teacherActions" class="teacher-actions"></div>
+				</section>
+			</section>
+		</main>
+		<script src="../cliente/educraft-config.js"></script>
+		<script src="dashboard.js"></script>
+	</body>
+</html>

@@ -1,21 +1,23 @@
+const STORAGE_KEYS = {
+	access: "educraft.dashboard.accessToken",
+	refresh: "educraft.dashboard.refreshToken"
+};
+
 const state = {
-	token: localStorage.getItem("educraft.dashboard.accessToken") || "",
-	refreshToken: localStorage.getItem("educraft.dashboard.refreshToken") || "",
+	token: localStorage.getItem(STORAGE_KEYS.access) || "",
+	refreshToken: localStorage.getItem(STORAGE_KEYS.refresh) || "",
 	me: null,
 	summary: null,
 	students: []
 };
 
 const apiBase = (window.EDUCRAFT_API_BASE_URL || "http://127.0.0.1:8080").replace(/\/+$/, "");
-const views = {
-	administracion: "Administracion",
-	tic: "TIC",
-	profesor: "Profesor"
-};
-
+const currentPage = document.body.dataset.dashboardPage || "login";
+const companyRoles = new Set(["owner", "lead_developer", "developer", "support"]);
+const ticRoles = new Set(["institution_administrator", "director"]);
 const teacherActions = [
 	["alert_student", "Alertar alumno", "Envia un aviso visible al alumno."],
-	["clear_inventory", "Limpiar inventario", "Vaciar inventario del alumno."],
+	["clear_inventory", "Limpiar inventario", "Vacia el inventario del alumno."],
 	["freeze_student", "Congelar alumno", "Bloquea movimiento temporalmente."],
 	["unfreeze_student", "Descongelar alumno", "Restaura movimiento."],
 	["teleport_to_teacher", "Traer al profesor", "Teleporta alumno a tu posicion."],
@@ -60,127 +62,159 @@ const teacherActions = [
 
 const $ = (selector) => document.querySelector(selector);
 
-init();
+init().catch((error) => {
+	const node = $("#authMessage") || $("#registerMessage") || $("#studentMessage") || $("#actionMessage");
+	if (node) {
+		setMessage(node, error.message || "No se pudo cargar el portal.", "error");
+	}
+});
 
-function init() {
-	$("#apiPill").textContent = `API: ${apiBase}`;
-	bindEvents();
-	renderTeacherActions();
-	setView(location.hash.replace("#", "") || "administracion");
-	if (state.token) {
-		restoreSession();
+async function init() {
+	if (currentPage === "login") {
+		bindLogin();
+		if (state.token) {
+			await restoreAndRedirect();
+		}
+		return;
+	}
+
+	if (currentPage === "registro") {
+		bindRegister();
+		if (state.token) {
+			await restoreAndRedirect();
+		}
+		return;
+	}
+
+	bindDashboard();
+	await requireDashboardSession();
+}
+
+function bindLogin() {
+	$("#loginForm")?.addEventListener("submit", async (event) => {
+		event.preventDefault();
+		await login($("#emailInput").value, $("#passwordInput").value, $("#authMessage"));
+	});
+	const email = new URLSearchParams(location.search).get("email");
+	if (email && $("#emailInput")) {
+		$("#emailInput").value = email;
 	}
 }
 
-function bindEvents() {
-	$("#loginForm").addEventListener("submit", async (event) => {
+function bindRegister() {
+	$("#registerForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
-		await login();
+		const message = $("#registerMessage");
+		const email = $("#registerEmail").value.trim();
+		const password = $("#registerPassword").value;
+		setMessage(message, "Creando centro...", "");
+		try {
+			await request("/register", {
+				method: "POST",
+				auth: false,
+				body: {
+					institutionName: $("#registerInstitution").value,
+					contactName: $("#registerName").value,
+					email,
+					password
+				}
+			});
+			setMessage(message, "Centro creado. Entrando al panel TIC...", "ok");
+			await login(email, password, message);
+		} catch (error) {
+			setMessage(message, error.message, "error");
+		}
 	});
+}
 
-	$("#logoutButton").addEventListener("click", logout);
-	$("#studentForm").addEventListener("submit", async (event) => {
+function bindDashboard() {
+	$("#logoutButton")?.addEventListener("click", logout);
+	$("#studentForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		await createStudent();
 	});
-	$("#reloadStudents").addEventListener("click", loadStudents);
+	$("#reloadStudents")?.addEventListener("click", loadStudents);
+	renderTeacherActions();
+}
 
-	for (const tab of document.querySelectorAll(".dash-tab")) {
-		tab.addEventListener("click", () => setView(tab.dataset.view));
-	}
-
-	window.addEventListener("hashchange", () => {
-		setView(location.hash.replace("#", "") || "administracion");
+async function login(email, password, messageNode) {
+	setMessage(messageNode, "Validando credenciales...", "");
+	const response = await request("/login", {
+		method: "POST",
+		auth: false,
+		body: { email: email.trim(), password }
 	});
-}
-
-async function login() {
-	setMessage("#authMessage", "Entrando...", "");
-	try {
-		const response = await request("/login", {
-			method: "POST",
-			auth: false,
-			body: {
-				email: $("#emailInput").value,
-				password: $("#passwordInput").value
-			}
-		});
-		state.token = response.accessToken;
-		state.refreshToken = response.refreshToken;
-		state.me = response;
-		localStorage.setItem("educraft.dashboard.accessToken", state.token);
-		localStorage.setItem("educraft.dashboard.refreshToken", state.refreshToken);
-		setMessage("#authMessage", "Sesion iniciada.", "ok");
-		await hydrateDashboard();
-		routeForRole(response.role);
-	} catch (error) {
-		setMessage("#authMessage", error.message, "error");
-		setApiStatus(false);
+	storeSession(response);
+	const destination = pageForRole(response.role);
+	if (!destination) {
+		clearSession();
+		throw new Error("Esta cuenta no tiene acceso al portal privado.");
 	}
+	location.replace(destination);
 }
 
-async function restoreSession() {
+async function restoreAndRedirect() {
 	try {
 		state.me = await request("/me");
-		await hydrateDashboard();
-		routeForRole(state.me.role);
+		const destination = pageForRole(state.me.role);
+		if (!destination) {
+			clearSession();
+			return;
+		}
+		location.replace(destination);
+	} catch (_) {
+		clearSession();
+	}
+}
+
+async function requireDashboardSession() {
+	if (!state.token) {
+		location.replace("login.html");
+		return;
+	}
+	try {
+		state.me = await request("/me");
+		const destination = pageForRole(state.me.role);
+		if (!destination) {
+			logout();
+			return;
+		}
+		if (pageName(destination) !== currentPage) {
+			location.replace(destination);
+			return;
+		}
+		renderIdentity();
+		await loadSummary();
+		if (currentPage === "tic" || currentPage === "profesor") {
+			await loadStudents();
+		}
 	} catch (_) {
 		logout();
 	}
 }
 
-async function hydrateDashboard() {
-	if (state.me.role === "student") {
-		logout();
-		setMessage("#authMessage", "Tu cuenta de alumno no tiene acceso al dashboard privado.", "error");
-		return;
-	}
-
-	$("#loginPanel").hidden = true;
-	$("#identityPanel").hidden = false;
-	$("#logoutButton").hidden = false;
-	$("#sessionLabel").textContent = state.me.email || "Sesion activa";
-	$("#identityEmail").textContent = state.me.email || "-";
-	$("#identityRole").textContent = readableRole(state.me.role);
-	$("#identityInstitution").textContent = shortId(state.me.institutionId);
-	$("#identitySession").textContent = shortId(state.me.sessionId);
-	setApiStatus(true);
-	await Promise.all([loadSummary(), loadStudents()]);
-}
-
 async function loadSummary() {
-	if (!state.token) {
-		renderMetrics({});
-		return;
-	}
-	try {
-		state.summary = await request("/dashboard/summary");
-		renderMetrics(state.summary.metrics || {});
-		renderSignals();
-	} catch (error) {
-		setApiStatus(false);
-		renderMetrics({});
-	}
+	state.summary = await request("/dashboard/summary");
+	renderMetrics(state.summary.metrics || {});
+	renderSignals();
 }
 
 async function loadStudents() {
-	if (!state.token) {
-		renderStudents([]);
+	if (!$("#studentTableBody") && !$("#targetStudent")) {
 		return;
 	}
 	try {
 		const response = await request("/dashboard/students");
 		state.students = response.items || [];
-		renderStudents(state.students);
-		setApiStatus(true);
+		renderStudents();
 	} catch (error) {
-		renderStudents([]);
-		setMessage("#studentMessage", error.message, "error");
+		setMessage($("#studentMessage") || $("#actionMessage"), error.message, "error");
 	}
 }
 
 async function createStudent() {
-	setMessage("#studentMessage", "Creando alumno...", "");
+	const message = $("#studentMessage");
+	setMessage(message, "Creando alumno...", "");
 	try {
 		await request("/dashboard/students", {
 			method: "POST",
@@ -191,36 +225,51 @@ async function createStudent() {
 			}
 		});
 		$("#studentForm").reset();
-		setMessage("#studentMessage", "Alumno creado.", "ok");
-		await Promise.all([loadStudents(), loadSummary()]);
+		setMessage(message, "Alumno creado.", "ok");
+		await Promise.all([loadSummary(), loadStudents()]);
 	} catch (error) {
-		setMessage("#studentMessage", error.message, "error");
+		setMessage(message, error.message, "error");
 	}
 }
 
 async function disableStudent(id) {
 	try {
 		await request(`/dashboard/students/${encodeURIComponent(id)}`, { method: "DELETE" });
-		await Promise.all([loadStudents(), loadSummary()]);
+		await Promise.all([loadSummary(), loadStudents()]);
 	} catch (error) {
-		setMessage("#studentMessage", error.message, "error");
+		setMessage($("#studentMessage"), error.message, "error");
 	}
 }
 
 async function queueAction(actionKey) {
-	const targetUserId = $("#targetStudent").value;
-	const reason = $("#actionReason").value;
-	setMessage("#actionMessage", "Registrando accion...", "");
+	const message = $("#actionMessage");
+	setMessage(message, "Registrando accion...", "");
 	try {
 		const response = await request("/dashboard/teacher/actions", {
 			method: "POST",
-			body: { actionKey, targetUserId, reason }
+			body: {
+				actionKey,
+				targetUserId: $("#targetStudent")?.value || "",
+				reason: $("#actionReason")?.value || ""
+			}
 		});
-		setMessage("#actionMessage", `Accion en cola: ${shortId(response.id)}`, "ok");
+		setMessage(message, `Accion en cola: ${shortId(response.id)}`, "ok");
 		await loadSummary();
 	} catch (error) {
-		setMessage("#actionMessage", error.message, "error");
+		setMessage(message, error.message, "error");
 	}
+}
+
+function renderIdentity() {
+	$("#sessionLabel").textContent = state.me.email || "Sesion activa";
+	$("#identityPanel").innerHTML = `
+		<dl>
+			<div><dt>Email</dt><dd>${escapeHtml(state.me.email || "-")}</dd></div>
+			<div><dt>Rol</dt><dd>${escapeHtml(readableRole(state.me.role))}</dd></div>
+			<div><dt>Institucion</dt><dd>${escapeHtml(shortId(state.me.institutionId))}</dd></div>
+			<div><dt>Sesion</dt><dd>${escapeHtml(shortId(state.me.sessionId))}</dd></div>
+		</dl>
+	`;
 }
 
 function renderMetrics(metrics) {
@@ -234,88 +283,78 @@ function renderMetrics(metrics) {
 		activeSessions: "Sesiones activas",
 		queuedActions: "Acciones en cola"
 	};
-	const entries = Object.entries(metrics);
+	const preferred = [
+		"institutions",
+		"activeInstitutions",
+		"users",
+		"students",
+		"teachers",
+		"activeStudents",
+		"activeSessions",
+		"queuedActions"
+	];
+	const entries = preferred.filter((key) => Object.hasOwn(metrics, key)).map((key) => [key, metrics[key]]);
 	$("#metricsGrid").innerHTML = entries.length ? entries.map(([key, value]) => `
 		<article><strong>${escapeHtml(String(value))}</strong><span>${escapeHtml(labels[key] || key)}</span></article>
-	`).join("") : `
-		<article><strong>-</strong><span>Inicia sesion para ver metricas</span></article>
-	`;
+	`).join("") : `<article><strong>-</strong><span>Sin metricas para este rol</span></article>`;
 }
 
 function renderSignals() {
-	const licenses = state.summary?.licenses || {};
-	$("#licenseRack").innerHTML = Object.entries(licenses).length ? Object.entries(licenses).map(([key, total]) => `
-		<div><span>${escapeHtml(key)}</span><strong>${escapeHtml(String(total))}</strong></div>
-	`).join("") : `<div><span>Licencias</span><strong>Sin datos</strong></div>`;
-
-	$("#healthRack").innerHTML = (state.summary?.health || []).map((item) => `
-		<div><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.value)}</strong></div>
-	`).join("");
-
-	$("#activityRack").innerHTML = (state.summary?.activity || []).map((item) => `
-		<div><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.value)}</strong></div>
-	`).join("");
+	renderSignalList("#licenseRack", Object.entries(state.summary?.licenses || {}).map(([label, value]) => ({ label, value })), "Licencias");
+	renderSignalList("#healthRack", state.summary?.health || [], "Salud");
+	renderSignalList("#activityRack", state.summary?.activity || [], "Actividad");
 }
 
-function renderStudents(students) {
-	const rows = students.map((student) => `
-		<tr>
-			<td>${escapeHtml(student.email)}</td>
-			<td>${escapeHtml(student.status)}</td>
-			<td>${escapeHtml(shortId(student.institutionId))}</td>
-			<td><button type="button" data-disable-student="${escapeHtml(student.id)}">Desactivar</button></td>
-		</tr>
-	`).join("");
-	$("#studentTableBody").innerHTML = rows || `<tr><td colspan="4">Sin alumnos visibles para este rol.</td></tr>`;
-	$("#targetStudent").innerHTML = `<option value="">Toda la clase</option>` + students.map((student) => `
-		<option value="${escapeHtml(student.id)}">${escapeHtml(student.email)}</option>
-	`).join("");
+function renderSignalList(selector, items, fallback) {
+	const node = $(selector);
+	if (!node) {
+		return;
+	}
+	node.innerHTML = items.length ? items.map((item) => `
+		<div><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(String(item.value))}</strong></div>
+	`).join("") : `<div><span>${escapeHtml(fallback)}</span><strong>Sin datos</strong></div>`;
+}
 
-	for (const button of document.querySelectorAll("[data-disable-student]")) {
-		button.addEventListener("click", () => disableStudent(button.dataset.disableStudent));
+function renderStudents() {
+	if ($("#studentTableBody")) {
+		$("#studentTableBody").innerHTML = state.students.length ? state.students.map((student) => `
+			<tr>
+				<td>${escapeHtml(student.email)}</td>
+				<td>${escapeHtml(student.status)}</td>
+				<td>${escapeHtml(shortId(student.institutionId))}</td>
+				<td><button type="button" data-disable-student="${escapeHtml(student.id)}">Desactivar</button></td>
+			</tr>
+		`).join("") : `<tr><td colspan="4">Sin alumnos visibles para este rol.</td></tr>`;
+		for (const button of document.querySelectorAll("[data-disable-student]")) {
+			button.addEventListener("click", () => disableStudent(button.dataset.disableStudent));
+		}
+	}
+
+	if ($("#targetStudent")) {
+		$("#targetStudent").innerHTML = `<option value="">Toda la clase</option>` + state.students.map((student) => `
+			<option value="${escapeHtml(student.id)}">${escapeHtml(student.email)}</option>
+		`).join("");
 	}
 }
 
 function renderTeacherActions() {
+	if (!$("#teacherActions")) {
+		return;
+	}
 	$("#teacherActions").innerHTML = teacherActions.map(([key, label, description]) => `
 		<button type="button" data-action-key="${key}">
 			<strong>${escapeHtml(label)}</strong>
 			<small>${escapeHtml(description)}</small>
 		</button>
 	`).join("");
-
 	for (const button of document.querySelectorAll("[data-action-key]")) {
 		button.addEventListener("click", () => queueAction(button.dataset.actionKey));
 	}
 }
 
-function setView(view) {
-	const next = views[view] ? view : "administracion";
-	$("#viewTitle").textContent = views[next];
-	for (const tab of document.querySelectorAll(".dash-tab")) {
-		tab.classList.toggle("is-active", tab.dataset.view === next);
-	}
-	for (const panel of document.querySelectorAll("[data-view-panel]")) {
-		panel.classList.toggle("is-active", panel.dataset.viewPanel === next);
-	}
-	if (location.hash.replace("#", "") !== next) {
-		history.replaceState(null, "", `#${next}`);
-	}
-}
-
-function routeForRole(role) {
-	if (["teacher"].includes(role)) {
-		setView("profesor");
-	} else if (["institution_administrator", "director"].includes(role)) {
-		setView("tic");
-	} else {
-		setView("administracion");
-	}
-}
-
 async function request(path, options = {}) {
 	const headers = {
-		"Accept": "application/json",
+		Accept: "application/json",
 		"Content-Type": "application/json"
 	};
 	if (options.auth !== false && state.token) {
@@ -334,58 +373,81 @@ async function request(path, options = {}) {
 	return data;
 }
 
-function logout() {
+function pageForRole(role) {
+	if (companyRoles.has(role)) {
+		return "administracion.html";
+	}
+	if (ticRoles.has(role)) {
+		return "tic.html";
+	}
+	if (role === "teacher") {
+		return "profesor.html";
+	}
+	return "";
+}
+
+function pageName(path) {
+	return path.replace(".html", "");
+}
+
+function storeSession(response) {
+	state.token = response.accessToken;
+	state.refreshToken = response.refreshToken;
+	state.me = response;
+	localStorage.setItem(STORAGE_KEYS.access, state.token);
+	localStorage.setItem(STORAGE_KEYS.refresh, state.refreshToken || "");
+}
+
+function clearSession() {
 	state.token = "";
 	state.refreshToken = "";
 	state.me = null;
 	state.summary = null;
 	state.students = [];
-	localStorage.removeItem("educraft.dashboard.accessToken");
-	localStorage.removeItem("educraft.dashboard.refreshToken");
-	$("#loginPanel").hidden = false;
-	$("#identityPanel").hidden = true;
-	$("#logoutButton").hidden = true;
-	$("#sessionLabel").textContent = "Sin sesion";
-	renderMetrics({});
-	renderStudents([]);
-	setApiStatus(false);
+	localStorage.removeItem(STORAGE_KEYS.access);
+	localStorage.removeItem(STORAGE_KEYS.refresh);
 }
 
-function setApiStatus(ok) {
-	$("#apiPill").classList.toggle("is-ok", ok);
-	$("#apiPill").classList.toggle("is-error", !ok);
+function logout() {
+	clearSession();
+	location.replace("login.html");
 }
 
-function setMessage(selector, text, tone) {
-	const node = $(selector);
-	node.textContent = text;
+function setMessage(node, text, tone) {
+	if (!node) {
+		return;
+	}
+	node.textContent = text || "";
 	node.classList.toggle("is-ok", tone === "ok");
 	node.classList.toggle("is-error", tone === "error");
 }
 
 function readableRole(role) {
-	return ({
-		owner: "Direccion global",
+	const labels = {
+		owner: "Administracion EduCraft",
 		lead_developer: "Direccion tecnica",
-		developer: "Equipo EduCraft",
+		developer: "Equipo tecnico EduCraft",
+		support: "Soporte EduCraft",
 		institution_administrator: "TIC de centro",
 		director: "Direccion de centro",
 		teacher: "Profesor",
-		student: "Alumno",
-		support: "Soporte"
-	})[role] || role || "-";
+		student: "Alumno"
+	};
+	return labels[role] || role || "-";
 }
 
 function shortId(value) {
-	return value ? `${value.slice(0, 8)}...` : "-";
+	if (!value) {
+		return "-";
+	}
+	return value.length > 12 ? `${value.slice(0, 8)}...` : value;
 }
 
 function escapeHtml(value) {
-	return value.replace(/[&<>"']/g, (char) => ({
-		"&": "&amp;",
-		"<": "&lt;",
-		">": "&gt;",
-		'"': "&quot;",
-		"'": "&#039;"
-	})[char]);
+	return value
+		.replaceAll("&", "&amp;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(">", "&gt;")
+		.replaceAll("\"", "&quot;")
+		.replaceAll("'", "&#039;");
 }

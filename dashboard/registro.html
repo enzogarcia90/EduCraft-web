@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="Registro privado EduCraft para centros educativos.">
+		<meta name="robots" content="noindex,nofollow">
+		<meta name="theme-color" content="#15986f">
+		<title>Registro | EduCraft</title>
+		<link rel="stylesheet" href="../styles.css">
+		<link rel="stylesheet" href="dashboard.css">
+	</head>
+	<body class="portal-auth" data-dashboard-page="registro">
+		<main class="auth-layout">
+			<section class="auth-visual">
+				<a class="portal-brand" href="../index.html"><span class="brand-mark">E</span><span><strong>EduCraft</strong><small>Alta de centro</small></span></a>
+				<div>
+					<p class="eyebrow">Registro</p>
+					<h1 class="auth-title">Crea el acceso TIC inicial de tu centro.</h1>
+					<p>El registro crea una institucion en modo prueba y una cuenta TIC administradora. Despues iniciaras sesion y entraras al dashboard TIC.</p>
+				</div>
+			</section>
+			<section class="auth-card">
+				<p class="eyebrow">Nueva institucion</p>
+				<h2>Datos de alta</h2>
+				<form id="registerForm" class="portal-form">
+					<label><span>Centro educativo</span><input id="registerInstitution" type="text" autocomplete="organization" required></label>
+					<label><span>Nombre de contacto</span><input id="registerName" type="text" autocomplete="name"></label>
+					<label><span>Email TIC</span><input id="registerEmail" type="email" autocomplete="username" required></label>
+					<label><span>Contrasena</span><input id="registerPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+					<button class="button primary" type="submit">Crear cuenta</button>
+				</form>
+				<p id="registerMessage" class="portal-message" role="status"></p>
+				<div class="auth-links"><a href="login.html">Ya tengo cuenta</a><a href="../index.html">Volver a la web</a></div>
+			</section>
+		</main>
+		<script src="../cliente/educraft-config.js"></script>
+		<script src="dashboard.js"></script>
+	</body>
+</html>
