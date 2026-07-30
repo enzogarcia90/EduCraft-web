@@ -14,7 +14,7 @@ const state = {
 const apiBase = (window.EDUCRAFT_API_BASE_URL || "http://127.0.0.1:8080").replace(/\/+$/, "");
 const currentPage = document.body.dataset.dashboardPage || "login";
 const companyRoles = new Set(["owner", "lead_developer", "developer", "support"]);
-const ticRoles = new Set(["institution_administrator", "director"]);
+const ticRoles = new Set(["institution_administrator", "institution_admin", "director"]);
 const teacherActions = [
 	["alert_student", "Alertar alumno", "Envia un aviso visible al alumno."],
 	["clear_inventory", "Limpiar inventario", "Vacia el inventario del alumno."],
@@ -93,7 +93,12 @@ async function init() {
 function bindLogin() {
 	$("#loginForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
-		await login($("#emailInput").value, $("#passwordInput").value, $("#authMessage"));
+		const message = $("#authMessage");
+		try {
+			await login($("#emailInput").value, $("#passwordInput").value, message);
+		} catch (error) {
+			setMessage(message, friendlyLoginError(error), "error");
+		}
 	});
 	const email = new URLSearchParams(location.search).get("email");
 	if (email && $("#emailInput")) {
@@ -119,10 +124,10 @@ function bindRegister() {
 					password
 				}
 			});
-			setMessage(message, "Centro creado. Entrando al panel TIC...", "ok");
+			setMessage(message, "Registro completado. Continuando...", "ok");
 			await login(email, password, message);
 		} catch (error) {
-			setMessage(message, error.message, "error");
+			setMessage(message, friendlyLoginError(error), "error");
 		}
 	});
 }
@@ -131,7 +136,11 @@ function bindDashboard() {
 	$("#logoutButton")?.addEventListener("click", logout);
 	$("#studentForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
-		await createStudent();
+		try {
+			await createStudent();
+		} catch (error) {
+			setMessage($("#studentMessage"), friendlyLoginError(error), "error");
+		}
 	});
 	$("#reloadStudents")?.addEventListener("click", loadStudents);
 	renderTeacherActions();
@@ -148,7 +157,7 @@ async function login(email, password, messageNode) {
 	const destination = pageForRole(response.role);
 	if (!destination) {
 		clearSession();
-		throw new Error("Esta cuenta no tiene acceso al portal privado.");
+		throw new Error("portal_access_denied");
 	}
 	location.replace(destination);
 }
@@ -386,6 +395,20 @@ function pageForRole(role) {
 	return "";
 }
 
+function friendlyLoginError(error) {
+	const message = String(error?.message || "");
+	if (message === "portal_access_denied" || message.includes("access denied")) {
+		return "Esta cuenta no puede acceder aqui.";
+	}
+	if (message.includes("invalid") || message.includes("unauthorized") || message.includes("HTTP 401") || message.includes("HTTP 403")) {
+		return "Credenciales no validas.";
+	}
+	if (message.includes("Failed to fetch") || message.includes("NetworkError")) {
+		return "No se pudo conectar. Intentalo de nuevo.";
+	}
+	return "No se pudo iniciar sesion.";
+}
+
 function pageName(path) {
 	return path.replace(".html", "");
 }
@@ -429,6 +452,7 @@ function readableRole(role) {
 		developer: "Equipo tecnico EduCraft",
 		support: "Soporte EduCraft",
 		institution_administrator: "TIC de centro",
+		institution_admin: "TIC de centro",
 		director: "Direccion de centro",
 		teacher: "Profesor",
 		student: "Alumno"
