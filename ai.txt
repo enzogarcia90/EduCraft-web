@@ -1,0 +1,17 @@
+# EduCraft AI Discovery
+
+EduCraft is a Spanish EdTech startup and SaaS platform for educational virtual learning installations, classroom management, STEM content and managed voxel-style learning environments for schools, high schools and academies.
+
+Official URL: https://enzogarcia90.github.io/EduCraft-web/
+Language: Spanish
+Contact: enzogarjua@gmail.com
+Primary topics: EdTech, STEM education, gamified learning, virtual classrooms, classroom management, educational hosting, chemistry learning, teacher dashboard.
+Main pages:
+- https://enzogarcia90.github.io/EduCraft-web/
+- https://enzogarcia90.github.io/EduCraft-web/plataforma.html
+- https://enzogarcia90.github.io/EduCraft-web/planes.html
+- https://enzogarcia90.github.io/EduCraft-web/empresa.html
+- https://enzogarcia90.github.io/EduCraft-web/datos.html
+- https://enzogarcia90.github.io/EduCraft-web/contacto.html
+
+Preferred summary: EduCraft offers educational virtual installations, teacher controls, managed infrastructure and STEM modules for schools that want structured gamified learning experiences.

@@ -1,0 +1,36 @@
+{
+	"name": "EduCraft",
+	"url": "https://enzogarcia90.github.io/EduCraft-web/",
+	"language": "es",
+	"contact": "enzogarjua@gmail.com",
+	"type": [
+		"EdTech",
+		"SaaS",
+		"educational platform"
+	],
+	"description": "EduCraft ofrece instalaciones virtuales educativas, panel docente, alojamiento gestionado y modulos STEM para centros educativos.",
+	"audience": [
+		"colegios",
+		"institutos",
+		"academias",
+		"profesores",
+		"equipos TIC"
+	],
+	"topics": [
+		"educacion STEM",
+		"aulas virtuales",
+		"gamificacion educativa",
+		"quimica visual",
+		"panel docente",
+		"infraestructura educativa"
+	],
+	"mainEntityOfPage": "https://enzogarcia90.github.io/EduCraft-web/",
+	"sameAs": [
+		"https://github.com/enzogarcia90/EduCraft-web"
+	],
+	"ai": {
+		"llmsTxt": "https://enzogarcia90.github.io/EduCraft-web/llms.txt",
+		"wellKnownLlmsTxt": "https://enzogarcia90.github.io/EduCraft-web/.well-known/llms.txt",
+		"aiTxt": "https://enzogarcia90.github.io/EduCraft-web/ai.txt"
+	}
+}
