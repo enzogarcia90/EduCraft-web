@@ -923,6 +923,52 @@ body.portal-app * {
 	text-transform: uppercase;
 }
 
+.minecraft-actions {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.minecraft-action {
+	display: grid;
+	gap: 7px;
+	min-height: 92px;
+	padding: 13px;
+	border: 1px solid var(--portal-line);
+	border-left: 4px solid #8b9a95;
+	background: #fff;
+	box-shadow: 0 10px 24px rgba(19, 33, 29, 0.05);
+}
+
+.minecraft-action strong,
+.minecraft-action span,
+.minecraft-action small {
+	overflow-wrap: anywhere;
+}
+
+.minecraft-action strong {
+	font-size: 13px;
+}
+
+.minecraft-action span,
+.minecraft-action small {
+	color: var(--portal-muted);
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+.minecraft-action.sent {
+	border-left-color: #1d6ce3;
+}
+
+.minecraft-action.completed {
+	border-left-color: #15986f;
+}
+
+.minecraft-action.failed {
+	border-left-color: #c84f6a;
+}
+
 .empty-actions {
 	display: grid;
 	min-height: 112px;
@@ -942,6 +988,7 @@ body.portal-app * {
 	.portal-metrics,
 	.portal-grid.three,
 	.portal-grid.charts-grid,
+	.minecraft-actions,
 	.teacher-actions {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
@@ -1008,6 +1055,7 @@ body.portal-app * {
 	.portal-metrics,
 	.portal-grid.three,
 	.portal-grid.charts-grid,
+	.minecraft-actions,
 	.teacher-actions {
 		grid-template-columns: 1fr;
 	}

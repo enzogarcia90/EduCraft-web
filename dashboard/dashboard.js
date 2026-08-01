@@ -10,6 +10,7 @@ const state = {
 	summary: null,
 	students: [],
 	teachers: [],
+	actions: [],
 	policy: null,
 	livePolicy: null,
 	route: null,
@@ -330,6 +331,9 @@ async function requireDashboardSession() {
 		if (currentPage === "tic") {
 			await loadTeachers();
 		}
+		if (currentPage === "tic" || currentPage === "profesor") {
+			await loadTeacherActions();
+		}
 	} catch (_) {
 		logout();
 	}
@@ -387,6 +391,19 @@ async function loadTeachers() {
 		renderContextPanels();
 	} catch (error) {
 		setMessage($("#teacherMessage"), error.message, "error");
+	}
+}
+
+async function loadTeacherActions() {
+	if (!$("#minecraftActionRack")) {
+		return;
+	}
+	try {
+		const response = await request("/dashboard/teacher/actions");
+		state.actions = response.items || [];
+		renderMinecraftActions();
+	} catch (error) {
+		renderMinecraftActions(error);
 	}
 }
 
@@ -461,7 +478,7 @@ async function queueAction(actionKey) {
 			}
 		});
 		setMessage(message, `Accion en cola: ${shortId(response.id)}`, "ok");
-		await loadSummary();
+		await Promise.all([loadSummary(), loadTeacherActions()]);
 	} catch (error) {
 		setMessage(message, error.message, "error");
 	}
@@ -566,6 +583,24 @@ function renderActionOpsPanel() {
 		{ label: "Objetivo", value: "alumno o clase" },
 		{ label: "Auditoria", value: "motivo registrado" }
 	], "Acciones");
+}
+
+function renderMinecraftActions(error) {
+	const node = $("#minecraftActionRack");
+	if (!node) {
+		return;
+	}
+	if (error) {
+		node.innerHTML = `<div class="minecraft-action empty"><strong>Sin estado</strong><span>${escapeHtml(error.message || "No se pudo cargar la entrega.")}</span></div>`;
+		return;
+	}
+	node.innerHTML = state.actions.length ? state.actions.slice(0, 8).map((action) => `
+		<div class="minecraft-action ${escapeHtml(action.status || "queued")}">
+			<strong>${escapeHtml(actionLabel(action.actionKey))}</strong>
+			<span>${escapeHtml(actionTargetLabel(action))}</span>
+			<small>${escapeHtml(actionDeliveryLabel(action))}</small>
+		</div>
+	`).join("") : `<div class="minecraft-action empty"><strong>Sin acciones recientes</strong><span>Minecraft todavia no tiene ordenes pendientes.</span></div>`;
 }
 
 function renderClassPanel() {
@@ -987,9 +1022,32 @@ function readableStatus(status) {
 	const labels = {
 		active: "activo",
 		disabled: "desactivado",
-		queued: "en cola"
+		queued: "en cola",
+		sent: "en Minecraft",
+		completed: "completada",
+		failed: "fallida",
+		cancelled: "cancelada"
 	};
 	return labels[status] || status || "-";
+}
+
+function actionLabel(actionKey) {
+	const action = teacherActions.find((item) => item.key === actionKey);
+	return action ? action.label : actionKey || "Accion";
+}
+
+function actionTargetLabel(action) {
+	if (action.targetEmail) {
+		return action.targetEmail;
+	}
+	return "Toda la clase";
+}
+
+function actionDeliveryLabel(action) {
+	const status = readableStatus(action.status);
+	const server = action.serverName ? ` · ${action.serverName}` : "";
+	const result = action.resultMessage ? ` · ${action.resultMessage}` : "";
+	return `${status}${server}${result}`;
 }
 
 function readableCategory(category) {
