@@ -1,0 +1,22 @@
+{
+	"name": "EduCraft",
+	"short_name": "EduCraft",
+	"description": "Aulas Minecraft educativas gestionadas para centros docentes.",
+	"start_url": "/EduCraft-web/",
+	"scope": "/EduCraft-web/",
+	"display": "standalone",
+	"background_color": "#f5f4ec",
+	"theme_color": "#15986f",
+	"icons": [
+		{
+			"src": "assets/educraft-icon-192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "assets/educraft-icon-512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	]
+}
