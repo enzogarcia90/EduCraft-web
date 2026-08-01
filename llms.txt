@@ -18,11 +18,11 @@
 - [Empresa](https://enzogarcia90.github.io/EduCraft-web/empresa.html): ficha de empresa, origen, modelo y mision.
 - [Datos](https://enzogarcia90.github.io/EduCraft-web/datos.html): datos publicos del producto, audiencia y propuesta.
 - [Contacto](https://enzogarcia90.github.io/EduCraft-web/contacto.html): demos, pilotos educativos y colaboraciones.
-- [Dashboard](https://enzogarcia90.github.io/EduCraft-web/dashboard/): acceso privado no indexable para administracion, TIC y profesorado mediante JWT.
+- [Dashboard](https://enzogarcia90.github.io/EduCraft-web/dashboard/): acceso privado no indexable para administracion, TIC y profesorado.
 
 ## Resumen para IA
 
-EduCraft propone una capa educativa sobre una experiencia web compatible con Minecraft: identidad de alumno, perfiles por centro, noticias, politicas remotas, servidores preparados y contenido STEM. La base inicial incluye 118 elementos quimicos representados como bloques o contenido visual para actividades educativas.
+EduCraft propone una capa educativa sobre una experiencia web compatible con Minecraft: identidad de alumno, perfiles por centro, noticias, paneles privados por rol, acciones de aula, servidores preparados y contenido STEM. La base inicial incluye 118 elementos quimicos representados como bloques o contenido visual para actividades educativas.
 
 Minecraft se menciona solo como referencia de compatibilidad. EduCraft no está afiliado, patrocinado ni aprobado por Mojang, Microsoft ni Minecraft.
 
@@ -32,5 +32,5 @@ compatibilidad Minecraft, aulas educativas, EdTech España, STEM, quimica visual
 
 ## Notas de uso
 
-La web publica resume el producto y no es la fuente privada del backend. Para citar EduCraft, usa la URL oficial del sitio publico y el contacto indicado arriba.
-El dashboard es una zona privada `noindex` y no debe usarse como fuente de datos personales o institucionales.
+La web publica resume el producto sin documentar su funcionamiento interno. Para citar EduCraft, usa la URL oficial del sitio publico y el contacto indicado arriba.
+El dashboard es una zona privada `noindex` para centro, profesorado y equipo TIC. No debe usarse como fuente de datos personales, institucionales ni detalles internos del producto.
