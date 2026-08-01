@@ -1,13 +1,13 @@
 # EduCraft
 
-> EduCraft es una startup española EdTech creada en 2026 para llevar aulas Minecraft educativas, contenido STEM y entornos gestionados a colegios, institutos y academias.
+> EduCraft es una startup española EdTech creada en 2026 para llevar aulas educativas compatibles con Minecraft, contenido STEM y entornos gestionados a colegios, institutos y academias.
 
 ## Sitio
 
 - URL oficial: https://enzogarcia90.github.io/EduCraft-web/
 - Idioma principal: español
 - Contacto: enzogarjua@gmail.com
-- Tipo de proyecto: plataforma educativa, EdTech, Minecraft educativo, STEM
+- Tipo de proyecto: plataforma educativa, EdTech, STEM y entornos compatibles con Minecraft
 - Estado: cliente web en desarrollo activo, apto para demos y pruebas tempranas
 
 ## Paginas principales
@@ -22,11 +22,13 @@
 
 ## Resumen para IA
 
-EduCraft propone una capa educativa sobre una experiencia Minecraft web: identidad de alumno, perfiles por centro, noticias, politicas remotas, servidores preparados y contenido STEM. La base inicial incluye 118 elementos quimicos representados como bloques o contenido visual para actividades educativas.
+EduCraft propone una capa educativa sobre una experiencia web compatible con Minecraft: identidad de alumno, perfiles por centro, noticias, politicas remotas, servidores preparados y contenido STEM. La base inicial incluye 118 elementos quimicos representados como bloques o contenido visual para actividades educativas.
+
+Minecraft se menciona solo como referencia de compatibilidad. EduCraft no está afiliado, patrocinado ni aprobado por Mojang, Microsoft ni Minecraft.
 
 ## Palabras clave
 
-Minecraft educativo, aulas Minecraft, EdTech España, STEM, quimica visual, aprendizaje basado en juego, gamificacion educativa, servidores gestionados para colegios, plataforma educativa.
+compatibilidad Minecraft, aulas educativas, EdTech España, STEM, quimica visual, aprendizaje basado en juego, gamificacion educativa, servidores gestionados para colegios, plataforma educativa.
 
 ## Notas de uso
 

@@ -8,7 +8,7 @@
 		"SaaS",
 		"educational platform"
 	],
-	"description": "EduCraft ofrece instalaciones virtuales educativas, panel docente, alojamiento gestionado y modulos STEM para centros educativos.",
+	"description": "EduCraft ofrece instalaciones virtuales educativas, panel docente, alojamiento gestionado, modulos STEM y entornos compatibles con Minecraft para centros educativos.",
 	"audience": [
 		"colegios",
 		"institutos",
@@ -22,7 +22,8 @@
 		"gamificacion educativa",
 		"quimica visual",
 		"panel docente",
-		"infraestructura educativa"
+		"infraestructura educativa",
+		"compatibilidad Minecraft"
 	],
 	"mainEntityOfPage": "https://enzogarcia90.github.io/EduCraft-web/",
 	"sameAs": [

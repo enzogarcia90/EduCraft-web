@@ -1040,6 +1040,14 @@ article p,
 	font-weight: 950;
 }
 
+.footer .legal-note {
+	max-width: 620px;
+	color: rgba(255, 255, 255, 0.54);
+	font-size: 12px;
+	line-height: 1.45;
+	text-align: right;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	* {
 		animation-duration: 1ms !important;
@@ -1168,5 +1176,10 @@ article p,
 	.footer {
 		align-items: flex-start;
 		flex-direction: column;
+	}
+
+	.footer .legal-note {
+		max-width: none;
+		text-align: left;
 	}
 }
