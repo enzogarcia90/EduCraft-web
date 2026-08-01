@@ -47,9 +47,10 @@ body.portal-app * {
 
 .portal-brand .brand-mark img {
 	display: block;
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
+	width: 78%;
+	height: 78%;
+	object-fit: contain;
+	border-radius: 6px;
 }
 
 .portal-brand strong,
