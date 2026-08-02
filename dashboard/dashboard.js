@@ -338,6 +338,11 @@ function bindDashboard() {
 		const panel = $("[data-manual-activity]");
 		setManualActivityVisible(panel?.hidden ?? true);
 	});
+	$("[data-activity-review-toggle]")?.addEventListener("click", () => {
+		fillActivityDraft(state.activityDraft || activityPayload());
+		setManualActivityVisible(true);
+		setMessage($("#activityMessage"), "Borrador listo para revisar y guardar.", "ok");
+	});
 	$("#activityReset")?.addEventListener("click", () => fillActivityTemplate(activityTemplates[0], true));
 	renderActionFilters();
 	renderTeacherActions();
@@ -646,9 +651,7 @@ async function sendActivityChat(messageOverride) {
 		if ($("#activityAiPrompt")) {
 			$("#activityAiPrompt").value = "";
 		}
-		setManualActivityVisible(true);
-		setMessage(message, "Borrador actualizado. Puedes seguir pidiendo cambios.", "ok");
-		setMessage($("#activityMessage"), "Borrador del chatbot cargado en el editor.", "ok");
+		setMessage(message, "Borrador actualizado. Pulsa Revisar y guardar cuando quieras abrirlo.", "ok");
 	} catch (error) {
 		state.activityChat.push({ role: "assistant", content: "No he podido actualizar la clase: " + error.message });
 		renderActivityChat();

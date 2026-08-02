@@ -55,7 +55,7 @@
 					<form id="activityAiForm" class="activity-ai-form chat-mode">
 						<label class="wide"><span>Habla con el asistente</span><textarea id="activityAiPrompt" rows="4" maxlength="900" placeholder="Explícale la clase: tema, edad, duración, si quieres Lua o Scratch, nivel, objetivos, materiales, dificultad..."></textarea></label>
 						<div id="activityAiSuggestions" class="activity-ai-suggestions wide"></div>
-						<div class="builder-actions wide"><button class="button primary" type="submit">Enviar al asistente</button><button id="activityManualToggle" class="portal-ghost" type="button" data-activity-manual-toggle aria-expanded="false">Hacer a mano</button><p id="activityAiMessage" class="portal-message"></p></div>
+						<div class="builder-actions wide"><button class="button primary" type="submit">Enviar al asistente</button><button class="portal-ghost" type="button" data-activity-review-toggle>Revisar y guardar</button><button id="activityManualToggle" class="portal-ghost" type="button" data-activity-manual-toggle aria-expanded="false">Hacer a mano</button><p id="activityAiMessage" class="portal-message"></p></div>
 					</form>
 				</section>
 				<section class="activity-builder" data-manual-activity hidden>
@@ -119,6 +119,6 @@
 			</section>
 		</main>
 		<script src="../cliente/educraft-config.js"></script>
-		<script src="dashboard.js?v=20260802-chatfix1"></script>
+		<script src="dashboard.js?v=20260802-chatfix2"></script>
 	</body>
 </html>
