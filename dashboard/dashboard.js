@@ -1,6 +1,7 @@
 const STORAGE_KEYS = {
 	access: "educraft.dashboard.accessToken",
-	refresh: "educraft.dashboard.refreshToken"
+	refresh: "educraft.dashboard.refreshToken",
+	expires: "educraft.dashboard.expiresAt"
 };
 
 const state = {
@@ -942,6 +943,9 @@ function pageForRole(role) {
 	if (role === "teacher") {
 		return "profesor.html";
 	}
+	if (role === "student") {
+		return "../cliente/index.html";
+	}
 	return "";
 }
 
@@ -969,6 +973,7 @@ function storeSession(response) {
 	state.me = response;
 	localStorage.setItem(STORAGE_KEYS.access, state.token);
 	localStorage.setItem(STORAGE_KEYS.refresh, state.refreshToken || "");
+	localStorage.setItem(STORAGE_KEYS.expires, response.expiresAt || "");
 }
 
 function clearSession() {
@@ -983,6 +988,7 @@ function clearSession() {
 	state.route = null;
 	localStorage.removeItem(STORAGE_KEYS.access);
 	localStorage.removeItem(STORAGE_KEYS.refresh);
+	localStorage.removeItem(STORAGE_KEYS.expires);
 }
 
 function logout() {
