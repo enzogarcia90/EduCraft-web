@@ -490,8 +490,8 @@ function renderIdentity() {
 		<dl>
 			<div><dt>Email</dt><dd>${escapeHtml(state.me.email || "-")}</dd></div>
 			<div><dt>Rol</dt><dd>${escapeHtml(readableRole(state.me.role))}</dd></div>
-			<div><dt>Institucion</dt><dd>${escapeHtml(shortId(state.me.institutionId))}</dd></div>
-			<div><dt>Sesion</dt><dd>${escapeHtml(shortId(state.me.sessionId))}</dd></div>
+			<div><dt>Centro</dt><dd>${state.me.institutionId ? "Asignado" : "Global"}</dd></div>
+			<div><dt>Acceso</dt><dd>Privado</dd></div>
 		</dl>
 	`;
 }
@@ -600,7 +600,7 @@ function renderMinecraftActions(error) {
 			<span>${escapeHtml(actionTargetLabel(action))}</span>
 			<small>${escapeHtml(actionDeliveryLabel(action))}</small>
 		</div>
-	`).join("") : `<div class="minecraft-action empty"><strong>Sin acciones recientes</strong><span>Minecraft todavia no tiene ordenes pendientes.</span></div>`;
+	`).join("") : `<div class="minecraft-action empty"><strong>Sin acciones recientes</strong><span>No hay entregas pendientes para la clase.</span></div>`;
 }
 
 function renderClassPanel() {
@@ -1023,7 +1023,7 @@ function readableStatus(status) {
 		active: "activo",
 		disabled: "desactivado",
 		queued: "en cola",
-		sent: "en Minecraft",
+		sent: "entregada",
 		completed: "completada",
 		failed: "fallida",
 		cancelled: "cancelada"

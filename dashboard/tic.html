@@ -26,6 +26,11 @@
 	<body class="portal-app" data-dashboard-page="tic">
 		<header class="portal-header">
 			<a class="portal-brand" href="../index.html"><span class="brand-mark" aria-hidden="true"><img src="../assets/educraft-icon-192.png" alt=""></span><span><strong>EduCraft</strong><small>Panel TIC</small></span></a>
+			<nav class="portal-nav" aria-label="Paneles EduCraft">
+				<a href="administracion.html">Empresa</a>
+				<a class="is-active" href="tic.html">Centro</a>
+				<a href="profesor.html">Profesor</a>
+			</nav>
 			<div class="portal-session"><span id="sessionLabel">Validando sesion</span><button id="logoutButton" class="portal-ghost" type="button">Salir</button></div>
 		</header>
 		<main class="portal-layout">
@@ -36,6 +41,10 @@
 				<div id="identityPanel" class="identity-list"></div>
 			</aside>
 			<section class="portal-main">
+				<div class="workspace-head">
+					<div><p class="eyebrow">Gestion del centro</p><h2>Usuarios, estado y soporte</h2></div>
+					<span class="status-chip">Privado</span>
+				</div>
 				<section id="metricsGrid" class="portal-metrics"></section>
 				<section class="portal-grid charts-grid">
 					<article><h2>Usuarios del centro</h2><div id="peopleChart" class="chart-box"></div></article>
@@ -52,7 +61,7 @@
 						<h2>Crear alumno</h2>
 						<label><span>Email</span><input id="studentEmail" type="email" placeholder="alumno@centro.edu" required></label>
 						<label><span>Contrasena inicial</span><input id="studentPassword" type="text" minlength="4" required></label>
-						<label><span>ID institucion opcional</span><input id="studentInstitution" type="text" placeholder="solo equipos EduCraft"></label>
+						<label><span>Centro opcional</span><input id="studentInstitution" type="text" placeholder="solo equipo autorizado"></label>
 						<button class="button primary" type="submit">Crear alumno</button>
 						<p id="studentMessage" class="portal-message"></p>
 					</form>
@@ -67,7 +76,7 @@
 						<h2>Crear profesor</h2>
 						<label><span>Email</span><input id="teacherEmail" type="email" placeholder="profesor@centro.edu" required></label>
 						<label><span>Contrasena inicial</span><input id="teacherPassword" type="text" minlength="4" required></label>
-						<label><span>ID institucion opcional</span><input id="teacherInstitution" type="text" placeholder="solo equipos EduCraft"></label>
+						<label><span>Centro opcional</span><input id="teacherInstitution" type="text" placeholder="solo equipo autorizado"></label>
 						<button class="button primary" type="submit">Crear profesor</button>
 						<p id="teacherMessage" class="portal-message"></p>
 					</form>

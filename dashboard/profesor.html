@@ -26,16 +26,25 @@
 	<body class="portal-app" data-dashboard-page="profesor">
 		<header class="portal-header">
 			<a class="portal-brand" href="../index.html"><span class="brand-mark" aria-hidden="true"><img src="../assets/educraft-icon-192.png" alt=""></span><span><strong>EduCraft</strong><small>Profesor</small></span></a>
+			<nav class="portal-nav" aria-label="Paneles EduCraft">
+				<a href="administracion.html">Empresa</a>
+				<a href="tic.html">Centro</a>
+				<a class="is-active" href="profesor.html">Profesor</a>
+			</nav>
 			<div class="portal-session"><span id="sessionLabel">Validando sesion</span><button id="logoutButton" class="portal-ghost" type="button">Salir</button></div>
 		</header>
 		<main class="portal-layout">
 			<aside class="portal-sidebar">
 				<p class="eyebrow">Aula</p>
 				<h1 class="portal-title">Panel del profesor</h1>
-				<p>Acciones de clase y seguimiento de alumnos. Las acciones quedan auditadas y en cola para integracion con servidor.</p>
+				<p>Acciones de clase, seguimiento de alumnos y control educativo desde una vista pensada para trabajar rapido.</p>
 				<div id="identityPanel" class="identity-list"></div>
 			</aside>
 			<section class="portal-main">
+				<div class="workspace-head">
+					<div><p class="eyebrow">Clase activa</p><h2>Seguimiento y acciones</h2></div>
+					<span class="status-chip">Privado</span>
+				</div>
 				<section id="metricsGrid" class="portal-metrics"></section>
 				<section class="portal-grid charts-grid">
 					<article><h2>Estado de alumnos</h2><div id="studentStatusChart" class="chart-box"></div></article>
