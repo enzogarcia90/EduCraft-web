@@ -1,7 +1,8 @@
 const STORAGE_KEYS = {
 	access: "educraft.dashboard.accessToken",
 	refresh: "educraft.dashboard.refreshToken",
-	expires: "educraft.dashboard.expiresAt"
+	expires: "educraft.dashboard.expiresAt",
+	teacherPage: "educraft.dashboard.teacherPage"
 };
 
 const state = {
@@ -12,6 +13,7 @@ const state = {
 	students: [],
 	teachers: [],
 	actions: [],
+	activities: [],
 	policy: null,
 	livePolicy: null,
 	route: null,
@@ -57,6 +59,53 @@ const actionCategories = [
 	["avisos", "Avisos"]
 ];
 const chartColors = ["#15986f", "#1d6ce3", "#b8652d", "#6f5bc6", "#c84f6a", "#257b84"];
+const activityTemplates = [
+	{
+		key: "lua-intro",
+		title: "Primer script Lua en el aula",
+		subject: "Programacion",
+		level: "ESO / iniciacion",
+		durationMinutes: 30,
+		programmingMode: "lua",
+		tag: "Lua",
+		objectives: "Entender variables, salida por consola y repeticion simple.\nRelacionar una instruccion escrita con un efecto visible en el mundo.\nCompletar un mini reto sin copiar comandos sueltos.",
+		setupSteps: "1. Abrir el cliente EduCraft y entrar al servidor asignado.\n2. Abrir Programacion desde el menu de pausa.\n3. Seleccionar modo Lua.\n4. Mantener a los alumnos en una zona plana o aula de pruebas.",
+		activityScript: "Inicio (5 min): el profesor muestra print y variables.\nPractica (10 min): cada alumno cambia un contador y observa la salida.\nReto (10 min): crear un while que cuente hasta 5 y diga una frase final.\nCierre (5 min): comparar soluciones y nombrar variable, condicion y bucle.",
+		studentDeliverable: "Captura o copia del codigo final con un while funcional y una explicacion de que hace la condicion.",
+		assessmentRubric: "3 puntos: usa variable y la actualiza.\n3 puntos: el while termina sin bucle infinito.\n2 puntos: usa print para explicar el progreso.\n2 puntos: puede explicar el codigo con sus palabras.",
+		teacherNotes: "Codigo base sugerido:\nx = 0\nwhile x < 5 do\n  print(x)\n  x = x + 1\nend\nprint(\"terminado\")"
+	},
+	{
+		key: "scratch-build",
+		title: "Algoritmos con bloques Scratch",
+		subject: "Pensamiento computacional",
+		level: "Primaria avanzada / ESO",
+		durationMinutes: 25,
+		programmingMode: "scratch",
+		tag: "Scratch",
+		objectives: "Construir una secuencia de instrucciones.\nUsar repeticion para evitar pasos duplicados.\nTraducir bloques simples a comportamiento dentro del mundo.",
+		setupSteps: "1. Abrir Programacion desde pausa.\n2. Cambiar a modo Scratch.\n3. Preparar una meta visible en el mapa.\n4. Dar una plantilla y pedir una variacion propia.",
+		activityScript: "Inicio (5 min): explicar decir, avanzar, repetir y saltar.\nPractica (8 min): ejecutar una secuencia guiada.\nReto (8 min): llegar a una marca usando repetir.\nCierre (4 min): detectar que instrucciones se repiten.",
+		studentDeliverable: "Programa Scratch textual que use al menos un repetir y una accion de movimiento.",
+		assessmentRubric: "4 puntos: secuencia ordenada.\n3 puntos: usa repetir correctamente.\n2 puntos: ajusta el programa tras probarlo.\n1 punto: explica el patron repetido.",
+		teacherNotes: "Ejemplo:\ndecir inicio\nrepetir 3 avanzar 1\nsaltar\ndecir listo"
+	},
+	{
+		key: "chemistry-lab",
+		title: "Laboratorio de elementos y compuestos",
+		subject: "Quimica",
+		level: "ESO",
+		durationMinutes: 30,
+		programmingMode: "none",
+		tag: "STEM",
+		objectives: "Identificar elementos por nombre y simbolo.\nObservar combinaciones cercanas y registrar un compuesto.\nTrabajar con normas de laboratorio digital.",
+		setupSteps: "1. Preparar zona segura de laboratorio.\n2. Repartir roles: constructor, observador y relator.\n3. Activar modo aventura si hace falta.\n4. Usar bloques de elementos autorizados.",
+		activityScript: "Inicio (5 min): normas del laboratorio.\nExploracion (10 min): inspeccionar elementos y anotar propiedades.\nConstruccion (10 min): probar combinaciones guiadas.\nCierre (5 min): cada grupo entrega una ficha de descubrimiento.",
+		studentDeliverable: "Ficha con elementos usados, compuesto observado, captura del montaje y explicacion de seguridad.",
+		assessmentRubric: "3 puntos: identifica elementos.\n3 puntos: registra observacion con evidencia.\n2 puntos: respeta normas de laboratorio.\n2 puntos: comunica el resultado con claridad.",
+		teacherNotes: "Conviene tener acciones de aula listas: modo aventura, bloquear construccion y anuncio de clase."
+	}
+];
 
 const $ = (selector) => document.querySelector(selector);
 const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
@@ -252,6 +301,7 @@ function validateRegisterPayload(payload) {
 
 function bindDashboard() {
 	$("#logoutButton")?.addEventListener("click", logout);
+	bindTeacherPages();
 	$("#studentForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		try {
@@ -274,8 +324,51 @@ function bindDashboard() {
 		state.actionQuery = event.target.value.trim().toLowerCase();
 		renderTeacherActions();
 	});
+	$("#activityForm")?.addEventListener("submit", async (event) => {
+		event.preventDefault();
+		await createActivity();
+	});
+	$("#activityReset")?.addEventListener("click", () => fillActivityTemplate(activityTemplates[0], true));
 	renderActionFilters();
 	renderTeacherActions();
+	renderActivityTemplates();
+}
+
+function bindTeacherPages() {
+	const buttons = Array.from(document.querySelectorAll("[data-teacher-page]"));
+	if (!buttons.length) {
+		return;
+	}
+	for (const button of buttons) {
+		button.addEventListener("click", () => setTeacherPage(button.dataset.teacherPage, true));
+	}
+	const requested = new URLSearchParams(location.search).get("vista") || location.hash.replace("#", "");
+	const defaultPage = document.body.dataset.teacherDefault || "clases";
+	setTeacherPage(requested || defaultPage, false);
+}
+
+function setTeacherPage(page, persist) {
+	const validPages = new Set(["info", "clases", "control"]);
+	const nextPage = validPages.has(page) ? page : "clases";
+	for (const button of document.querySelectorAll("[data-teacher-page]")) {
+		const active = button.dataset.teacherPage === nextPage;
+		button.classList.toggle("is-active", active);
+		button.setAttribute("aria-selected", active ? "true" : "false");
+	}
+	for (const panel of document.querySelectorAll("[data-teacher-panel]")) {
+		panel.hidden = panel.dataset.teacherPanel !== nextPage;
+	}
+	if (nextPage === "info") {
+		renderDashboardCharts();
+		renderContextPanels();
+	}
+	if (nextPage === "control") {
+		renderTeacherActions();
+		renderMinecraftActions();
+	}
+	if (persist) {
+		localStorage.setItem(STORAGE_KEYS.teacherPage, nextPage);
+	}
 }
 
 async function login(email, password, messageNode) {
@@ -334,6 +427,9 @@ async function requireDashboardSession() {
 		}
 		if (currentPage === "tic" || currentPage === "profesor") {
 			await loadTeacherActions();
+		}
+		if (currentPage === "profesor") {
+			await loadActivities();
 		}
 	} catch (_) {
 		logout();
@@ -405,6 +501,19 @@ async function loadTeacherActions() {
 		renderMinecraftActions();
 	} catch (error) {
 		renderMinecraftActions(error);
+	}
+}
+
+async function loadActivities() {
+	if (!$("#activityList")) {
+		return;
+	}
+	try {
+		const response = await request("/dashboard/activities");
+		state.activities = response.items || [];
+		renderActivities();
+	} catch (error) {
+		setMessage($("#activityMessage"), error.message, "error");
 	}
 }
 
@@ -480,6 +589,21 @@ async function queueAction(actionKey) {
 		});
 		setMessage(message, `Accion en cola: ${shortId(response.id)}`, "ok");
 		await Promise.all([loadSummary(), loadTeacherActions()]);
+	} catch (error) {
+		setMessage(message, error.message, "error");
+	}
+}
+
+async function createActivity() {
+	const message = $("#activityMessage");
+	setMessage(message, "Guardando actividad...", "");
+	try {
+		const response = await request("/dashboard/activities", {
+			method: "POST",
+			body: activityPayload()
+		});
+		setMessage(message, `Actividad guardada: ${shortId(response.id)}`, "ok");
+		await Promise.all([loadActivities(), loadSummary()]);
 	} catch (error) {
 		setMessage(message, error.message, "error");
 	}
@@ -604,6 +728,87 @@ function renderMinecraftActions(error) {
 	`).join("") : `<div class="minecraft-action empty"><strong>Sin acciones recientes</strong><span>No hay entregas pendientes para la clase.</span></div>`;
 }
 
+function renderActivityTemplates() {
+	const node = $("#activityTemplates");
+	if (!node) {
+		return;
+	}
+	node.innerHTML = activityTemplates.map((template, index) => `
+		<button type="button" data-activity-template="${escapeHtml(template.key)}" class="${index === 0 ? "is-active" : ""}">
+			<strong>${escapeHtml(template.title)}</strong>
+			<span>${escapeHtml(template.subject)} · ${escapeHtml(String(template.durationMinutes))} min</span>
+			<em>${escapeHtml(template.tag)}</em>
+		</button>
+	`).join("");
+	for (const button of document.querySelectorAll("[data-activity-template]")) {
+		button.addEventListener("click", () => {
+			for (const item of document.querySelectorAll("[data-activity-template]")) item.classList.remove("is-active");
+			button.classList.add("is-active");
+			fillActivityTemplate(activityTemplates.find((template) => template.key === button.dataset.activityTemplate), true);
+		});
+	}
+	if (!$("#activityTitle")?.value) {
+		fillActivityTemplate(activityTemplates[0], false);
+	}
+}
+
+function fillActivityTemplate(template, notify) {
+	if (!template) {
+		return;
+	}
+	$("#activityTitle").value = template.title;
+	$("#activitySubject").value = template.subject;
+	$("#activityLevel").value = template.level;
+	$("#activityDuration").value = template.durationMinutes;
+	$("#activityProgrammingMode").value = template.programmingMode;
+	$("#activityStatus").value = "draft";
+	$("#activityObjectives").value = template.objectives;
+	$("#activitySetup").value = template.setupSteps;
+	$("#activityScript").value = template.activityScript;
+	$("#activityDeliverable").value = template.studentDeliverable;
+	$("#activityRubric").value = template.assessmentRubric;
+	$("#activityNotes").value = template.teacherNotes;
+	$("#activityDraftHint").textContent = `${template.durationMinutes} min`;
+	if (notify) {
+		setMessage($("#activityMessage"), "Plantilla cargada. Ajusta detalles y guarda.", "ok");
+	}
+}
+
+function renderActivities() {
+	const node = $("#activityList");
+	if (!node) {
+		return;
+	}
+	node.innerHTML = state.activities.length ? state.activities.map((activity) => `
+		<article class="activity-card ${escapeHtml(activity.status)}">
+			<div>
+				<strong>${escapeHtml(activity.title)}</strong>
+				<span>${escapeHtml(activity.subject)} · ${escapeHtml(activity.level)} · ${escapeHtml(String(activity.durationMinutes))} min</span>
+			</div>
+			<p>${escapeHtml(firstLine(activity.objectives))}</p>
+			<footer>
+				<small>${escapeHtml(readableActivityStatus(activity.status))} · ${escapeHtml((activity.programmingMode || "none").toUpperCase())}</small>
+				${activity.status === "published" ? `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="draft">Pasar a borrador</button>` : `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="published">Publicar</button>`}
+			</footer>
+		</article>
+	`).join("") : `<article class="activity-card empty"><strong>Sin actividades</strong><p>Elige una plantilla, ajusta el guion y guarda la primera clase.</p></article>`;
+	for (const button of document.querySelectorAll("[data-activity-status]")) {
+		button.addEventListener("click", () => updateActivityStatus(button.dataset.activityStatus, button.dataset.status));
+	}
+}
+
+async function updateActivityStatus(id, status) {
+	try {
+		await request(`/dashboard/activities/${encodeURIComponent(id)}/status`, {
+			method: "PATCH",
+			body: { status }
+		});
+		await loadActivities();
+	} catch (error) {
+		setMessage($("#activityMessage"), error.message, "error");
+	}
+}
+
 function renderClassPanel() {
 	const metrics = state.summary?.metrics || {};
 	renderSignalList("#classRack", [
@@ -612,6 +817,24 @@ function renderClassPanel() {
 		{ label: "Sesiones", value: String(metrics.activeSessions || 0) },
 		{ label: "Acciones en cola", value: String(metrics.queuedActions || 0) }
 	], "Clase");
+}
+
+function activityPayload() {
+	return {
+		title: $("#activityTitle").value,
+		subject: $("#activitySubject").value,
+		level: $("#activityLevel").value,
+		durationMinutes: Number($("#activityDuration").value),
+		templateKey: document.querySelector("[data-activity-template].is-active")?.dataset.activityTemplate || "custom",
+		programmingMode: $("#activityProgrammingMode").value,
+		status: $("#activityStatus").value,
+		objectives: $("#activityObjectives").value,
+		setupSteps: $("#activitySetup").value,
+		activityScript: $("#activityScript").value,
+		studentDeliverable: $("#activityDeliverable").value,
+		assessmentRubric: $("#activityRubric").value,
+		teacherNotes: $("#activityNotes").value
+	};
 }
 
 function renderSignalList(selector, items, fallback) {
@@ -941,7 +1164,7 @@ function pageForRole(role) {
 		return "tic.html";
 	}
 	if (role === "teacher") {
-		return "profesor.html";
+		return "profesor-clases.html";
 	}
 	if (role === "student") {
 		return "../cliente/index.html";
@@ -964,6 +1187,9 @@ function friendlyLoginError(error) {
 }
 
 function pageName(path) {
+	if (path.startsWith("profesor-")) {
+		return "profesor";
+	}
 	return path.replace(".html", "");
 }
 
@@ -1054,6 +1280,19 @@ function actionDeliveryLabel(action) {
 	const server = action.serverName ? ` · ${action.serverName}` : "";
 	const result = action.resultMessage ? ` · ${action.resultMessage}` : "";
 	return `${status}${server}${result}`;
+}
+
+function readableActivityStatus(status) {
+	const labels = {
+		draft: "Borrador",
+		published: "Publicada",
+		archived: "Archivada"
+	};
+	return labels[status] || status || "Actividad";
+}
+
+function firstLine(value) {
+	return String(value || "").split("\n").find((line) => line.trim()) || "Sin objetivos.";
 }
 
 function readableCategory(category) {

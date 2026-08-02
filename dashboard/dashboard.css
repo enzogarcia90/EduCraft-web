@@ -1353,6 +1353,209 @@ body.portal-app {
 	box-shadow: var(--portal-shadow);
 }
 
+.teacher-page-tabs {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 8px;
+	padding: 6px;
+	border: 1px solid rgba(17, 28, 24, 0.1);
+	border-radius: 8px;
+	background: #f6faf8;
+}
+
+.teacher-page-tabs button,
+.teacher-page-tabs a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 46px;
+	border: 1px solid transparent;
+	border-radius: 7px;
+	background: transparent;
+	color: var(--portal-muted);
+	font: inherit;
+	font-size: 13px;
+	font-weight: 900;
+	text-align: center;
+	text-decoration: none;
+}
+
+.teacher-page-tabs button:hover,
+.teacher-page-tabs button.is-active,
+.teacher-page-tabs a:hover,
+.teacher-page-tabs a.is-active {
+	border-color: rgba(20, 150, 110, 0.48);
+	background: #fff;
+	color: var(--portal-ink);
+	box-shadow: 0 10px 22px rgba(17, 28, 24, 0.06);
+}
+
+.teacher-page-panel {
+	display: grid;
+	gap: 14px;
+}
+
+.teacher-page-panel[hidden] {
+	display: none;
+}
+
+.activity-builder {
+	display: grid;
+	gap: 12px;
+	padding: 18px;
+	border: 1px solid rgba(17, 28, 24, 0.1);
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: var(--portal-shadow);
+}
+
+.builder-head,
+.builder-actions,
+.activity-card footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.builder-head h2 {
+	margin: 0;
+	font-size: 24px;
+	line-height: 1.1;
+}
+
+.activity-templates {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.activity-templates button {
+	display: grid;
+	gap: 6px;
+	min-height: 98px;
+	padding: 13px;
+	border: 1px solid var(--portal-line);
+	border-radius: 8px;
+	background: #fff;
+	color: var(--portal-ink);
+	text-align: left;
+}
+
+.activity-templates button:hover,
+.activity-templates button.is-active {
+	border-color: rgba(20, 150, 110, 0.58);
+	background: #f7fcfa;
+}
+
+.activity-templates strong,
+.activity-card strong {
+	font-size: 14px;
+	line-height: 1.25;
+}
+
+.activity-templates span,
+.activity-card span,
+.activity-card p,
+.activity-card small {
+	color: var(--portal-muted);
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.activity-templates em {
+	color: var(--portal-accent);
+	font-size: 11px;
+	font-style: normal;
+	font-weight: 950;
+	text-transform: uppercase;
+}
+
+.activity-form {
+	display: grid;
+	gap: 10px;
+}
+
+.activity-fields {
+	display: grid;
+	grid-template-columns: 1.5fr repeat(5, minmax(110px, 1fr));
+	gap: 10px;
+}
+
+.activity-form label {
+	display: grid;
+	gap: 7px;
+}
+
+.activity-form label span {
+	color: var(--portal-muted);
+	font-size: 11px;
+	font-weight: 950;
+	text-transform: uppercase;
+}
+
+.activity-form input,
+.activity-form select,
+.activity-form textarea {
+	width: 100%;
+	border: 1px solid #ccd8d2;
+	border-radius: 8px;
+	background: #fff;
+	color: var(--portal-ink);
+	font: inherit;
+}
+
+.activity-form input,
+.activity-form select {
+	min-height: 42px;
+	padding: 0 12px;
+}
+
+.activity-form textarea {
+	min-height: 94px;
+	padding: 11px 12px;
+	resize: vertical;
+	line-height: 1.45;
+}
+
+.activity-list {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.activity-card {
+	display: grid;
+	gap: 10px;
+	min-height: 142px;
+	padding: 14px;
+	border: 1px solid var(--portal-line);
+	border-left: 4px solid #8b9a95;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.activity-card.published {
+	border-left-color: var(--portal-accent);
+}
+
+.activity-card.draft {
+	border-left-color: var(--portal-gold);
+}
+
+.activity-card.archived {
+	opacity: 0.72;
+}
+
+.activity-card button {
+	min-height: 32px;
+	padding: 0 10px;
+}
+
+.activity-card.empty {
+	border-style: dashed;
+}
+
 .donut-chart {
 	width: min(146px, 48vw);
 }
@@ -1397,6 +1600,15 @@ body.portal-app {
 	.portal-metrics {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
+
+	.activity-templates,
+	.activity-list {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.activity-fields {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
 }
 
 @media (max-width: 620px) {
@@ -1404,4 +1616,17 @@ body.portal-app {
 		grid-template-columns: 1fr;
 	}
 
+	.activity-templates,
+	.activity-list,
+	.activity-fields,
+	.teacher-page-tabs {
+		grid-template-columns: 1fr;
+	}
+
+	.builder-head,
+	.builder-actions,
+	.activity-card footer {
+		align-items: stretch;
+		flex-direction: column;
+	}
 }
