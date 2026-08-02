@@ -1399,6 +1399,50 @@ body.portal-app {
 	display: none;
 }
 
+.activity-ai-panel {
+	display: grid;
+	gap: 12px;
+	padding: 18px;
+	border: 1px solid rgba(29, 108, 227, 0.18);
+	border-radius: 8px;
+	background: #f8fbff;
+	box-shadow: var(--portal-shadow);
+}
+
+.activity-ai-form {
+	display: grid;
+	grid-template-columns: 1.4fr repeat(4, minmax(100px, 1fr));
+	gap: 10px;
+}
+
+.activity-ai-form label {
+	display: grid;
+	gap: 7px;
+}
+
+.activity-ai-form label span {
+	color: var(--portal-muted);
+	font-size: 11px;
+	font-weight: 950;
+	text-transform: uppercase;
+}
+
+.activity-ai-form input,
+.activity-ai-form select {
+	width: 100%;
+	min-height: 42px;
+	padding: 0 12px;
+	border: 1px solid #c8d6e6;
+	border-radius: 8px;
+	background: #fff;
+	color: var(--portal-ink);
+	font: inherit;
+}
+
+.activity-ai-form .wide {
+	grid-column: 1 / -1;
+}
+
 .activity-builder {
 	display: grid;
 	gap: 12px;
@@ -1609,6 +1653,10 @@ body.portal-app {
 	.activity-fields {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
+
+	.activity-ai-form {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
 }
 
 @media (max-width: 620px) {
@@ -1619,6 +1667,7 @@ body.portal-app {
 	.activity-templates,
 	.activity-list,
 	.activity-fields,
+	.activity-ai-form,
 	.teacher-page-tabs {
 		grid-template-columns: 1fr;
 	}

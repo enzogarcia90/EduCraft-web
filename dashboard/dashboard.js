@@ -328,6 +328,10 @@ function bindDashboard() {
 		event.preventDefault();
 		await createActivity();
 	});
+	$("#activityAiForm")?.addEventListener("submit", async (event) => {
+		event.preventDefault();
+		await generateActivity();
+	});
 	$("#activityReset")?.addEventListener("click", () => fillActivityTemplate(activityTemplates[0], true));
 	renderActionFilters();
 	renderTeacherActions();
@@ -609,6 +613,29 @@ async function createActivity() {
 	}
 }
 
+async function generateActivity() {
+	const message = $("#activityAiMessage");
+	setMessage(message, "Generando borrador...", "");
+	try {
+		const activity = await request("/dashboard/activities/generate", {
+			method: "POST",
+			body: {
+				topic: $("#activityAiTopic").value,
+				subject: $("#activityAiSubject").value,
+				level: $("#activityAiLevel").value,
+				durationMinutes: Number($("#activityAiDuration").value),
+				programmingMode: $("#activityAiMode").value,
+				goal: $("#activityAiGoal").value
+			}
+		});
+		fillActivityDraft(activity);
+		setMessage(message, "Borrador generado. Revisa y guarda la actividad.", "ok");
+		setMessage($("#activityMessage"), "Clase generada por IA y cargada en el creador.", "ok");
+	} catch (error) {
+		setMessage(message, error.message, "error");
+	}
+}
+
 function renderIdentity() {
 	$("#sessionLabel").textContent = state.me.email || "Sesion activa";
 	$("#identityPanel").innerHTML = `
@@ -772,6 +799,26 @@ function fillActivityTemplate(template, notify) {
 	if (notify) {
 		setMessage($("#activityMessage"), "Plantilla cargada. Ajusta detalles y guarda.", "ok");
 	}
+}
+
+function fillActivityDraft(activity) {
+	if (!activity) {
+		return;
+	}
+	for (const item of document.querySelectorAll("[data-activity-template]")) item.classList.remove("is-active");
+	$("#activityTitle").value = activity.title || "";
+	$("#activitySubject").value = activity.subject || "";
+	$("#activityLevel").value = activity.level || "";
+	$("#activityDuration").value = activity.durationMinutes || 30;
+	$("#activityProgrammingMode").value = activity.programmingMode || "lua";
+	$("#activityStatus").value = activity.status || "draft";
+	$("#activityObjectives").value = activity.objectives || "";
+	$("#activitySetup").value = activity.setupSteps || "";
+	$("#activityScript").value = activity.activityScript || "";
+	$("#activityDeliverable").value = activity.studentDeliverable || "";
+	$("#activityRubric").value = activity.assessmentRubric || "";
+	$("#activityNotes").value = activity.teacherNotes || "";
+	$("#activityDraftHint").textContent = "IA";
 }
 
 function renderActivities() {
@@ -1149,7 +1196,15 @@ async function request(path, options = {}) {
 		body: options.body ? JSON.stringify(options.body) : undefined
 	});
 	const text = await response.text();
-	const data = text ? JSON.parse(text) : {};
+	let data = {};
+	if (text) {
+		try {
+			data = JSON.parse(text);
+		} catch (_) {
+			const preview = text.replace(/\s+/g, " ").trim().slice(0, 120);
+			throw new Error(preview || `HTTP ${response.status}`);
+		}
+	}
 	if (!response.ok) {
 		throw new Error(data.message || data.error || `HTTP ${response.status}`);
 	}

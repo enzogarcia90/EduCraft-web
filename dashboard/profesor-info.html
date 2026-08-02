@@ -46,6 +46,21 @@
 					<a href="profesor-control.html" data-teacher-page="control">Control de clase</a>
 				</nav>
 				<section class="teacher-page-panel" data-teacher-panel="clases">
+				<section class="activity-ai-panel">
+					<div class="builder-head">
+						<div><p class="eyebrow">IA docente</p><h2>Generar clase automaticamente</h2></div>
+						<span class="status-chip">Borrador revisable</span>
+					</div>
+					<form id="activityAiForm" class="activity-ai-form">
+						<label><span>Tema</span><input id="activityAiTopic" type="text" maxlength="120" placeholder="bucles, redstone, ecosistemas..." required></label>
+						<label><span>Materia</span><input id="activityAiSubject" type="text" maxlength="80" value="Programacion"></label>
+						<label><span>Nivel</span><input id="activityAiLevel" type="text" maxlength="80" value="ESO / iniciacion"></label>
+						<label><span>Duracion</span><input id="activityAiDuration" type="number" min="5" max="180" step="5" value="30"></label>
+						<label><span>Modo</span><select id="activityAiMode"><option value="lua">Lua</option><option value="scratch">Scratch</option><option value="none">Sin codigo</option></select></label>
+						<label class="wide"><span>Objetivo especial</span><input id="activityAiGoal" type="text" maxlength="180" placeholder="que entiendan variables y entreguen un mini reto"></label>
+						<div class="builder-actions wide"><button class="button primary" type="submit">Generar con IA</button><p id="activityAiMessage" class="portal-message"></p></div>
+					</form>
+				</section>
 				<section class="activity-builder">
 					<div class="builder-head">
 						<div><p class="eyebrow">Actividades</p><h2>Crear clase en 30 minutos</h2></div>
