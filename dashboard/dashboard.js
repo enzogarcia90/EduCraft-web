@@ -332,6 +332,10 @@ function bindDashboard() {
 		event.preventDefault();
 		await generateActivity();
 	});
+	$("[data-activity-manual-toggle]")?.addEventListener("click", () => {
+		const panel = $("[data-manual-activity]");
+		setManualActivityVisible(panel?.hidden ?? true);
+	});
 	$("#activityReset")?.addEventListener("click", () => fillActivityTemplate(activityTemplates[0], true));
 	renderActionFilters();
 	renderTeacherActions();
@@ -629,10 +633,27 @@ async function generateActivity() {
 			}
 		});
 		fillActivityDraft(activity);
+		setManualActivityVisible(true);
 		setMessage(message, "Borrador generado. Revisa y guarda la actividad.", "ok");
 		setMessage($("#activityMessage"), "Clase generada por IA y cargada en el creador.", "ok");
 	} catch (error) {
 		setMessage(message, error.message, "error");
+	}
+}
+
+function setManualActivityVisible(visible) {
+	const panel = $("[data-manual-activity]");
+	const toggle = $("[data-activity-manual-toggle]");
+	if (!panel) {
+		return;
+	}
+	panel.hidden = !visible;
+	if (toggle) {
+		toggle.textContent = visible ? "Ocultar manual" : "Hacer a mano";
+		toggle.setAttribute("aria-expanded", visible ? "true" : "false");
+	}
+	if (visible) {
+		panel.scrollIntoView({ block: "start", behavior: "smooth" });
 	}
 }
 

@@ -1453,6 +1453,10 @@ body.portal-app {
 	box-shadow: var(--portal-shadow);
 }
 
+.activity-builder[hidden] {
+	display: none;
+}
+
 .builder-head,
 .builder-actions,
 .activity-card footer {
