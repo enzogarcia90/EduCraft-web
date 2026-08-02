@@ -1415,6 +1415,66 @@ body.portal-app {
 	gap: 10px;
 }
 
+.activity-ai-form.chat-mode {
+	grid-template-columns: 1fr;
+}
+
+.activity-ai-chat {
+	display: grid;
+	gap: 10px;
+	max-height: 320px;
+	overflow: auto;
+	padding: 12px;
+	border: 1px solid rgba(29, 108, 227, 0.16);
+	border-radius: 8px;
+	background: #fff;
+}
+
+.activity-chat-message {
+	display: grid;
+	gap: 4px;
+	max-width: min(760px, 92%);
+	padding: 10px 12px;
+	border: 1px solid rgba(17, 28, 24, 0.08);
+	border-radius: 8px;
+	background: #f6faf8;
+}
+
+.activity-chat-message.user {
+	justify-self: end;
+	background: #eef5ff;
+}
+
+.activity-chat-message strong {
+	font-size: 11px;
+	text-transform: uppercase;
+	color: var(--portal-muted);
+}
+
+.activity-chat-message p {
+	margin: 0;
+	color: var(--portal-ink);
+	font-size: 13px;
+	line-height: 1.45;
+}
+
+.activity-ai-suggestions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.activity-ai-suggestions button {
+	min-height: 34px;
+	padding: 0 10px;
+	border: 1px solid rgba(29, 108, 227, 0.22);
+	border-radius: 999px;
+	background: #fff;
+	color: var(--portal-ink);
+	font-size: 12px;
+	font-weight: 850;
+}
+
 .activity-ai-form label {
 	display: grid;
 	gap: 7px;
@@ -1428,15 +1488,27 @@ body.portal-app {
 }
 
 .activity-ai-form input,
-.activity-ai-form select {
+.activity-ai-form select,
+.activity-ai-form textarea {
 	width: 100%;
-	min-height: 42px;
-	padding: 0 12px;
 	border: 1px solid #c8d6e6;
 	border-radius: 8px;
 	background: #fff;
 	color: var(--portal-ink);
 	font: inherit;
+}
+
+.activity-ai-form input,
+.activity-ai-form select {
+	min-height: 42px;
+	padding: 0 12px;
+}
+
+.activity-ai-form textarea {
+	min-height: 112px;
+	padding: 11px 12px;
+	resize: vertical;
+	line-height: 1.45;
 }
 
 .activity-ai-form .wide {

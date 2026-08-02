@@ -18,7 +18,9 @@ const state = {
 	livePolicy: null,
 	route: null,
 	actionFilter: "all",
-	actionQuery: ""
+	actionQuery: "",
+	activityChat: [],
+	activityDraft: null
 };
 
 const apiBase = (window.EDUCRAFT_API_BASE_URL || "http://127.0.0.1:8080").replace(/\/+$/, "");
@@ -330,7 +332,7 @@ function bindDashboard() {
 	});
 	$("#activityAiForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
-		await generateActivity();
+		await sendActivityChat();
 	});
 	$("[data-activity-manual-toggle]")?.addEventListener("click", () => {
 		const panel = $("[data-manual-activity]");
@@ -340,6 +342,7 @@ function bindDashboard() {
 	renderActionFilters();
 	renderTeacherActions();
 	renderActivityTemplates();
+	renderActivityChat();
 }
 
 function bindTeacherPages() {
@@ -617,28 +620,65 @@ async function createActivity() {
 	}
 }
 
-async function generateActivity() {
+async function sendActivityChat(messageOverride) {
 	const message = $("#activityAiMessage");
-	setMessage(message, "Generando borrador...", "");
+	const prompt = (messageOverride || $("#activityAiPrompt")?.value || "").trim();
+	if (!prompt) {
+		setMessage(message, "Escribe que clase quieres preparar.", "error");
+		return;
+	}
+	state.activityChat.push({ role: "user", content: prompt });
+	renderActivityChat();
+	setMessage(message, "Pensando borrador...", "");
 	try {
-		const activity = await request("/dashboard/activities/generate", {
+		const response = await request("/dashboard/activities/chat", {
 			method: "POST",
 			body: {
-				topic: $("#activityAiTopic").value,
-				subject: $("#activityAiSubject").value,
-				level: $("#activityAiLevel").value,
-				durationMinutes: Number($("#activityAiDuration").value),
-				programmingMode: $("#activityAiMode").value,
-				goal: $("#activityAiGoal").value
+				message: prompt,
+				draft: state.activityDraft || {},
+				history: state.activityChat.slice(-8)
 			}
 		});
-		fillActivityDraft(activity);
+		state.activityDraft = response.draft;
+		state.activityChat.push({ role: "assistant", content: response.reply || "Borrador actualizado." });
+		fillActivityDraft(response.draft);
+		renderActivityChat(response.suggestions || []);
+		if ($("#activityAiPrompt")) {
+			$("#activityAiPrompt").value = "";
+		}
 		setManualActivityVisible(true);
-		setMessage(message, "Borrador generado. Revisa y guarda la actividad.", "ok");
-		setMessage($("#activityMessage"), "Clase generada por IA y cargada en el creador.", "ok");
+		setMessage(message, "Borrador actualizado. Puedes seguir pidiendo cambios.", "ok");
+		setMessage($("#activityMessage"), "Borrador del chatbot cargado en el editor.", "ok");
 	} catch (error) {
+		state.activityChat.push({ role: "assistant", content: "No he podido actualizar la clase: " + error.message });
+		renderActivityChat();
 		setMessage(message, error.message, "error");
 	}
+}
+
+function renderActivityChat(suggestions = []) {
+	const node = $("#activityAiChat");
+	if (!node) {
+		return;
+	}
+	const messages = state.activityChat.length ? state.activityChat : [
+		{ role: "assistant", content: "Cuéntame qué clase quieres crear. Por ejemplo: una clase de 30 minutos sobre bucles en Lua para ESO, con reto final y rúbrica simple." }
+	];
+	node.innerHTML = messages.slice(-8).map((item) => `
+		<div class="activity-chat-message ${escapeHtml(item.role)}">
+			<strong>${item.role === "user" ? "Profesor" : "Asistente"}</strong>
+			<p>${escapeHtml(item.content)}</p>
+		</div>
+	`).join("");
+	const suggestionsNode = $("#activityAiSuggestions");
+	if (suggestionsNode) {
+		const items = suggestions.length ? suggestions : ["Hazla mas facil", "Adaptala a grupos", "Mejora la rubrica", "Cambiala a Scratch"];
+		suggestionsNode.innerHTML = items.map((item) => `<button type="button" data-activity-suggestion="${escapeHtml(item)}">${escapeHtml(item)}</button>`).join("");
+		for (const button of suggestionsNode.querySelectorAll("[data-activity-suggestion]")) {
+			button.addEventListener("click", () => sendActivityChat(button.dataset.activitySuggestion));
+		}
+	}
+	node.scrollTop = node.scrollHeight;
 }
 
 function setManualActivityVisible(visible) {

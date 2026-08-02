@@ -48,17 +48,14 @@
 				<section class="teacher-page-panel" data-teacher-panel="clases">
 				<section class="activity-ai-panel">
 					<div class="builder-head">
-						<div><p class="eyebrow">IA docente</p><h2>Generar clase automaticamente</h2></div>
+						<div><p class="eyebrow">IA docente</p><h2>Chat para crear clases</h2></div>
 						<span class="status-chip">Borrador revisable</span>
 					</div>
-					<form id="activityAiForm" class="activity-ai-form">
-						<label><span>Tema</span><input id="activityAiTopic" type="text" maxlength="120" placeholder="bucles, redstone, ecosistemas..." required></label>
-						<label><span>Materia</span><input id="activityAiSubject" type="text" maxlength="80" value="Programacion"></label>
-						<label><span>Nivel</span><input id="activityAiLevel" type="text" maxlength="80" value="ESO / iniciacion"></label>
-						<label><span>Duracion</span><input id="activityAiDuration" type="number" min="5" max="180" step="5" value="30"></label>
-						<label><span>Modo</span><select id="activityAiMode"><option value="lua">Lua</option><option value="scratch">Scratch</option><option value="none">Sin codigo</option></select></label>
-						<label class="wide"><span>Objetivo especial</span><input id="activityAiGoal" type="text" maxlength="180" placeholder="que entiendan variables y entreguen un mini reto"></label>
-						<div class="builder-actions wide"><button class="button primary" type="submit">Generar con IA</button><button id="activityManualToggle" class="portal-ghost" type="button" data-activity-manual-toggle aria-expanded="false">Hacer a mano</button><p id="activityAiMessage" class="portal-message"></p></div>
+					<div id="activityAiChat" class="activity-ai-chat" aria-live="polite"></div>
+					<form id="activityAiForm" class="activity-ai-form chat-mode">
+						<label class="wide"><span>Habla con el asistente</span><textarea id="activityAiPrompt" rows="4" maxlength="900" placeholder="Explícale la clase: tema, edad, duración, si quieres Lua o Scratch, nivel, objetivos, materiales, dificultad..."></textarea></label>
+						<div id="activityAiSuggestions" class="activity-ai-suggestions wide"></div>
+						<div class="builder-actions wide"><button class="button primary" type="submit">Enviar al asistente</button><button id="activityManualToggle" class="portal-ghost" type="button" data-activity-manual-toggle aria-expanded="false">Hacer a mano</button><p id="activityAiMessage" class="portal-message"></p></div>
 					</form>
 				</section>
 				<section class="activity-builder" data-manual-activity hidden>
