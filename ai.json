@@ -27,6 +27,18 @@
 		"infraestructura educativa",
 		"compatibilidad Minecraft"
 	],
+	"trustPages": [
+		"https://enzogarcia90.github.io/EduCraft-web/documentacion.html",
+		"https://enzogarcia90.github.io/EduCraft-web/ayuda.html",
+		"https://enzogarcia90.github.io/EduCraft-web/privacidad.html",
+		"https://enzogarcia90.github.io/EduCraft-web/terminos.html",
+		"https://enzogarcia90.github.io/EduCraft-web/cookies.html",
+		"https://enzogarcia90.github.io/EduCraft-web/transparencia-ia.html",
+		"https://enzogarcia90.github.io/EduCraft-web/seguridad.html",
+		"https://enzogarcia90.github.io/EduCraft-web/trust-center.html",
+		"https://enzogarcia90.github.io/EduCraft-web/estado.html",
+		"https://enzogarcia90.github.io/EduCraft-web/contacto-legal.html"
+	],
 	"mainEntityOfPage": "https://enzogarcia90.github.io/EduCraft-web/",
 	"sameAs": [
 		"https://github.com/enzogarcia90/EduCraft-web"

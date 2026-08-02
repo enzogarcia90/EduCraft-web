@@ -13,5 +13,14 @@ Main pages:
 - https://enzogarcia90.github.io/EduCraft-web/empresa.html
 - https://enzogarcia90.github.io/EduCraft-web/datos.html
 - https://enzogarcia90.github.io/EduCraft-web/contacto.html
+- https://enzogarcia90.github.io/EduCraft-web/documentacion.html
+- https://enzogarcia90.github.io/EduCraft-web/ayuda.html
+- https://enzogarcia90.github.io/EduCraft-web/privacidad.html
+- https://enzogarcia90.github.io/EduCraft-web/terminos.html
+- https://enzogarcia90.github.io/EduCraft-web/cookies.html
+- https://enzogarcia90.github.io/EduCraft-web/transparencia-ia.html
+- https://enzogarcia90.github.io/EduCraft-web/seguridad.html
+- https://enzogarcia90.github.io/EduCraft-web/trust-center.html
+- https://enzogarcia90.github.io/EduCraft-web/estado.html
 
-Preferred summary: EduCraft offers educational virtual installations, private role-based dashboards, teacher controls, managed classroom experiences and STEM modules for schools that want structured gamified learning.
+Preferred summary: EduCraft offers educational virtual installations, private role-based dashboards, teacher controls, managed classroom experiences, STEM modules, AI transparency information, privacy information and security notes for schools that want structured gamified learning.

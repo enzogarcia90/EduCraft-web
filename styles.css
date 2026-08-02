@@ -963,6 +963,23 @@ article p,
 	font-size: 14px;
 }
 
+.footer-links {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 10px 14px;
+	max-width: 620px;
+}
+
+.footer-links a {
+	color: rgba(255, 255, 255, 0.76);
+	text-decoration: none;
+}
+
+.footer-links a:hover {
+	color: white;
+}
+
 .reveal {
 	opacity: 0;
 	transform: translateY(26px);
