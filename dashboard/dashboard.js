@@ -791,6 +791,9 @@ function parseScheduleRows(text) {
 	const teacherIndex = findColumn(table.headers, ["profesor", "docente", "teacher"]);
 	const roomIndex = findColumn(table.headers, ["aula", "sala", "room"]);
 	const notesIndex = findColumn(table.headers, ["notas", "observaciones", "notes"]);
+	if (dayIndex < 0 && timeIndex >= 0) {
+		return parseScheduleMatrixRows(table, timeIndex);
+	}
 	if (dayIndex < 0 || timeIndex < 0) {
 		throw new Error("El horario necesita al menos columnas de dia y hora.");
 	}
@@ -803,6 +806,44 @@ function parseScheduleRows(text) {
 		room: cleanCell(row[roomIndex]),
 		notes: cleanCell(row[notesIndex])
 	})).filter((row) => row.day && row.time);
+}
+
+function parseScheduleMatrixRows(table, timeIndex) {
+	const dayColumns = table.headers.map((header, index) => ({
+		index,
+		day: readableScheduleDay(header)
+	})).filter((item) => item.index !== timeIndex && item.day);
+	if (!dayColumns.length) {
+		throw new Error("No encuentro columnas de dias como Lunes, Martes o Miercoles.");
+	}
+	return table.rows.flatMap((row) => {
+		const time = cleanCell(row[timeIndex]);
+		if (!time) {
+			return [];
+		}
+		return dayColumns.map((column) => ({
+			day: column.day,
+			time,
+			group: "",
+			subject: cleanCell(row[column.index]),
+			teacher: "",
+			room: "",
+			notes: ""
+		})).filter((item) => item.subject);
+	});
+}
+
+function readableScheduleDay(header) {
+	const labels = {
+		lunes: "Lunes",
+		martes: "Martes",
+		miercoles: "Miercoles",
+		jueves: "Jueves",
+		viernes: "Viernes",
+		sabado: "Sabado",
+		domingo: "Domingo"
+	};
+	return labels[header] || "";
 }
 
 function parseDelimitedTable(text) {
