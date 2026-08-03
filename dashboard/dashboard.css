@@ -1313,6 +1313,18 @@ body.portal-app {
 	gap: 14px;
 }
 
+.import-note {
+	margin: 0;
+	padding: 11px 12px;
+	border: 1px solid rgba(20, 150, 110, 0.2);
+	border-radius: 8px;
+	background: rgba(20, 150, 110, 0.07);
+	color: var(--portal-muted);
+	font-size: 13px;
+	font-weight: 850;
+	line-height: 1.42;
+}
+
 .import-panel .status-chip {
 	border-radius: 8px;
 	white-space: nowrap;
