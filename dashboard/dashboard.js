@@ -2,7 +2,8 @@ const STORAGE_KEYS = {
 	access: "educraft.dashboard.accessToken",
 	refresh: "educraft.dashboard.refreshToken",
 	expires: "educraft.dashboard.expiresAt",
-	teacherPage: "educraft.dashboard.teacherPage"
+	teacherPage: "educraft.dashboard.teacherPage",
+	scheduleRows: "educraft.dashboard.scheduleRows"
 };
 
 const state = {
@@ -20,7 +21,9 @@ const state = {
 	actionFilter: "all",
 	actionQuery: "",
 	activityChat: [],
-	activityDraft: null
+	activityDraft: null,
+	studentImportRows: [],
+	scheduleImportRows: []
 };
 
 const apiBase = (window.EDUCRAFT_API_BASE_URL || "http://127.0.0.1:8080").replace(/\/+$/, "");
@@ -304,6 +307,7 @@ function validateRegisterPayload(payload) {
 function bindDashboard() {
 	$("#logoutButton")?.addEventListener("click", logout);
 	bindTeacherPages();
+	bindTicPages();
 	$("#studentForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		try {
@@ -313,6 +317,20 @@ function bindDashboard() {
 		}
 	});
 	$("#reloadStudents")?.addEventListener("click", loadStudents);
+	$("#studentImportPreview")?.addEventListener("click", previewStudentImport);
+	$("#studentImportFile")?.addEventListener("change", resetStudentImport);
+	$("#studentImportText")?.addEventListener("input", resetStudentImport);
+	$("#studentImportForm")?.addEventListener("submit", async (event) => {
+		event.preventDefault();
+		await submitStudentImport();
+	});
+	$("#scheduleImportPreview")?.addEventListener("click", previewScheduleImport);
+	$("#scheduleImportFile")?.addEventListener("change", resetScheduleImport);
+	$("#scheduleImportText")?.addEventListener("input", resetScheduleImport);
+	$("#scheduleImportForm")?.addEventListener("submit", async (event) => {
+		event.preventDefault();
+		await saveScheduleImport();
+	});
 	$("#teacherForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		try {
@@ -387,6 +405,40 @@ function setTeacherPage(page, persist) {
 	}
 }
 
+function bindTicPages() {
+	const buttons = Array.from(document.querySelectorAll("[data-tic-page]"));
+	if (!buttons.length) {
+		return;
+	}
+	for (const button of buttons) {
+		button.addEventListener("click", () => localStorage.setItem("educraft.dashboard.ticPage", button.dataset.ticPage || "resumen"));
+	}
+	const requested = new URLSearchParams(location.search).get("vista") || location.hash.replace("#", "");
+	const defaultPage = document.body.dataset.ticDefault || localStorage.getItem("educraft.dashboard.ticPage") || "resumen";
+	setTicPage(requested || defaultPage);
+}
+
+function setTicPage(page) {
+	const validPages = new Set(["resumen", "alumnos", "profesores", "horario", "operacion"]);
+	const nextPage = validPages.has(page) ? page : "resumen";
+	for (const button of document.querySelectorAll("[data-tic-page]")) {
+		const active = button.dataset.ticPage === nextPage;
+		button.classList.toggle("is-active", active);
+		button.setAttribute("aria-selected", active ? "true" : "false");
+	}
+	for (const panel of document.querySelectorAll("[data-tic-panel]")) {
+		panel.hidden = panel.dataset.ticPanel !== nextPage;
+	}
+	if (nextPage === "resumen") {
+		renderDashboardCharts();
+		renderContextPanels();
+	}
+	if (nextPage === "operacion") {
+		renderMinecraftActions();
+		renderActionOpsPanel();
+	}
+}
+
 async function login(email, password, messageNode) {
 	setMessage(messageNode, "Validando credenciales...", "");
 	const response = await request("/login", {
@@ -440,6 +492,7 @@ async function requireDashboardSession() {
 		}
 		if (currentPage === "tic") {
 			await loadTeachers();
+			await loadSchedule();
 		}
 		if (currentPage === "tic" || currentPage === "profesor") {
 			await loadTeacherActions();
@@ -520,6 +573,23 @@ async function loadTeacherActions() {
 	}
 }
 
+async function loadSchedule() {
+	if (!$("#scheduleImportPreviewTable")) {
+		return;
+	}
+	try {
+		const response = await request("/dashboard/schedule");
+		state.scheduleImportRows = response.items || [];
+		renderImportPreview("#scheduleImportPreviewTable", state.scheduleImportRows, ["day", "time", "group", "subject", "teacher"], "Sin horario para importar.");
+		localStorage.setItem(STORAGE_KEYS.scheduleRows, JSON.stringify(state.scheduleImportRows));
+		if (state.scheduleImportRows.length) {
+			setMessage($("#scheduleImportMessage"), `${state.scheduleImportRows.length} filas de horario cargadas.`, "ok");
+		}
+	} catch (_) {
+		restoreSavedSchedule();
+	}
+}
+
 async function loadActivities() {
 	if (!$("#activityList")) {
 		return;
@@ -553,6 +623,115 @@ async function createStudent() {
 	}
 }
 
+async function previewStudentImport() {
+	const message = $("#studentImportMessage");
+	try {
+		const text = await readImportText("studentImportFile", "studentImportText");
+		const rows = parseStudentRows(text);
+		state.studentImportRows = rows;
+		renderImportPreview("#studentImportPreviewTable", rows, ["email", "password", "institutionId"], "Sin alumnos para importar.");
+		setMessage(message, `${rows.length} alumnos listos para crear.`, rows.length ? "ok" : "error");
+	} catch (error) {
+		state.studentImportRows = [];
+		renderImportPreview("#studentImportPreviewTable", [], ["email", "password", "institutionId"], "Sin alumnos para importar.");
+		setMessage(message, error.message, "error");
+	}
+}
+
+async function submitStudentImport() {
+	const message = $("#studentImportMessage");
+	if (!state.studentImportRows.length) {
+		await previewStudentImport();
+	}
+	if (!state.studentImportRows.length) {
+		return;
+	}
+	setMessage(message, `Creando ${state.studentImportRows.length} alumnos...`, "");
+	let created = 0;
+	const failures = [];
+	for (const row of state.studentImportRows) {
+		try {
+			await request("/dashboard/students", {
+				method: "POST",
+				body: {
+					email: row.email,
+					password: row.password,
+					institutionId: row.institutionId
+				}
+			});
+			created += 1;
+		} catch (error) {
+			failures.push(`${row.email}: ${error.message}`);
+		}
+	}
+	await Promise.all([loadSummary(), loadStudents()]);
+	const result = failures.length ? `${created} creados, ${failures.length} con error. ${failures.slice(0, 2).join(" | ")}` : `${created} alumnos creados.`;
+	setMessage(message, result, failures.length ? "error" : "ok");
+}
+
+async function previewScheduleImport() {
+	const message = $("#scheduleImportMessage");
+	try {
+		const text = await readImportText("scheduleImportFile", "scheduleImportText");
+		const rows = parseScheduleRows(text);
+		state.scheduleImportRows = rows;
+		renderImportPreview("#scheduleImportPreviewTable", rows, ["day", "time", "group", "subject", "teacher"], "Sin horario para importar.");
+		setMessage(message, `${rows.length} filas de horario listas.`, rows.length ? "ok" : "error");
+	} catch (error) {
+		state.scheduleImportRows = [];
+		renderImportPreview("#scheduleImportPreviewTable", [], ["day", "time", "group", "subject", "teacher"], "Sin horario para importar.");
+		setMessage(message, error.message, "error");
+	}
+}
+
+async function saveScheduleImport() {
+	const message = $("#scheduleImportMessage");
+	if (!state.scheduleImportRows.length) {
+		await previewScheduleImport();
+	}
+	if (!state.scheduleImportRows.length) {
+		return;
+	}
+	try {
+		const response = await request("/dashboard/schedule", {
+			method: "PUT",
+			body: { items: state.scheduleImportRows }
+		});
+		state.scheduleImportRows = response.items || [];
+		localStorage.setItem(STORAGE_KEYS.scheduleRows, JSON.stringify(state.scheduleImportRows));
+		renderImportPreview("#scheduleImportPreviewTable", state.scheduleImportRows, ["day", "time", "group", "subject", "teacher"], "Sin horario para importar.");
+		setMessage(message, `${state.scheduleImportRows.length} filas de horario guardadas en el centro.`, "ok");
+	} catch (error) {
+		localStorage.setItem(STORAGE_KEYS.scheduleRows, JSON.stringify(state.scheduleImportRows));
+		setMessage(message, `Guardado local. Backend no acepto el horario: ${error.message}`, "error");
+	}
+}
+
+function restoreSavedSchedule() {
+	const raw = localStorage.getItem(STORAGE_KEYS.scheduleRows);
+	if (!raw) {
+		return;
+	}
+	try {
+		state.scheduleImportRows = JSON.parse(raw) || [];
+		renderImportPreview("#scheduleImportPreviewTable", state.scheduleImportRows, ["day", "time", "group", "subject", "teacher"], "Sin horario para importar.");
+	} catch (_) {
+		localStorage.removeItem(STORAGE_KEYS.scheduleRows);
+	}
+}
+
+function resetStudentImport() {
+	state.studentImportRows = [];
+	setMessage($("#studentImportMessage"), "", "");
+	renderImportPreview("#studentImportPreviewTable", [], ["email", "password", "institutionId"], "Sin alumnos para importar.");
+}
+
+function resetScheduleImport() {
+	state.scheduleImportRows = [];
+	setMessage($("#scheduleImportMessage"), "", "");
+	renderImportPreview("#scheduleImportPreviewTable", [], ["day", "time", "group", "subject", "teacher"], "Sin horario para importar.");
+}
+
 async function createTeacher() {
 	const message = $("#teacherMessage");
 	setMessage(message, "Creando profesor...", "");
@@ -571,6 +750,154 @@ async function createTeacher() {
 	} catch (error) {
 		setMessage(message, error.message, "error");
 	}
+}
+
+async function readImportText(fileInputId, textAreaId) {
+	const typed = $(`#${textAreaId}`)?.value?.trim() || "";
+	if (typed) {
+		return typed;
+	}
+	const file = $(`#${fileInputId}`)?.files?.[0];
+	if (!file) {
+		throw new Error("Sube un CSV/TSV o pega datos desde la hoja.");
+	}
+	if (/\.(xlsx|xls)$/i.test(file.name)) {
+		throw new Error("Exporta el Excel o Google Sheets como CSV/TSV y vuelve a subirlo.");
+	}
+	return await file.text();
+}
+
+function parseStudentRows(text) {
+	const table = parseDelimitedTable(text);
+	const emailIndex = findColumn(table.headers, ["email", "correo", "mail", "alumno", "usuario"]);
+	const passwordIndex = findColumn(table.headers, ["password", "contrasena", "contraseña", "clave"]);
+	const institutionIndex = findColumn(table.headers, ["centro", "institution", "institutionid", "institucion", "institución"]);
+	if (emailIndex < 0) {
+		throw new Error("No encuentro columna de email/correo.");
+	}
+	return table.rows.map((row, index) => ({
+		email: cleanCell(row[emailIndex]).toLowerCase(),
+		password: cleanCell(row[passwordIndex]) || defaultStudentPassword(index),
+		institutionId: cleanCell(row[institutionIndex])
+	})).filter((row) => row.email.includes("@") && row.password.length >= 4);
+}
+
+function parseScheduleRows(text) {
+	const table = parseDelimitedTable(text);
+	const dayIndex = findColumn(table.headers, ["dia", "día", "day", "fecha"]);
+	const timeIndex = findColumn(table.headers, ["hora", "time", "tramo", "slot"]);
+	const groupIndex = findColumn(table.headers, ["grupo", "clase", "curso", "class"]);
+	const subjectIndex = findColumn(table.headers, ["asignatura", "materia", "subject"]);
+	const teacherIndex = findColumn(table.headers, ["profesor", "docente", "teacher"]);
+	const roomIndex = findColumn(table.headers, ["aula", "sala", "room"]);
+	const notesIndex = findColumn(table.headers, ["notas", "observaciones", "notes"]);
+	if (dayIndex < 0 || timeIndex < 0) {
+		throw new Error("El horario necesita al menos columnas de dia y hora.");
+	}
+	return table.rows.map((row) => ({
+		day: cleanCell(row[dayIndex]),
+		time: cleanCell(row[timeIndex]),
+		group: cleanCell(row[groupIndex]),
+		subject: cleanCell(row[subjectIndex]),
+		teacher: cleanCell(row[teacherIndex]),
+		room: cleanCell(row[roomIndex]),
+		notes: cleanCell(row[notesIndex])
+	})).filter((row) => row.day && row.time);
+}
+
+function parseDelimitedTable(text) {
+	const delimiter = detectDelimiter(text);
+	const lines = String(text || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n").filter((line) => line.trim());
+	if (lines.length < 2) {
+		throw new Error("La hoja necesita cabecera y al menos una fila.");
+	}
+	return {
+		headers: splitDelimitedLine(lines[0], delimiter).map(normalizeHeader),
+		rows: lines.slice(1).map((line) => splitDelimitedLine(line, delimiter))
+	};
+}
+
+function detectDelimiter(text) {
+	const firstLine = String(text || "").split(/\r?\n/).find((line) => line.trim()) || "";
+	const counts = {
+		"\t": (firstLine.match(/\t/g) || []).length,
+		";": (firstLine.match(/;/g) || []).length,
+		",": (firstLine.match(/,/g) || []).length
+	};
+	return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+function splitDelimitedLine(line, delimiter) {
+	const cells = [];
+	let cell = "";
+	let quoted = false;
+	for (let index = 0; index < line.length; index += 1) {
+		const char = line[index];
+		if (char === "\"" && line[index + 1] === "\"") {
+			cell += "\"";
+			index += 1;
+		} else if (char === "\"") {
+			quoted = !quoted;
+		} else if (char === delimiter && !quoted) {
+			cells.push(cell);
+			cell = "";
+		} else {
+			cell += char;
+		}
+	}
+	cells.push(cell);
+	return cells;
+}
+
+function findColumn(headers, aliases) {
+	const cleanAliases = aliases.map(normalizeHeader);
+	return headers.findIndex((header) => cleanAliases.includes(header));
+}
+
+function normalizeHeader(value) {
+	return String(value || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+}
+
+function cleanCell(value) {
+	return String(value || "").trim();
+}
+
+function defaultStudentPassword(index) {
+	return `EduCraft${String(index + 1).padStart(3, "0")}`;
+}
+
+function renderImportPreview(selector, rows, columns, emptyText) {
+	const node = $(selector);
+	if (!node) {
+		return;
+	}
+	if (!rows.length) {
+		node.innerHTML = `<div class="chart-empty">${escapeHtml(emptyText)}</div>`;
+		return;
+	}
+	node.innerHTML = `
+		<table class="portal-table compact-table">
+			<thead><tr>${columns.map((column) => `<th>${escapeHtml(importColumnLabel(column))}</th>`).join("")}</tr></thead>
+			<tbody>${rows.slice(0, 8).map((row) => `
+				<tr>${columns.map((column) => `<td>${escapeHtml(row[column] || "-")}</td>`).join("")}</tr>
+			`).join("")}</tbody>
+		</table>
+		<p>${escapeHtml(String(rows.length))} filas detectadas${rows.length > 8 ? ", mostrando las primeras 8" : ""}.</p>
+	`;
+}
+
+function importColumnLabel(column) {
+	const labels = {
+		email: "Email",
+		password: "Contrasena",
+		institutionId: "Centro",
+		day: "Dia",
+		time: "Hora",
+		group: "Grupo",
+		subject: "Asignatura",
+		teacher: "Profesor"
+	};
+	return labels[column] || column;
 }
 
 async function disableStudent(id) {

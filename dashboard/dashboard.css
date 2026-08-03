@@ -422,9 +422,9 @@ body.portal-app * {
 }
 
 .portal-form input,
-.portal-form select {
+.portal-form select,
+.portal-form textarea {
 	width: 100%;
-	min-height: 44px;
 	padding: 0 12px;
 	border: 1px solid #cbd8d0;
 	border-radius: 8px;
@@ -433,8 +433,21 @@ body.portal-app * {
 	font: inherit;
 }
 
+.portal-form input,
+.portal-form select {
+	min-height: 44px;
+}
+
+.portal-form textarea {
+	min-height: 118px;
+	padding: 11px 12px;
+	resize: vertical;
+	line-height: 1.45;
+}
+
 .portal-form input:focus,
-.portal-form select:focus {
+.portal-form select:focus,
+.portal-form textarea:focus {
 	outline: 3px solid rgba(21, 152, 111, 0.18);
 	border-color: var(--portal-accent);
 }
@@ -1282,14 +1295,44 @@ body.portal-app {
 }
 
 .portal-form input,
-.portal-form select {
+.portal-form select,
+.portal-form textarea {
 	border-color: #ccd8d2;
 	background: #fff;
 }
 
 .portal-form input:hover,
-.portal-form select:hover {
+.portal-form select:hover,
+.portal-form textarea:hover {
 	border-color: #aebfb7;
+}
+
+.import-panel {
+	display: grid;
+	align-content: start;
+	gap: 14px;
+}
+
+.import-panel .status-chip {
+	border-radius: 8px;
+	white-space: nowrap;
+}
+
+.import-preview {
+	display: grid;
+	gap: 10px;
+	min-width: 0;
+}
+
+.import-preview .portal-table {
+	margin-top: 0;
+}
+
+.import-preview p {
+	margin: 0;
+	color: var(--portal-muted);
+	font-size: 12px;
+	font-weight: 850;
 }
 
 .portal-table {
@@ -1361,6 +1404,10 @@ body.portal-app {
 	border: 1px solid rgba(17, 28, 24, 0.1);
 	border-radius: 8px;
 	background: #f6faf8;
+}
+
+.teacher-page-tabs.tic-page-tabs {
+	grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .teacher-page-tabs button,
@@ -1742,6 +1789,10 @@ body.portal-app {
 	}
 
 	.activity-ai-form {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.teacher-page-tabs.tic-page-tabs {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
