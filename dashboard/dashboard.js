@@ -612,7 +612,9 @@ async function createStudent() {
 			body: {
 				email: $("#studentEmail").value,
 				password: $("#studentPassword").value,
-				institutionId: $("#studentInstitution").value
+				institutionId: $("#studentInstitution").value,
+				course: $("#studentCourse")?.value || "",
+				classGroup: $("#studentClassGroup")?.value || ""
 			}
 		});
 		$("#studentForm").reset();
@@ -629,11 +631,11 @@ async function previewStudentImport() {
 		const text = await readImportText("studentImportFile", "studentImportText");
 		const rows = parseStudentRows(text);
 		state.studentImportRows = rows;
-		renderImportPreview("#studentImportPreviewTable", rows, ["email", "password", "institutionId"], "Sin alumnos para importar.");
+		renderImportPreview("#studentImportPreviewTable", rows, ["email", "password", "course", "classGroup", "institutionId"], "Sin alumnos para importar.");
 		setMessage(message, `${rows.length} alumnos listos para crear.`, rows.length ? "ok" : "error");
 	} catch (error) {
 		state.studentImportRows = [];
-		renderImportPreview("#studentImportPreviewTable", [], ["email", "password", "institutionId"], "Sin alumnos para importar.");
+		renderImportPreview("#studentImportPreviewTable", [], ["email", "password", "course", "classGroup", "institutionId"], "Sin alumnos para importar.");
 		setMessage(message, error.message, "error");
 	}
 }
@@ -656,7 +658,9 @@ async function submitStudentImport() {
 				body: {
 					email: row.email,
 					password: row.password,
-					institutionId: row.institutionId
+					institutionId: row.institutionId,
+					course: row.course,
+					classGroup: row.classGroup
 				}
 			});
 			created += 1;
@@ -723,7 +727,7 @@ function restoreSavedSchedule() {
 function resetStudentImport() {
 	state.studentImportRows = [];
 	setMessage($("#studentImportMessage"), "", "");
-	renderImportPreview("#studentImportPreviewTable", [], ["email", "password", "institutionId"], "Sin alumnos para importar.");
+	renderImportPreview("#studentImportPreviewTable", [], ["email", "password", "course", "classGroup", "institutionId"], "Sin alumnos para importar.");
 }
 
 function resetScheduleImport() {
@@ -772,12 +776,16 @@ function parseStudentRows(text) {
 	const emailIndex = findColumn(table.headers, ["email", "correo", "mail", "alumno", "usuario"]);
 	const passwordIndex = findColumn(table.headers, ["password", "contrasena", "contraseña", "clave"]);
 	const institutionIndex = findColumn(table.headers, ["centro", "institution", "institutionid", "institucion", "institución"]);
+	const courseIndex = findColumn(table.headers, ["curso", "course", "nivel", "etapa"]);
+	const classGroupIndex = findColumn(table.headers, ["clase", "grupo", "class", "classgroup", "grupo clase", "aula"]);
 	if (emailIndex < 0) {
 		throw new Error("No encuentro columna de email/correo.");
 	}
 	return table.rows.map((row, index) => ({
 		email: cleanCell(row[emailIndex]).toLowerCase(),
 		password: cleanCell(row[passwordIndex]) || defaultStudentPassword(index),
+		course: cleanCell(row[courseIndex]),
+		classGroup: cleanCell(row[classGroupIndex]),
 		institutionId: cleanCell(row[institutionIndex])
 	})).filter((row) => row.email.includes("@") && row.password.length >= 4);
 }
@@ -931,6 +939,8 @@ function importColumnLabel(column) {
 	const labels = {
 		email: "Email",
 		password: "Contrasena",
+		course: "Curso",
+		classGroup: "Clase",
 		institutionId: "Centro",
 		day: "Dia",
 		time: "Hora",
@@ -1331,11 +1341,13 @@ function renderStudents() {
 		$("#studentTableBody").innerHTML = state.students.length ? state.students.map((student) => `
 			<tr>
 				<td>${escapeHtml(student.email)}</td>
+				<td>${escapeHtml(student.course || "-")}</td>
+				<td>${escapeHtml(student.classGroup || "-")}</td>
 				<td>${escapeHtml(student.status)}</td>
 				<td>${escapeHtml(shortId(student.institutionId))}</td>
 				<td><button type="button" data-disable-student="${escapeHtml(student.id)}">Desactivar</button></td>
 			</tr>
-		`).join("") : `<tr><td colspan="4">Sin alumnos visibles para este rol.</td></tr>`;
+		`).join("") : `<tr><td colspan="6">Sin alumnos visibles para este rol.</td></tr>`;
 		for (const button of document.querySelectorAll("[data-disable-student]")) {
 			button.addEventListener("click", () => disableStudent(button.dataset.disableStudent));
 		}

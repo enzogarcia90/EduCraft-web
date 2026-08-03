@@ -66,6 +66,8 @@
 						<h2>Crear alumno</h2>
 						<label><span>Email</span><input id="studentEmail" type="email" placeholder="alumno@centro.edu" required></label>
 						<label><span>Contrasena inicial</span><input id="studentPassword" type="text" minlength="4" required></label>
+						<label><span>Curso</span><input id="studentCourse" type="text" placeholder="1 ESO"></label>
+						<label><span>Clase</span><input id="studentClassGroup" type="text" placeholder="1 ESO A"></label>
 						<label><span>Centro opcional</span><input id="studentInstitution" type="text" placeholder="solo equipo autorizado"></label>
 						<button class="button primary" type="submit">Crear alumno</button>
 						<p id="studentMessage" class="portal-message"></p>
@@ -86,7 +88,7 @@
 					<section class="portal-panel">
 						<div class="table-head"><h2>Alumnos</h2><button id="reloadStudents" class="portal-ghost" type="button">Actualizar</button></div>
 						<div id="studentBreakdown" class="compact-rack"></div>
-						<table class="portal-table"><thead><tr><th>Email</th><th>Estado</th><th>Centro</th><th></th></tr></thead><tbody id="studentTableBody"></tbody></table>
+						<table class="portal-table"><thead><tr><th>Email</th><th>Curso</th><th>Clase</th><th>Estado</th><th>Centro</th><th></th></tr></thead><tbody id="studentTableBody"></tbody></table>
 					</section>
 				</section>
 				</section>
