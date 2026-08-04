@@ -15,6 +15,7 @@ const state = {
 	teachers: [],
 	classServers: [],
 	actions: [],
+	moderationAlerts: [],
 	activities: [],
 	policy: null,
 	livePolicy: null,
@@ -500,6 +501,9 @@ async function requireDashboardSession() {
 			await loadTeacherActions();
 		}
 		if (currentPage === "profesor") {
+			await loadModerationAlerts();
+		}
+		if (currentPage === "profesor") {
 			await loadActivities();
 		}
 	} catch (_) {
@@ -587,6 +591,19 @@ async function loadTeacherActions() {
 		renderMinecraftActions();
 	} catch (error) {
 		renderMinecraftActions(error);
+	}
+}
+
+async function loadModerationAlerts() {
+	if (!$("#moderationAlertRack")) {
+		return;
+	}
+	try {
+		const response = await request("/dashboard/moderation/alerts");
+		state.moderationAlerts = response.items || [];
+		renderModerationAlerts();
+	} catch (error) {
+		renderModerationAlerts(error);
 	}
 }
 
@@ -1212,6 +1229,31 @@ function renderMinecraftActions(error) {
 			<small>${escapeHtml(actionDeliveryLabel(action))}</small>
 		</div>
 	`).join("") : `<div class="minecraft-action empty"><strong>Sin acciones recientes</strong><span>No hay entregas pendientes para la clase.</span></div>`;
+}
+
+function renderModerationAlerts(error) {
+	const node = $("#moderationAlertRack");
+	if (!node) {
+		return;
+	}
+	if (error) {
+		node.innerHTML = `<div class="minecraft-action empty"><strong>Sin alertas</strong><span>${escapeHtml(error.message || "No se pudieron cargar las alertas.")}</span></div>`;
+		return;
+	}
+	node.innerHTML = state.moderationAlerts.length ? state.moderationAlerts.slice(0, 8).map((alert) => `
+		<div class="minecraft-action ${alert.severity === "critical" ? "failed" : "sent"}">
+			<strong>${escapeHtml(alert.username || "Alumno")}</strong>
+			<span>${escapeHtml(alert.reason || "Contenido no valido")}</span>
+			<small>${escapeHtml(moderationAlertLabel(alert))}</small>
+		</div>
+	`).join("") : `<div class="minecraft-action empty"><strong>Sin alertas recientes</strong><span>No hay incidencias de entregas.</span></div>`;
+}
+
+function moderationAlertLabel(alert) {
+	const server = alert.serverName ? `${alert.serverName} · ` : "";
+	const lesson = alert.lessonTitle ? `${alert.lessonTitle} · ` : "";
+	const sample = alert.sample ? ` · ${alert.sample}` : "";
+	return `${server}${lesson}${readableStatus(alert.status)}${sample}`;
 }
 
 function renderActivityTemplates() {
@@ -1861,7 +1903,10 @@ function readableStatus(status) {
 		sent: "entregada",
 		completed: "completada",
 		failed: "fallida",
-		cancelled: "cancelada"
+		cancelled: "cancelada",
+		open: "abierta",
+		reviewed: "revisada",
+		dismissed: "descartada"
 	};
 	return labels[status] || status || "-";
 }
