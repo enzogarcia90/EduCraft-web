@@ -1756,9 +1756,23 @@ function pageForRole(role) {
 		return "profesor-clases.html";
 	}
 	if (role === "student") {
-		return "../cliente/index.html";
+		return clientUrlWithSession("../cliente/index.html");
 	}
 	return "";
+}
+
+function clientUrlWithSession(path) {
+	if (!state.token || !state.refreshToken) {
+		return path;
+	}
+	const params = new URLSearchParams();
+	params.set("accessToken", state.token);
+	params.set("refreshToken", state.refreshToken);
+	const expiresAt = localStorage.getItem(STORAGE_KEYS.expires) || "";
+	if (expiresAt) {
+		params.set("expiresAt", expiresAt);
+	}
+	return `${path}#${params.toString()}`;
 }
 
 function friendlyLoginError(error) {

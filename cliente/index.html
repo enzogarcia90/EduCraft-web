@@ -23,18 +23,37 @@
 		<script type="text/javascript" src="bootstrap.js"></script>
 		<script type="text/javascript">
 			"use strict";
+			function restoreEduCraftPortalSession() {
+				try {
+					if(!window.location.hash || window.location.hash.length < 2 || typeof window.URLSearchParams === "undefined") {
+						return;
+					}
+					var params = new window.URLSearchParams(window.location.hash.substring(1));
+					var accessToken = params.get("accessToken") || "";
+					var refreshToken = params.get("refreshToken") || "";
+					if(!accessToken || !refreshToken || !window.localStorage) {
+						return;
+					}
+					window.localStorage.setItem("educraft.dashboard.accessToken", accessToken);
+					window.localStorage.setItem("educraft.dashboard.refreshToken", refreshToken);
+					window.localStorage.setItem("educraft.dashboard.expiresAt", params.get("expiresAt") || "");
+					window.history.replaceState(null, document.title, window.location.pathname + window.location.search);
+				}catch(e) {
+				}
+			}
 			window.addEventListener("load", function() {
 				if(window.location.href.indexOf("file:") === 0) {
 					alert("HTTP please, do not open this file locally, run a local HTTP server and load it via HTTP");
 				}else {
-					
+					restoreEduCraftPortalSession();
+
 					// %%%%%%%%% launch options %%%%%%%%%%%%
-					
+
 					var relayId = Math.floor(Math.random() * 3);
 					window.eaglercraftXOpts = {
 						demoMode: false,
 						container: "game_frame",
-						assetsURI: "assets.epw",
+						assetsURI: "assets.epw?v=20260804-session-handoff",
 						worldsDB: "worlds",
 						servers: [
 						],
@@ -44,18 +63,18 @@
 							{ addr: "wss://relay.shhnowisnottheti.me/", comment: "ayunami relay #1", primary: relayId == 2 }
 						]
 					};
-					
+
 					// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-					
+
 					var q = window.location.search;
 					if((typeof q === "string") && q[0] === "?" && (typeof window.URLSearchParams !== "undefined")) {
 						q = new window.URLSearchParams(q);
 						var s = q.get("server");
 						if(s) window.eaglercraftXOpts.joinServer = s;
 					}
-					
+
 					main();
-					
+
 				}
 			});
 		</script>
