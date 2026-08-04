@@ -686,6 +686,58 @@ body.portal-app * {
 	color: var(--portal-ink);
 }
 
+.class-server-rack {
+	display: grid;
+	gap: 10px;
+}
+
+.class-server-item {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 14px;
+	align-items: center;
+	padding: 13px;
+	border: 1px solid var(--portal-line);
+	border-left: 4px solid var(--portal-accent);
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 10px 24px rgba(19, 33, 29, 0.05);
+}
+
+.class-server-item h3 {
+	margin: 0 0 5px;
+	font-size: 15px;
+	line-height: 1.2;
+}
+
+.class-server-item p {
+	margin: 0;
+	color: var(--portal-muted);
+	font-size: 12px;
+	font-weight: 800;
+	line-height: 1.35;
+	overflow-wrap: anywhere;
+}
+
+.class-server-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.class-server-actions button {
+	min-height: 32px;
+	padding: 0 10px;
+	border: 1px solid var(--portal-line);
+	border-radius: 8px;
+	background: #fbfcfb;
+	color: var(--portal-ink);
+	font-size: 12px;
+	font-weight: 900;
+	cursor: pointer;
+}
+
 .chart-box {
 	display: grid;
 	min-height: 214px;
@@ -1824,8 +1876,14 @@ body.portal-app {
 
 	.builder-head,
 	.builder-actions,
+	.class-server-item,
+	.class-server-actions,
 	.activity-card footer {
 		align-items: stretch;
 		flex-direction: column;
+	}
+
+	.class-server-item {
+		grid-template-columns: 1fr;
 	}
 }

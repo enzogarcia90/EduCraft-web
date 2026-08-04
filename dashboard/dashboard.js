@@ -13,6 +13,7 @@ const state = {
 	summary: null,
 	students: [],
 	teachers: [],
+	classServers: [],
 	actions: [],
 	activities: [],
 	policy: null,
@@ -317,6 +318,7 @@ function bindDashboard() {
 		}
 	});
 	$("#reloadStudents")?.addEventListener("click", loadStudents);
+	$("#reloadClassServers")?.addEventListener("click", loadClassServers);
 	$("#studentImportPreview")?.addEventListener("click", previewStudentImport);
 	$("#studentImportFile")?.addEventListener("change", resetStudentImport);
 	$("#studentImportText")?.addEventListener("input", resetStudentImport);
@@ -541,8 +543,23 @@ async function loadStudents() {
 		state.students = response.items || [];
 		renderStudents();
 		renderContextPanels();
+		await loadClassServers();
 	} catch (error) {
 		setMessage($("#studentMessage") || $("#actionMessage"), error.message, "error");
+	}
+}
+
+async function loadClassServers() {
+	if (!$("#classServerRack")) {
+		return;
+	}
+	try {
+		const response = await request("/dashboard/class-servers");
+		state.classServers = response.items || [];
+		renderClassServers();
+	} catch (error) {
+		state.classServers = [];
+		renderClassServers(error);
 	}
 }
 
@@ -1148,7 +1165,7 @@ function renderPolicyPanel() {
 	renderSignalList("#policyRack", [
 		{ label: "Mundos locales", value: boolLabel(live.allowSingleplayerWorlds ?? policy.allowSingleplayerWorlds) },
 		{ label: "Fin permiso local", value: live.localWorldsExpiresAt ? formatDateTime(live.localWorldsExpiresAt) : "sin permiso temporal" },
-		{ label: "Resource pack", value: resourcePack.enabled ? (resourcePack.required ? "obligatorio" : "activo") : "inactivo" },
+		{ label: "Pack oficial", value: resourcePack.enabled ? (resourcePack.required ? "global obligatorio" : "global activo") : "inactivo" },
 		{ label: "Skin", value: skin.forceCommon ? `comun ${skin.mode || ""}`.trim() : "libre" }
 	], "Politica");
 }
@@ -1369,6 +1386,79 @@ function renderStudents() {
 	}
 	renderStudentBreakdown();
 	renderDashboardCharts();
+}
+
+function renderClassServers(error) {
+	const rack = $("#classServerRack");
+	if (!rack) {
+		return;
+	}
+	if (error) {
+		rack.innerHTML = `<div class="empty-state">${escapeHtml(error.message || "No se pudo cargar el sistema Paper.")}</div>`;
+		return;
+	}
+	rack.innerHTML = state.classServers.length ? state.classServers.map((server) => {
+		const stateLabel = server.status?.state || (server.record ? "creado" : "sin crear");
+		const agentText = server.agentAvailable ? stateLabel : "agente sin configurar";
+		return `
+			<article class="class-server-item">
+				<div>
+					<h3>${escapeHtml(server.classGroup || server.displayName || server.classId)}</h3>
+					<p>${escapeHtml(server.studentCount || 0)} alumnos · ${escapeHtml(server.serverName || server.id)} · ${escapeHtml(agentText)}</p>
+				</div>
+				<div class="class-server-actions">
+					<button type="button" data-class-server-create="${escapeHtml(server.classGroup)}">Crear + arrancar</button>
+					<button type="button" data-class-server-action="start" data-class-server-id="${escapeHtml(server.id)}">Arrancar</button>
+					<button type="button" data-class-server-action="restart" data-class-server-id="${escapeHtml(server.id)}">Reiniciar</button>
+					<button type="button" data-class-server-action="status" data-class-server-id="${escapeHtml(server.id)}">Estado</button>
+				</div>
+			</article>
+		`;
+	}).join("") : `<div class="empty-state">Sin clases con alumnos activos.</div>`;
+	for (const button of document.querySelectorAll("[data-class-server-create]")) {
+		button.addEventListener("click", () => provisionClassServer(button.dataset.classServerCreate));
+	}
+	for (const button of document.querySelectorAll("[data-class-server-action]")) {
+		button.addEventListener("click", () => classServerAction(button.dataset.classServerId, button.dataset.classServerAction));
+	}
+}
+
+async function provisionClassServer(classGroup) {
+	const message = $("#classServerMessage");
+	setMessage(message, `Preparando Paper para ${classGroup}...`, "");
+	try {
+		await request("/dashboard/class-servers", {
+			method: "POST",
+			body: { classGroup, start: true }
+		});
+		setMessage(message, `Paper de ${classGroup} creado y arrancado.`, "ok");
+		await loadClassServers();
+	} catch (error) {
+		setMessage(message, error.message, "error");
+	}
+}
+
+async function classServerAction(id, action) {
+	const message = $("#classServerMessage");
+	const method = action === "status" ? "GET" : "POST";
+	setMessage(message, `${actionLabel(action)} ${id}...`, "");
+	try {
+		const response = await request(`/dashboard/class-servers/${encodeURIComponent(id)}/${action}`, { method });
+		const stateLabel = response.status?.state ? ` Estado: ${response.status.state}.` : "";
+		setMessage(message, `${actionLabel(action)} completado.${stateLabel}`, "ok");
+		await loadClassServers();
+	} catch (error) {
+		setMessage(message, error.message, "error");
+	}
+}
+
+function actionLabel(action) {
+	return {
+		start: "Arranque",
+		restart: "Reinicio",
+		stop: "Parada",
+		status: "Consulta"
+	}[action] || "Accion";
 }
 
 function renderTeachers() {
