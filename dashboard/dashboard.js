@@ -17,6 +17,8 @@ const state = {
 	actions: [],
 	moderationAlerts: [],
 	activities: [],
+	aiIntegrity: null,
+	aiIntegritySettings: null,
 	policy: null,
 	livePolicy: null,
 	route: null,
@@ -355,6 +357,13 @@ function bindDashboard() {
 		event.preventDefault();
 		await sendActivityChat();
 	});
+	$("#aiDetectionToggle")?.addEventListener("change", async (event) => {
+		await updateAIIntegritySettings(event.target.checked);
+	});
+	$("#aiIntegrityForm")?.addEventListener("submit", async (event) => {
+		event.preventDefault();
+		await analyzeAIIntegrity();
+	});
 	$("[data-activity-manual-toggle]")?.addEventListener("click", () => {
 		const panel = $("[data-manual-activity]");
 		setManualActivityVisible(panel?.hidden ?? true);
@@ -385,7 +394,7 @@ function bindTeacherPages() {
 }
 
 function setTeacherPage(page, persist) {
-	const validPages = new Set(["info", "clases", "control"]);
+	const validPages = new Set(["info", "clases", "control", "integridad"]);
 	const nextPage = validPages.has(page) ? page : "clases";
 	for (const button of document.querySelectorAll("[data-teacher-page]")) {
 		const active = button.dataset.teacherPage === nextPage;
@@ -402,6 +411,9 @@ function setTeacherPage(page, persist) {
 	if (nextPage === "control") {
 		renderTeacherActions();
 		renderMinecraftActions();
+	}
+	if (nextPage === "integridad") {
+		renderAIIntegrity();
 	}
 	if (persist) {
 		localStorage.setItem(STORAGE_KEYS.teacherPage, nextPage);
@@ -505,6 +517,9 @@ async function requireDashboardSession() {
 		}
 		if (currentPage === "profesor") {
 			await loadActivities();
+		}
+		if (currentPage === "profesor") {
+			await loadAIIntegrity();
 		}
 	} catch (_) {
 		logout();
@@ -634,6 +649,20 @@ async function loadActivities() {
 		renderActivities();
 	} catch (error) {
 		setMessage($("#activityMessage"), error.message, "error");
+	}
+}
+
+async function loadAIIntegrity() {
+	if (!$("#aiAverageChart")) {
+		return;
+	}
+	try {
+		const response = await request("/dashboard/ai-integrity/metrics");
+		state.aiIntegrity = response;
+		state.aiIntegritySettings = response.settings || null;
+		renderAIIntegrity();
+	} catch (error) {
+		renderAIIntegrity(error);
 	}
 }
 
@@ -1037,6 +1066,48 @@ async function createActivity() {
 	}
 }
 
+async function updateAIIntegritySettings(enabled) {
+	const message = $("#aiIntegrityMessage");
+	setMessage(message, enabled ? "Activando detector..." : "Desactivando detector...", "");
+	try {
+		state.aiIntegritySettings = await request("/dashboard/ai-integrity/settings", {
+			method: "PATCH",
+			body: { detectionEnabled: Boolean(enabled) }
+		});
+		await loadAIIntegrity();
+		setMessage(message, enabled ? "Deteccion activada." : "Deteccion desactivada.", "ok");
+	} catch (error) {
+		setMessage(message, error.message, "error");
+		if ($("#aiDetectionToggle") && state.aiIntegritySettings) {
+			$("#aiDetectionToggle").checked = Boolean(state.aiIntegritySettings.detectionEnabled);
+		}
+	}
+}
+
+async function analyzeAIIntegrity() {
+	const message = $("#aiIntegrityMessage");
+	const text = ($("#aiIntegrityText")?.value || "").trim();
+	if (text.length < 120) {
+		setMessage(message, "Necesita al menos 120 caracteres.", "error");
+		return;
+	}
+	setMessage(message, "Analizando porcentaje...", "");
+	try {
+		const response = await request("/dashboard/ai-integrity/analyze", {
+			method: "POST",
+			body: { text }
+		});
+		if ($("#aiIntegrityText")) {
+			$("#aiIntegrityText").value = "";
+		}
+		await loadAIIntegrity();
+		setMessage(message, response.detectionUsed ? `Analisis registrado: ${response.percent}% IA.` : "Detector desactivado.", "ok");
+	} catch (error) {
+		await loadAIIntegrity();
+		setMessage(message, error.message, "error");
+	}
+}
+
 async function sendActivityChat(messageOverride) {
 	const message = $("#activityAiMessage");
 	const prompt = (messageOverride || $("#activityAiPrompt")?.value || "").trim();
@@ -1367,6 +1438,45 @@ function renderClassPanel() {
 	], "Clase");
 }
 
+function renderAIIntegrity(error) {
+	const settings = state.aiIntegritySettings || state.aiIntegrity?.settings || {};
+	const toggle = $("#aiDetectionToggle");
+	if (toggle) {
+		toggle.checked = Boolean(settings.detectionEnabled);
+	}
+	const provider = $("#aiIntegrityProvider");
+	if (provider) {
+		const ready = settings.providerReady ? "Listo" : "Sin API";
+		provider.textContent = `${settings.provider || "detector"} · ${ready}`;
+	}
+	if (error) {
+		for (const selector of ["#aiAverageChart", "#aiBucketChart", "#aiTrendChart", "#aiStatusChart"]) {
+			const node = $(selector);
+			if (node) {
+				node.innerHTML = `<div class="chart-empty">${escapeHtml(error.message || "Sin metricas.")}</div>`;
+			}
+		}
+		return;
+	}
+	const metrics = state.aiIntegrity || {};
+	safeChart("#aiAverageChart", () => renderGaugeChart("#aiAverageChart", metrics.averageScore || 0, "IA media"));
+	safeChart("#aiBucketChart", () => renderBarChart("#aiBucketChart", (metrics.buckets || []).map((bucket, index) => ({
+		label: bucket.label,
+		value: bucket.count,
+		color: chartColors[index % chartColors.length]
+	}))));
+	safeChart("#aiTrendChart", () => renderBarChart("#aiTrendChart", (metrics.recent || []).map((point, index) => ({
+		label: point.date?.slice(5) || `Dia ${index + 1}`,
+		value: Math.round(point.averageScore || 0),
+		color: "#1d6ce3"
+	}))));
+	safeChart("#aiStatusChart", () => renderDonutChart("#aiStatusChart", Object.entries(metrics.status || {}).map(([label, value], index) => ({
+		label: readableAIStatus(label),
+		value,
+		color: chartColors[index % chartColors.length]
+	}))));
+}
+
 function activityPayload() {
 	return {
 		title: $("#activityTitle").value,
@@ -1630,6 +1740,21 @@ function renderBarChart(selector, segments) {
 	`;
 }
 
+function renderGaugeChart(selector, value, label) {
+	const node = $(selector);
+	if (!node) {
+		return;
+	}
+	const percent = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+	const color = percent >= 80 ? "#c84f6a" : percent >= 60 ? "#b8652d" : percent >= 35 ? "#1d6ce3" : "#15986f";
+	node.innerHTML = `
+		<div class="gauge-chart" style="--gauge-color: ${color}; --gauge-size: ${percent}%">
+			<strong>${escapeHtml(String(percent))}%</strong>
+			<span>${escapeHtml(label)}</span>
+		</div>
+	`;
+}
+
 function renderChartLegend(segments, total) {
 	return `<div class="chart-legend">${segments.map((item) => `
 		<span><i style="background:${item.color}"></i>${escapeHtml(item.label)} <strong>${escapeHtml(String(item.value))}</strong><em>${Math.round((item.value / total) * 100)}%</em></span>
@@ -1671,6 +1796,16 @@ function actionCategorySegments() {
 		value,
 		color: chartColors[index % chartColors.length]
 	}));
+}
+
+function readableAIStatus(status) {
+	const labels = {
+		completed: "Analizados",
+		disabled: "Desactivado",
+		provider_unavailable: "Sin API",
+		failed: "Fallidos"
+	};
+	return labels[status] || status || "Estado";
 }
 
 function otherUsersCount(metrics) {

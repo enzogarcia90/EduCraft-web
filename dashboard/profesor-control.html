@@ -44,6 +44,7 @@
 					<a href="profesor-info.html" data-teacher-page="info">Informacion juego</a>
 					<a href="profesor-clases.html" data-teacher-page="clases">Clases</a>
 					<a href="profesor-control.html" data-teacher-page="control">Control de clase</a>
+					<a href="profesor-integridad.html" data-teacher-page="integridad">Integridad IA</a>
 				</nav>
 				<section class="teacher-page-panel" data-teacher-panel="clases">
 				<section class="activity-ai-panel">
@@ -118,6 +119,30 @@
 				</section>
 				<section class="portal-grid two">
 					<article><h2>Alumnos visibles</h2><div id="studentBreakdown" class="compact-rack"></div><table class="portal-table compact-table"><thead><tr><th>Email</th><th>Estado</th></tr></thead><tbody id="teacherStudentTableBody"></tbody></table></article>
+				</section>
+				</section>
+				<section class="teacher-page-panel" data-teacher-panel="integridad">
+				<section class="portal-grid two ai-integrity-layout">
+					<article>
+						<div class="builder-head">
+							<div><p class="eyebrow">Integridad</p><h2>Detector IA</h2></div>
+							<span id="aiIntegrityProvider" class="status-chip">Sin proveedor</span>
+						</div>
+						<div class="toggle-row">
+							<div><strong>Deteccion ChatGPT/IA</strong><span>Control del profesor para esta institucion.</span></div>
+							<label class="switch"><input id="aiDetectionToggle" type="checkbox"><span></span></label>
+						</div>
+						<form id="aiIntegrityForm" class="activity-ai-form chat-mode">
+							<label class="wide"><span>Texto a evaluar</span><textarea id="aiIntegrityText" rows="5" maxlength="6000" placeholder="Pega una entrega para obtener solo metricas agregadas. El contenido no se guarda."></textarea></label>
+							<div class="builder-actions wide"><button class="button primary" type="submit">Analizar porcentaje</button><p id="aiIntegrityMessage" class="portal-message"></p></div>
+						</form>
+					</article>
+					<article><h2>Porcentaje medio</h2><div id="aiAverageChart" class="chart-box"></div></article>
+				</section>
+				<section class="portal-grid charts-grid">
+					<article><h2>Rangos de IA</h2><div id="aiBucketChart" class="chart-box"></div></article>
+					<article><h2>Tendencia</h2><div id="aiTrendChart" class="chart-box"></div></article>
+					<article><h2>Estado del detector</h2><div id="aiStatusChart" class="chart-box"></div></article>
 				</section>
 				</section>
 			</section>
