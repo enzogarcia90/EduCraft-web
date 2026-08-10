@@ -1290,7 +1290,9 @@ function renderPolicyPanel() {
 
 function renderRoutePanel() {
 	renderSignalList("#routeRack", [
-		{ label: "Servidor asignado", value: state.route?.serverName || "sin ruta" },
+		{ label: "Siguiente salto", value: state.route?.serverName || "sin ruta" },
+		{ label: "Proxy centro", value: state.route?.institutionProxyName || "sin proxy" },
+		{ label: "Servidor clase", value: state.route?.classServerName || "sin clase" },
 		{ label: "Centro", value: shortId(state.route?.institutionId || state.me?.institutionId) }
 	], "Ruta");
 }
