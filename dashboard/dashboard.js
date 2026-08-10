@@ -131,17 +131,11 @@ init().catch((error) => {
 async function init() {
 	if (currentPage === "login") {
 		bindLogin();
-		if (state.token) {
-			await restoreAndRedirect();
-		}
 		return;
 	}
 
 	if (currentPage === "registro") {
 		bindRegister();
-		if (state.token) {
-			await restoreAndRedirect();
-		}
 		return;
 	}
 
