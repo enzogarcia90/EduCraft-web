@@ -21,6 +21,9 @@ const state = {
 	aiIntegrity: null,
 	aiIntegritySettings: null,
 	sysAdmin: null,
+	sysAdminSocket: null,
+	sysAdminLiveRetry: 0,
+	sysAdminServerError: null,
 	sysServerConsoleId: "",
 	policy: null,
 	livePolicy: null,
@@ -719,13 +722,72 @@ async function loadSysAdmin() {
 	try {
 		const servers = await request("/dashboard/sysadmin/servers");
 		state.classServers = servers.items || [];
+		state.sysAdminServerError = null;
 		setMessage($("#sysAdminMessage"), "", "");
 	} catch (error) {
 		serverError = error;
+		state.sysAdminServerError = error;
 		state.classServers = [];
 		setMessage($("#sysAdminMessage"), `Datos de backend cargados. Servidores: ${error.message}`, "error");
 	}
 	renderSysAdmin(null, serverError);
+	connectSysAdminLive();
+}
+
+function connectSysAdminLive() {
+	if (currentPage !== "administracion" || !state.token || !$("#sysBackendRack")) {
+		return;
+	}
+	if (state.sysAdminSocket && state.sysAdminSocket.readyState <= WebSocket.OPEN) {
+		return;
+	}
+	const socket = new WebSocket(`${webSocketBase()}/dashboard/sysadmin/live?access_token=${encodeURIComponent(state.token)}`);
+	state.sysAdminSocket = socket;
+	socket.addEventListener("open", () => {
+		if (state.sysAdminLiveRetry) {
+			clearTimeout(state.sysAdminLiveRetry);
+			state.sysAdminLiveRetry = 0;
+		}
+	});
+	socket.addEventListener("message", (event) => {
+		let message = null;
+		try {
+			message = JSON.parse(event.data);
+		} catch (_) {
+			return;
+		}
+		if (message?.type === "sysadmin_overview" && message.data) {
+			state.sysAdmin = message.data;
+			renderSysAdmin(null, state.sysAdminServerError);
+		}
+	});
+	socket.addEventListener("close", scheduleSysAdminLiveReconnect);
+	socket.addEventListener("error", () => {
+		socket.close();
+	});
+}
+
+function scheduleSysAdminLiveReconnect() {
+	if (state.sysAdminSocket) {
+		state.sysAdminSocket = null;
+	}
+	if (currentPage !== "administracion" || state.sysAdminLiveRetry) {
+		return;
+	}
+	state.sysAdminLiveRetry = setTimeout(() => {
+		state.sysAdminLiveRetry = 0;
+		connectSysAdminLive();
+	}, 5000);
+}
+
+function webSocketBase() {
+	if (apiBase.startsWith("https://")) {
+		return `wss://${apiBase.slice("https://".length)}`;
+	}
+	if (apiBase.startsWith("http://")) {
+		return `ws://${apiBase.slice("http://".length)}`;
+	}
+	return apiBase;
 }
 
 async function createStudent() {
