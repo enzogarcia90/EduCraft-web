@@ -506,6 +506,11 @@ async function requireDashboardSession() {
 			logout();
 			return;
 		}
+		if (isClientDestination(destination)) {
+			clearSession();
+			location.replace("login.html");
+			return;
+		}
 		if (pageName(destination) !== currentPage) {
 			location.replace(destination);
 			return;
@@ -2155,6 +2160,10 @@ function pageName(path) {
 		return "profesor";
 	}
 	return path.replace(".html", "");
+}
+
+function isClientDestination(path) {
+	return path.includes("/cliente/") || path.startsWith("../cliente/");
 }
 
 function storeSession(response) {
