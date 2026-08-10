@@ -707,18 +707,25 @@ async function loadSysAdmin() {
 	if (!$("#sysBackendRack")) {
 		return;
 	}
+	let serverError = null;
 	try {
-		const [overview, servers] = await Promise.all([
-			request("/dashboard/sysadmin/overview"),
-			request("/dashboard/sysadmin/servers")
-		]);
+		const overview = await request("/dashboard/sysadmin/overview");
 		state.sysAdmin = overview;
-		state.classServers = servers.items || [];
-		renderSysAdmin();
 	} catch (error) {
 		setMessage($("#sysAdminMessage"), error.message, "error");
 		renderSysAdmin(error);
+		return;
 	}
+	try {
+		const servers = await request("/dashboard/sysadmin/servers");
+		state.classServers = servers.items || [];
+		setMessage($("#sysAdminMessage"), "", "");
+	} catch (error) {
+		serverError = error;
+		state.classServers = [];
+		setMessage($("#sysAdminMessage"), `Datos de backend cargados. Servidores: ${error.message}`, "error");
+	}
+	renderSysAdmin(null, serverError);
 }
 
 async function createStudent() {
@@ -1290,7 +1297,7 @@ function renderOperations() {
 	], "Operacion");
 }
 
-function renderSysAdmin(error) {
+function renderSysAdmin(error, serverError) {
 	const data = state.sysAdmin || {};
 	const backend = data.backend || {};
 	const database = data.database || {};
@@ -1308,7 +1315,7 @@ function renderSysAdmin(error) {
 		{ label: "Idle", value: String(database.idleConnections || 0) },
 		{ label: "Detector IA", value: `${data.ai?.detectorProvider || "n/a"} · ${data.ai?.detectorReady ? "listo" : "sin API"}` }
 	], "DB");
-	renderSysServerRack(error);
+	renderSysServerRack(serverError || error);
 }
 
 function renderContextPanels() {
