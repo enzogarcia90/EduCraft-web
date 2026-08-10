@@ -20,6 +20,8 @@ const state = {
 	activities: [],
 	aiIntegrity: null,
 	aiIntegritySettings: null,
+	sysAdmin: null,
+	sysServerConsoleId: "",
 	policy: null,
 	livePolicy: null,
 	route: null,
@@ -369,6 +371,8 @@ function bindDashboard() {
 		setMessage($("#activityMessage"), "Borrador listo para revisar y guardar.", "ok");
 	});
 	$("#activityReset")?.addEventListener("click", () => fillActivityTemplate(activityTemplates[0], true));
+	$("#sysRefreshButton")?.addEventListener("click", loadSysAdmin);
+	$("#sysVelocityConsoleButton")?.addEventListener("click", loadVelocityConsole);
 	renderActionFilters();
 	renderTeacherActions();
 	renderActivityTemplates();
@@ -533,6 +537,9 @@ async function requireDashboardSession() {
 		if (currentPage === "profesor") {
 			await loadAIIntegrity();
 		}
+		if (currentPage === "administracion") {
+			await loadSysAdmin();
+		}
 	} catch (_) {
 		logout();
 	}
@@ -693,6 +700,24 @@ async function loadAIIntegrity() {
 		renderAIIntegrity();
 	} catch (error) {
 		renderAIIntegrity(error);
+	}
+}
+
+async function loadSysAdmin() {
+	if (!$("#sysBackendRack")) {
+		return;
+	}
+	try {
+		const [overview, servers] = await Promise.all([
+			request("/dashboard/sysadmin/overview"),
+			request("/dashboard/sysadmin/servers")
+		]);
+		state.sysAdmin = overview;
+		state.classServers = servers.items || [];
+		renderSysAdmin();
+	} catch (error) {
+		setMessage($("#sysAdminMessage"), error.message, "error");
+		renderSysAdmin(error);
 	}
 }
 
@@ -1265,6 +1290,27 @@ function renderOperations() {
 	], "Operacion");
 }
 
+function renderSysAdmin(error) {
+	const data = state.sysAdmin || {};
+	const backend = data.backend || {};
+	const database = data.database || {};
+	renderSignalList("#sysBackendRack", [
+		{ label: "Estado", value: error ? "error" : backend.status || "sin datos" },
+		{ label: "Runtime", value: `${backend.goVersion || "-"} · ${backend.os || "-"} / ${backend.arch || "-"}` },
+		{ label: "Uptime", value: formatDuration(backend.uptimeSeconds || 0) },
+		{ label: "Goroutines", value: String(backend.goroutines || 0) },
+		{ label: "Memoria", value: `${backend.memoryMb || 0} MB` }
+	], "Backend");
+	renderSignalList("#sysDatabaseRack", [
+		{ label: "Estado", value: database.status || "sin datos" },
+		{ label: "Conexiones", value: String(database.openConnections || 0) },
+		{ label: "En uso", value: String(database.acquiredConnections || 0) },
+		{ label: "Idle", value: String(database.idleConnections || 0) },
+		{ label: "Detector IA", value: `${data.ai?.detectorProvider || "n/a"} · ${data.ai?.detectorReady ? "listo" : "sin API"}` }
+	], "DB");
+	renderSysServerRack(error);
+}
+
 function renderContextPanels() {
 	renderPolicyPanel();
 	renderRoutePanel();
@@ -1789,6 +1835,94 @@ async function classServerAction(id, action) {
 	}
 }
 
+async function sysClassServerAction(id, action) {
+	const message = $("#sysAdminMessage");
+	const method = action === "status" ? "GET" : "POST";
+	setMessage(message, `${actionLabel(action)} ${id}...`, "");
+	try {
+		const response = await request(`/dashboard/class-servers/${encodeURIComponent(id)}/${action}`, { method });
+		const stateLabel = response.status?.state ? ` Estado: ${response.status.state}.` : "";
+		setMessage(message, `${actionLabel(action)} completado.${stateLabel}`, "ok");
+		await loadSysAdmin();
+	} catch (error) {
+		setMessage(message, error.message, "error");
+	}
+}
+
+async function loadServerConsole(id) {
+	state.sysServerConsoleId = id;
+	const target = $("#sysServerConsoleTarget");
+	if (target) {
+		target.textContent = id;
+	}
+	const node = $("#sysServerConsole");
+	if (node) {
+		node.textContent = "Leyendo consola...";
+	}
+	try {
+		const response = await request(`/dashboard/class-servers/${encodeURIComponent(id)}/console?lines=220`);
+		if (node) {
+			node.textContent = (response.lines || []).join("\n") || "Sin lineas de consola.";
+		}
+	} catch (error) {
+		if (node) {
+			node.textContent = error.message;
+		}
+	}
+}
+
+async function loadVelocityConsole() {
+	const node = $("#sysVelocityConsole");
+	if (node) {
+		node.textContent = "Leyendo Velocity...";
+	}
+	try {
+		const response = await request("/dashboard/velocity/console?lines=220");
+		if (node) {
+			node.textContent = (response.lines || []).join("\n") || "Sin lineas de Velocity.";
+		}
+	} catch (error) {
+		if (node) {
+			node.textContent = error.message;
+		}
+	}
+}
+
+function renderSysServerRack(error) {
+	const rack = $("#sysServerRack");
+	if (!rack) {
+		return;
+	}
+	if (error) {
+		rack.innerHTML = `<div class="empty-state">${escapeHtml(error.message || "No se pudo cargar sysadmin.")}</div>`;
+		return;
+	}
+	rack.innerHTML = state.classServers.length ? state.classServers.map((server) => {
+		const stateLabel = server.status?.state || (server.record ? "creado" : "sin crear");
+		return `
+			<article class="class-server-item sys-server-item">
+				<div>
+					<h3>${escapeHtml(server.serverName || server.id)}</h3>
+					<p>${escapeHtml(server.classGroup || server.displayName || "-")} · ${escapeHtml(String(server.port || "-"))} · ${escapeHtml(stateLabel)}</p>
+				</div>
+				<div class="class-server-actions">
+					<button type="button" data-sys-console="${escapeHtml(server.id)}">Consola</button>
+					<button type="button" data-sys-server-action="status" data-sys-server-id="${escapeHtml(server.id)}">Estado</button>
+					<button type="button" data-sys-server-action="start" data-sys-server-id="${escapeHtml(server.id)}">Start</button>
+					<button type="button" data-sys-server-action="restart" data-sys-server-id="${escapeHtml(server.id)}">Restart</button>
+					<button type="button" data-sys-server-action="stop" data-sys-server-id="${escapeHtml(server.id)}">Stop</button>
+				</div>
+			</article>
+		`;
+	}).join("") : `<div class="empty-state">Sin servidores creados en el VPS Agent.</div>`;
+	for (const button of document.querySelectorAll("[data-sys-console]")) {
+		button.addEventListener("click", () => loadServerConsole(button.dataset.sysConsole));
+	}
+	for (const button of document.querySelectorAll("[data-sys-server-action]")) {
+		button.addEventListener("click", () => sysClassServerAction(button.dataset.sysServerId, button.dataset.sysServerAction));
+	}
+}
+
 function actionLabel(action) {
 	return {
 		start: "Arranque",
@@ -1796,6 +1930,20 @@ function actionLabel(action) {
 		stop: "Parada",
 		status: "Consulta"
 	}[action] || "Accion";
+}
+
+function formatDuration(seconds) {
+	const value = Number(seconds) || 0;
+	const days = Math.floor(value / 86400);
+	const hours = Math.floor((value % 86400) / 3600);
+	const minutes = Math.floor((value % 3600) / 60);
+	if (days > 0) {
+		return `${days}d ${hours}h`;
+	}
+	if (hours > 0) {
+		return `${hours}h ${minutes}m`;
+	}
+	return `${minutes}m`;
 }
 
 function renderTeachers() {

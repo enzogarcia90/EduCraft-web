@@ -41,6 +41,10 @@
 					<span class="status-chip">Privado</span>
 				</div>
 				<section id="metricsGrid" class="portal-metrics"></section>
+				<section class="portal-grid two sysadmin-status">
+					<article><h2>Backend</h2><div id="sysBackendRack" class="signal-list"></div></article>
+					<article><h2>Base de datos</h2><div id="sysDatabaseRack" class="signal-list"></div></article>
+				</section>
 				<section class="portal-grid charts-grid">
 					<article><h2>Usuarios por rol</h2><div id="roleChart" class="chart-box"></div></article>
 					<article><h2>Centros activos</h2><div id="institutionChart" class="chart-box"></div></article>
@@ -49,6 +53,23 @@
 				<section class="portal-grid two">
 					<article><h2>Centros y licencias</h2><div id="licenseRack" class="signal-list"></div></article>
 					<article><h2>Operacion</h2><div id="operationsRack" class="signal-list"></div></article>
+				</section>
+				<section class="portal-grid two sysadmin-layout">
+					<article>
+						<div class="builder-head"><div><p class="eyebrow">VPS Agent</p><h2>Servers por clase</h2></div><button id="sysRefreshButton" class="portal-ghost" type="button">Recargar</button></div>
+						<div id="sysServerRack" class="class-server-rack"></div>
+						<p id="sysAdminMessage" class="portal-message"></p>
+					</article>
+					<article>
+						<div class="builder-head"><div><p class="eyebrow">Velocity</p><h2>Consola del proxy</h2></div><button id="sysVelocityConsoleButton" class="portal-ghost" type="button">Leer</button></div>
+						<pre id="sysVelocityConsole" class="sys-console">Sin datos.</pre>
+					</article>
+				</section>
+				<section class="portal-grid">
+					<article>
+						<div class="builder-head"><div><p class="eyebrow">Paper</p><h2>Consola por servidor</h2></div><span id="sysServerConsoleTarget" class="status-chip">Sin servidor</span></div>
+						<pre id="sysServerConsole" class="sys-console">Selecciona un servidor.</pre>
+					</article>
 				</section>
 			</section>
 		</main>

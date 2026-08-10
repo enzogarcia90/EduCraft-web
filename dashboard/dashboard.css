@@ -742,6 +742,31 @@ body.portal-app * {
 	cursor: pointer;
 }
 
+.sysadmin-layout article,
+.sysadmin-status article {
+	align-content: start;
+}
+
+.sys-server-item {
+	grid-template-columns: minmax(180px, 1fr) minmax(240px, auto);
+}
+
+.sys-console {
+	width: 100%;
+	min-height: 280px;
+	max-height: 520px;
+	margin: 0;
+	padding: 14px;
+	overflow: auto;
+	border: 1px solid #20342f;
+	border-radius: 8px;
+	background: #08110f;
+	color: #d7f8e8;
+	font: 12px/1.55 "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
 .chart-box {
 	display: grid;
 	min-height: 214px;
