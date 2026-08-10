@@ -16,6 +16,7 @@ const state = {
 	classServers: [],
 	actions: [],
 	moderationAlerts: [],
+	studentEvents: [],
 	activities: [],
 	aiIntegrity: null,
 	aiIntegritySettings: null,
@@ -386,7 +387,10 @@ function bindTeacherPages() {
 		return;
 	}
 	for (const button of buttons) {
-		button.addEventListener("click", () => setTeacherPage(button.dataset.teacherPage, true));
+		button.addEventListener("click", (event) => {
+			event.preventDefault();
+			setTeacherPage(button.dataset.teacherPage, true);
+		});
 	}
 	const requested = new URLSearchParams(location.search).get("vista") || location.hash.replace("#", "");
 	const defaultPage = document.body.dataset.teacherDefault || "clases";
@@ -394,7 +398,7 @@ function bindTeacherPages() {
 }
 
 function setTeacherPage(page, persist) {
-	const validPages = new Set(["info", "clases", "control", "integridad"]);
+	const validPages = new Set(["info", "clases", "control", "seguimiento", "integridad"]);
 	const nextPage = validPages.has(page) ? page : "clases";
 	for (const button of document.querySelectorAll("[data-teacher-page]")) {
 		const active = button.dataset.teacherPage === nextPage;
@@ -412,11 +416,17 @@ function setTeacherPage(page, persist) {
 		renderTeacherActions();
 		renderMinecraftActions();
 	}
+	if (nextPage === "seguimiento") {
+		renderTracking();
+	}
 	if (nextPage === "integridad") {
 		renderAIIntegrity();
 	}
 	if (persist) {
 		localStorage.setItem(STORAGE_KEYS.teacherPage, nextPage);
+		const url = new URL(location.href);
+		url.searchParams.set("vista", nextPage);
+		history.replaceState(null, "", url);
 	}
 }
 
@@ -516,6 +526,9 @@ async function requireDashboardSession() {
 			await loadModerationAlerts();
 		}
 		if (currentPage === "profesor") {
+			await loadStudentEvents();
+		}
+		if (currentPage === "profesor") {
 			await loadActivities();
 		}
 		if (currentPage === "profesor") {
@@ -532,6 +545,7 @@ async function loadSummary() {
 	renderDashboardCharts();
 	renderSignals();
 	renderOperations();
+	renderTracking();
 }
 
 async function loadPortalContext() {
@@ -554,7 +568,7 @@ async function loadPortalContext() {
 }
 
 async function loadStudents() {
-	if (!$("#studentTableBody") && !$("#targetStudent")) {
+	if (!$("#studentTableBody") && !$("#targetStudent") && !$("#trackingStudentTableBody")) {
 		return;
 	}
 	try {
@@ -597,28 +611,44 @@ async function loadTeachers() {
 }
 
 async function loadTeacherActions() {
-	if (!$("#minecraftActionRack")) {
+	if (!$("#minecraftActionRack") && !$("#trackingActionRack")) {
 		return;
 	}
 	try {
 		const response = await request("/dashboard/teacher/actions");
 		state.actions = response.items || [];
 		renderMinecraftActions();
+		renderTracking();
 	} catch (error) {
 		renderMinecraftActions(error);
 	}
 }
 
 async function loadModerationAlerts() {
-	if (!$("#moderationAlertRack")) {
+	if (!$("#moderationAlertRack") && !$("#trackingAlertRack")) {
 		return;
 	}
 	try {
 		const response = await request("/dashboard/moderation/alerts");
 		state.moderationAlerts = response.items || [];
 		renderModerationAlerts();
+		renderTracking();
 	} catch (error) {
 		renderModerationAlerts(error);
+	}
+}
+
+async function loadStudentEvents() {
+	if (!$("#trackingSummary") && !$("#trackingStudentTableBody") && !$("#trackingActionRack")) {
+		return;
+	}
+	try {
+		const response = await request("/dashboard/student-events?limit=160");
+		state.studentEvents = response.items || [];
+		renderTracking();
+	} catch (error) {
+		state.studentEvents = [];
+		renderTracking(error);
 	}
 }
 
@@ -640,13 +670,14 @@ async function loadSchedule() {
 }
 
 async function loadActivities() {
-	if (!$("#activityList")) {
+	if (!$("#activityList") && !$("#trackingActivityRack")) {
 		return;
 	}
 	try {
 		const response = await request("/dashboard/activities");
 		state.activities = response.items || [];
 		renderActivities();
+		renderTracking();
 	} catch (error) {
 		setMessage($("#activityMessage"), error.message, "error");
 	}
@@ -1318,6 +1349,158 @@ function renderModerationAlerts(error) {
 			<small>${escapeHtml(moderationAlertLabel(alert))}</small>
 		</div>
 	`).join("") : `<div class="minecraft-action empty"><strong>Sin alertas recientes</strong><span>No hay incidencias de entregas.</span></div>`;
+	renderTracking();
+}
+
+function renderTracking(error) {
+	if (!$("#trackingSummary") && !$("#trackingStudentTableBody") && !$("#trackingActionRack")) {
+		return;
+	}
+	const presence = trackingPresence();
+	const presentStudents = presence.present.size;
+	const missingStudents = Math.max(0, state.students.length - presentStudents);
+	const deliveredActions = state.studentEvents.filter((event) => event.eventKind === "answer_accepted").length;
+	const rejectedAnswers = state.studentEvents.filter((event) => event.eventKind === "answer_rejected").length;
+	const openAlerts = state.moderationAlerts.filter((alert) => alert.status === "open").length
+		+ state.studentEvents.filter((event) => event.eventKind === "chat_blocked" || event.eventKind === "command_blocked").length;
+	const publishedActivities = state.activities.filter((activity) => activity.status === "published").length;
+
+	const summary = $("#trackingSummary");
+	if (summary) {
+		summary.innerHTML = [
+			{ label: "Presentes", value: presentStudents },
+			{ label: "Faltas visibles", value: missingStudents },
+			{ label: "Respuestas", value: deliveredActions },
+			{ label: "Rechazadas", value: rejectedAnswers },
+			{ label: "Incidencias", value: openAlerts },
+			{ label: "Clases publicadas", value: publishedActivities }
+		].map((item) => `<article><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(String(item.value))}</strong></article>`).join("");
+	}
+
+	const studentBody = $("#trackingStudentTableBody");
+	if (studentBody) {
+		studentBody.innerHTML = state.students.length ? state.students.map((student) => {
+			const lastEvent = latestEventForStudent(student);
+			const lastAction = latestActionForStudent(student);
+			const present = lastEvent && lastEvent.eventKind !== "presence_quit";
+			const absence = present ? "No" : "Revisar";
+			const statusDetail = lastEvent ? studentEventLabel(lastEvent) : lastAction ? actionLabel(lastAction.actionKey) : readableStatus(student.status);
+			return `
+				<tr>
+					<td>${escapeHtml(student.email)}</td>
+					<td>${escapeHtml(student.classGroup || student.course || "-")}</td>
+					<td>${escapeHtml(statusDetail)}</td>
+					<td>${escapeHtml(absence)}</td>
+				</tr>
+			`;
+		}).join("") : `<tr><td colspan="4">Sin alumnos visibles.</td></tr>`;
+	}
+
+	const actionRack = $("#trackingActionRack");
+	if (actionRack) {
+		const answerEvents = state.studentEvents.filter((event) => event.eventKind === "answer_accepted" || event.eventKind === "answer_rejected");
+		actionRack.innerHTML = answerEvents.length ? answerEvents.map((event) => `
+			<div class="minecraft-action ${event.status === "accepted" ? "completed" : "failed"}">
+				<strong>${escapeHtml(event.username || "Alumno")}</strong>
+				<span>${escapeHtml(studentEventLabel(event))}</span>
+				<small>${escapeHtml(studentEventDetail(event))}</small>
+			</div>
+		`).join("") : state.actions.length ? state.actions.map((action) => `
+			<div class="minecraft-action ${escapeHtml(action.status || "queued")}">
+				<strong>${escapeHtml(actionLabel(action.actionKey))}</strong>
+				<span>${escapeHtml(actionTargetLabel(action))}</span>
+				<small>${escapeHtml(actionDeliveryLabel(action))}</small>
+			</div>
+		`).join("") : `<div class="minecraft-action empty"><strong>Sin respuestas</strong><span>No hay acciones ni entregas registradas.</span></div>`;
+	}
+
+	const alertRack = $("#trackingAlertRack");
+	if (alertRack) {
+		const blockedEvents = state.studentEvents.filter((event) => event.eventKind === "chat_blocked" || event.eventKind === "command_blocked");
+		const eventHtml = blockedEvents.map((event) => `
+			<div class="minecraft-action failed">
+				<strong>${escapeHtml(event.username || "Alumno")}</strong>
+				<span>${escapeHtml(studentEventLabel(event))}</span>
+				<small>${escapeHtml(studentEventDetail(event))}</small>
+			</div>
+		`).join("");
+		const alertHtml = state.moderationAlerts.map((alert) => `
+			<div class="minecraft-action ${alert.severity === "critical" ? "failed" : "sent"}">
+				<strong>${escapeHtml(alert.username || "Alumno")}</strong>
+				<span>${escapeHtml(alert.reason || "Incidencia")}</span>
+				<small>${escapeHtml(moderationAlertLabel(alert))}</small>
+			</div>
+		`).join("");
+		alertRack.innerHTML = eventHtml || alertHtml ? eventHtml + alertHtml : `<div class="minecraft-action empty"><strong>Sin incidencias</strong><span>No hay faltas de convivencia registradas.</span></div>`;
+	}
+
+	const activityRack = $("#trackingActivityRack");
+	if (activityRack) {
+		activityRack.innerHTML = state.activities.length ? state.activities.map((activity) => `
+			<div class="minecraft-action ${activity.status === "published" ? "completed" : "sent"}">
+				<strong>${escapeHtml(activity.title || "Actividad")}</strong>
+				<span>${escapeHtml(activity.subject || "Sin materia")} · ${escapeHtml(activity.level || "Sin nivel")}</span>
+				<small>${escapeHtml(readableActivityStatus(activity.status))} · ${escapeHtml((activity.programmingMode || "none").toUpperCase())}</small>
+			</div>
+		`).join("") : `<div class="minecraft-action empty"><strong>Sin actividades</strong><span>No hay clases guardadas todavia.</span></div>`;
+	}
+	if (error && actionRack && !state.studentEvents.length) {
+		actionRack.innerHTML = `<div class="minecraft-action empty"><strong>Eventos no disponibles</strong><span>${escapeHtml(error.message || "No se pudo cargar seguimiento real.")}</span></div>`;
+	}
+}
+
+function latestActionForStudent(student) {
+	return state.actions.find((action) => action.targetUserId === student.id || action.targetEmail === student.email);
+}
+
+function latestEventForStudent(student) {
+	return state.studentEvents.find((event) => sameStudentIdentity(event, student));
+}
+
+function sameStudentIdentity(event, student) {
+	const username = String(event.username || "").toLowerCase();
+	const email = String(student.email || "").toLowerCase();
+	const local = email.split("@")[0];
+	return username === email || username === local || username === String(student.id || "").toLowerCase();
+}
+
+function trackingPresence() {
+	const latest = new Map();
+	for (const event of state.studentEvents) {
+		if (event.eventKind !== "presence_join" && event.eventKind !== "presence_quit") {
+			continue;
+		}
+		const key = String(event.username || event.playerUuid || "").toLowerCase();
+		if (key && !latest.has(key)) {
+			latest.set(key, event);
+		}
+	}
+	const present = new Set();
+	for (const [key, event] of latest.entries()) {
+		if (event.eventKind === "presence_join") {
+			present.add(key);
+		}
+	}
+	return { latest, present };
+}
+
+function studentEventLabel(event) {
+	const labels = {
+		presence_join: "Entrada al servidor",
+		presence_quit: "Salida del servidor",
+		answer_accepted: "Respuesta aceptada",
+		answer_rejected: "Respuesta rechazada",
+		chat_blocked: "Chat bloqueado",
+		command_blocked: "Comando bloqueado"
+	};
+	return labels[event.eventKind] || event.eventKind || "Evento";
+}
+
+function studentEventDetail(event) {
+	const lesson = event.lessonTitle ? `${event.lessonTitle} · ` : "";
+	const reason = event.reason ? `${event.reason}` : readableStatus(event.status);
+	const sample = event.sample ? ` · ${event.sample}` : "";
+	return `${lesson}${reason}${sample}`;
 }
 
 function moderationAlertLabel(alert) {
@@ -1538,6 +1721,7 @@ function renderStudents() {
 	}
 	renderStudentBreakdown();
 	renderDashboardCharts();
+	renderTracking();
 }
 
 function renderClassServers(error) {

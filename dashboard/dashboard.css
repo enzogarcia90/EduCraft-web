@@ -1502,7 +1502,7 @@ body.portal-app {
 
 .teacher-page-tabs {
 	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
+	grid-template-columns: repeat(5, minmax(0, 1fr));
 	gap: 8px;
 	padding: 6px;
 	border: 1px solid rgba(17, 28, 24, 0.1);
@@ -1548,6 +1548,20 @@ body.portal-app {
 
 .teacher-page-panel[hidden] {
 	display: none;
+}
+
+.tracking-summary {
+	margin-bottom: 16px;
+}
+
+.tracking-grid + .tracking-grid {
+	margin-top: 16px;
+}
+
+.tracking-list {
+	max-height: 430px;
+	overflow: auto;
+	padding-right: 2px;
 }
 
 .activity-ai-panel {

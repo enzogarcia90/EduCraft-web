@@ -21,7 +21,7 @@
 		<link rel="sitemap" type="application/xml" href="https://enzogarcia90.github.io/EduCraft-web/sitemap.xml">
 		<title>Profesor | EduCraft</title>
 		<link rel="stylesheet" href="../styles.css">
-		<link rel="stylesheet" href="dashboard.css?v=20260802-legal1">
+		<link rel="stylesheet" href="dashboard.css?v=20260810-tracking1">
 	</head>
 	<body class="portal-app" data-dashboard-page="profesor" data-teacher-default="control">
 		<header class="portal-header">
@@ -44,6 +44,7 @@
 					<a href="profesor-info.html" data-teacher-page="info">Informacion juego</a>
 					<a href="profesor-clases.html" data-teacher-page="clases">Clases</a>
 					<a href="profesor-control.html" data-teacher-page="control">Control de clase</a>
+					<a href="profesor.html?vista=seguimiento" data-teacher-page="seguimiento">Seguimiento</a>
 					<a href="profesor-integridad.html" data-teacher-page="integridad">Integridad IA</a>
 				</nav>
 				<section class="teacher-page-panel" data-teacher-panel="clases">
@@ -121,6 +122,20 @@
 					<article><h2>Alumnos visibles</h2><div id="studentBreakdown" class="compact-rack"></div><table class="portal-table compact-table"><thead><tr><th>Email</th><th>Estado</th></tr></thead><tbody id="teacherStudentTableBody"></tbody></table></article>
 				</section>
 				</section>
+				<section class="teacher-page-panel" data-teacher-panel="seguimiento">
+				<section id="trackingSummary" class="portal-metrics tracking-summary"></section>
+				<section class="portal-grid two tracking-grid">
+					<article>
+						<h2>Alumnos y faltas</h2>
+						<table class="portal-table compact-table"><thead><tr><th>Alumno</th><th>Grupo</th><th>Estado</th><th>Falta</th></tr></thead><tbody id="trackingStudentTableBody"></tbody></table>
+					</article>
+					<article><h2>Respuestas y entregas</h2><div id="trackingActionRack" class="minecraft-actions tracking-list"></div></article>
+				</section>
+				<section class="portal-grid two tracking-grid">
+					<article><h2>Alertas e incidencias</h2><div id="trackingAlertRack" class="minecraft-actions tracking-list"></div></article>
+					<article><h2>Actividades</h2><div id="trackingActivityRack" class="minecraft-actions tracking-list"></div></article>
+				</section>
+				</section>
 				<section class="teacher-page-panel" data-teacher-panel="integridad">
 				<section class="portal-grid two ai-integrity-layout">
 					<article>
@@ -148,6 +163,6 @@
 			</section>
 		</main>
 		<script src="../cliente/educraft-config.js"></script>
-		<script src="dashboard.js?v=20260804-moderation-alerts"></script>
+		<script src="dashboard.js?v=20260810-tracking1"></script>
 	</body>
 </html>
