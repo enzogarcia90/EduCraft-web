@@ -4,24 +4,34 @@
 	const vertexSource = `#version 300 es
 		in vec3 aPosition;
 		in vec3 aNormal;
+		in vec2 aTexCoord;
 		in vec3 aOffset;
 		in vec3 aColor;
+		in float aTexture;
 		uniform mat4 uProjection;
 		uniform mat4 uView;
 		out vec3 vColor;
 		out float vLight;
+		out vec2 vUV;
+		flat out int vTexture;
 		void main() {
 			vec3 world = aPosition + aOffset;
 			gl_Position = uProjection * uView * vec4(world, 1.0);
 			vColor = aColor;
+			vUV = aTexCoord;
+			vTexture = int(aTexture + .5);
 			vLight = 0.48 + max(dot(normalize(aNormal), normalize(vec3(.4, 1., .25))), 0.0) * .52;
 		}`;
 	const fragmentSource = `#version 300 es
 		precision mediump float;
 		in vec3 vColor;
 		in float vLight;
+		in vec2 vUV;
+		flat in int vTexture;
+		uniform sampler2DArray uTextures;
 		out vec4 outColor;
-		void main() { outColor = vec4(vColor * vLight, 1.0); }`;
+		void main() { vec4 texel = texture(uTextures, vec3(vUV, float(vTexture))); if (texel.a < .12) discard; outColor = vec4(texel.rgb * vColor * vLight, texel.a); }`;
+	const textureFiles = ["grass_top", "dirt", "stone", "cobblestone", "planks_oak", "glass", "water_still", "sand"];
 
 	class EduCraftBlockViewer {
 		constructor(host) {
@@ -71,19 +81,48 @@
 			const gl = this.gl;
 			this.program = createProgram(gl, vertexSource, fragmentSource);
 			const cube = cubeGeometry();
-			const blocks = demoBlocks();
+			const blocks = [];
 			this.instanceCount = blocks.length;
 			this.vao = gl.createVertexArray();
 			gl.bindVertexArray(this.vao);
 			attribute(gl, this.program, "aPosition", cube.positions, 3, 0);
 			attribute(gl, this.program, "aNormal", cube.normals, 3, 0);
+			attribute(gl, this.program, "aTexCoord", cube.uvs, 2, 0);
 			this.offsetBuffer = attribute(gl, this.program, "aOffset", blocks.flatMap((block) => block.position), 3, 1);
 			this.colorBuffer = attribute(gl, this.program, "aColor", blocks.flatMap((block) => block.color), 3, 1);
+			this.textureIndexBuffer = attribute(gl, this.program, "aTexture", blocks.map((block) => block.texture || 0), 1, 1);
 			this.projectionLocation = gl.getUniformLocation(this.program, "uProjection");
 			this.viewLocation = gl.getUniformLocation(this.program, "uView");
+			this.initTextures();
 			gl.enable(gl.DEPTH_TEST);
 			gl.enable(gl.CULL_FACE);
 			gl.clearColor(.42, .7, .92, 1);
+		}
+
+		initTextures() {
+			const gl = this.gl;
+			this.textureArray = gl.createTexture();
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.textureArray);
+			gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, gl.RGBA8, 16, 16, textureFiles.length);
+			gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT);
+			gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT);
+			const fallback = new Uint8Array(16 * 16 * 4).fill(255);
+			for (let layer = 0; layer < textureFiles.length; layer++) gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, 0, 0, layer, 16, 16, 1, gl.RGBA, gl.UNSIGNED_BYTE, fallback);
+			textureFiles.forEach((name, layer) => {
+				const image = new Image();
+				image.onload = () => {
+					const canvas = document.createElement("canvas"); canvas.width = 16; canvas.height = 16;
+					const context = canvas.getContext("2d"); context.imageSmoothingEnabled = false; context.drawImage(image, 0, 0, 16, 16, 0, 0, 16, 16);
+					gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.textureArray);
+					gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, 0, 0, layer, 16, 16, 1, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+				};
+				image.src = `textures/blocks/${name}.png`;
+			});
+			gl.useProgram(this.program);
+			gl.uniform1i(gl.getUniformLocation(this.program, "uTextures"), 0);
 		}
 
 		reset() {
@@ -104,12 +143,12 @@
 				if (block.world !== world || block.removed || blocks.length >= 24000) continue;
 				const position = [block.x-origin[0], block.y-origin[1], block.z-origin[2]];
 				if (Math.abs(position[0]) > 64 || Math.abs(position[1]) > 40 || Math.abs(position[2]) > 64) continue;
-				blocks.push({ position, color: materialColor(block.material) });
+				blocks.push({ position, color: [1,1,1], texture: materialTexture(block.material) });
 			}
 			for (const player of server.players || []) {
 				if (player.world !== world) continue;
-				blocks.push({ position:[player.x-origin[0], player.y-origin[1], player.z-origin[2]], color:[.15,.4,1] });
-				blocks.push({ position:[player.x-origin[0], player.y-origin[1]+1, player.z-origin[2]], color:[1,.78,.25] });
+				blocks.push({ position:[player.x-origin[0], player.y-origin[1], player.z-origin[2]], color:[.25,.5,1], texture:4 });
+				blocks.push({ position:[player.x-origin[0], player.y-origin[1]+1, player.z-origin[2]], color:[1,.8,.3], texture:4 });
 			}
 			if (!blocks.length) return;
 			const gl = this.gl;
@@ -117,6 +156,8 @@
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blocks.flatMap((block) => block.position)), gl.DYNAMIC_DRAW);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blocks.flatMap((block) => block.color)), gl.DYNAMIC_DRAW);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.textureIndexBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blocks.map((block) => block.texture || 0)), gl.DYNAMIC_DRAW);
 			this.instanceCount = blocks.length;
 			this.position = [12, 10, 18];
 			this.host.dataset.server = server.serverName || "paper";
@@ -153,6 +194,8 @@
 			gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 			gl.useProgram(this.program);
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.textureArray);
 			gl.bindVertexArray(this.vao);
 			gl.uniformMatrix4fv(this.projectionLocation, false, perspective(Math.PI / 3, this.canvas.width / this.canvas.height, .1, 160));
 			gl.uniformMatrix4fv(this.viewLocation, false, viewMatrix(this.position, this.yaw, this.pitch));
@@ -172,22 +215,14 @@
 		}
 	}
 
-	function demoBlocks() {
-		const blocks = [];
-		for (let x = -12; x <= 12; x++) for (let z = -12; z <= 12; z++) blocks.push({ position: [x, -.5, z], color: ((x + z) & 1) ? [.27, .62, .25] : [.31, .68, .29] });
-		for (let x = -5; x <= 5; x++) for (let z = -4; z <= 4; z++) if (Math.abs(x) === 5 || Math.abs(z) === 4) for (let y = 0; y < 3; y++) blocks.push({ position: [x, y, z], color: [.58, .39, .2] });
-		for (let x = -5; x <= 5; x++) blocks.push({ position: [x, 3, -4], color: [.72, .25, .18] });
-		blocks.push({ position: [-2, 1, 7], color: [.2, .45, .95] }, { position: [3, 1, 5], color: [.95, .72, .16] }, { position: [7, 1, -2], color: [.78, .25, .72] });
-		return blocks;
-	}
-
 	function cubeGeometry() {
 		const faces = [[0,0,1,[-.5,-.5,.5,.5,-.5,.5,.5,.5,.5,-.5,-.5,.5,.5,.5,.5,-.5,.5,.5]],[0,0,-1,[.5,-.5,-.5,-.5,-.5,-.5,-.5,.5,-.5,.5,-.5,-.5,-.5,.5,-.5,.5,.5,-.5]],[1,0,0,[.5,-.5,.5,.5,-.5,-.5,.5,.5,-.5,.5,-.5,.5,.5,.5,-.5,.5,.5,.5]],[-1,0,0,[-.5,-.5,-.5,-.5,-.5,.5,-.5,.5,.5,-.5,-.5,-.5,-.5,.5,.5,-.5,.5,-.5]],[0,1,0,[-.5,.5,.5,.5,.5,.5,.5,.5,-.5,-.5,.5,.5,.5,.5,-.5,-.5,.5,-.5]],[0,-1,0,[-.5,-.5,-.5,.5,-.5,-.5,.5,-.5,.5,-.5,-.5,-.5,.5,-.5,.5,-.5,-.5,.5]]];
-		return { positions: faces.flatMap((face) => face[3]), normals: faces.flatMap((face) => Array(6).fill(face.slice(0, 3)).flat()) };
+		const faceUV = [0,1,1,1,1,0,0,1,1,0,0,0];
+		return { positions: faces.flatMap((face) => face[3]), normals: faces.flatMap((face) => Array(6).fill(face.slice(0, 3)).flat()), uvs: faces.flatMap(() => faceUV) };
 	}
 
 	function attribute(gl, program, name, data, size, divisor) { const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW); const location = gl.getAttribLocation(program, name); gl.enableVertexAttribArray(location); gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0); gl.vertexAttribDivisor(location, divisor); return buffer; }
-	function materialColor(material) { const value=(material||"").toUpperCase(); if(value.includes("GRASS")||value.includes("LEAVES"))return[.28,.65,.25]; if(value.includes("DIRT"))return[.48,.32,.18]; if(value.includes("STONE")||value.includes("COBBLE"))return[.5,.52,.52]; if(value.includes("WOOD")||value.includes("LOG")||value.includes("PLANK"))return[.58,.4,.22]; if(value.includes("WATER"))return[.18,.42,.82]; if(value.includes("SAND"))return[.82,.76,.48]; if(value.includes("BRICK"))return[.7,.25,.18]; if(value.includes("GLASS"))return[.55,.82,.9]; return[.62,.64,.6]; }
+	function materialTexture(material) { const value=(material||"").toUpperCase(); if(value.includes("GRASS")||value.includes("LEAVES"))return 0; if(value.includes("DIRT"))return 1; if(value.includes("COBBLE"))return 3; if(value.includes("STONE")||value.includes("ORE"))return 2; if(value.includes("WOOD")||value.includes("LOG")||value.includes("PLANK"))return 4; if(value.includes("GLASS"))return 5; if(value.includes("WATER"))return 6; if(value.includes("SAND"))return 7; return 2; }
 	function shader(gl, type, source) { const value = gl.createShader(type); gl.shaderSource(value, source); gl.compileShader(value); if (!gl.getShaderParameter(value, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(value)); return value; }
 	function createProgram(gl, vertex, fragment) { const program = gl.createProgram(); gl.attachShader(program, shader(gl, gl.VERTEX_SHADER, vertex)); gl.attachShader(program, shader(gl, gl.FRAGMENT_SHADER, fragment)); gl.linkProgram(program); if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program)); return program; }
 	function perspective(fov, aspect, near, far) { const f = 1 / Math.tan(fov / 2), nf = 1 / (near - far); return new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,(far+near)*nf,-1,0,0,2*far*near*nf,0]); }

@@ -480,7 +480,7 @@ function setExperimentalBlockViewer(enabled) {
 		host = document.createElement("section");
 		host.id = "experimentalBlockViewer";
 		host.className = "experimental-block-viewer";
-		host.innerHTML = `<div class="block-viewer-head"><div><p class="eyebrow">Experimental</p><h2>Visor 3D de bloques</h2><p>Vista preliminar WebGL 2 · WASD o flechas · arrastra para mirar</p></div><div><button type="button" class="portal-ghost" data-viewer-reset>Recentrar</button><button type="button" class="portal-ghost" data-viewer-fullscreen>Pantalla completa</button></div></div><div class="block-viewer-stage" data-viewer-stage><div class="block-viewer-loading">Preparando WebGL 2…</div></div><p class="block-viewer-disclaimer"><strong>Experimental:</strong> escena de demostración local. El streaming de bloques y alumnos desde Paper se conectará en la siguiente fase.</p>`;
+		host.innerHTML = `<div class="block-viewer-head"><div><p class="eyebrow">Experimental</p><h2>Visor 3D de bloques</h2><p>Vista WebGL 2 · WASD o flechas · arrastra para mirar</p></div><div><button type="button" class="portal-ghost" data-viewer-reset>Recentrar</button><button type="button" class="portal-ghost" data-viewer-fullscreen>Pantalla completa</button></div></div><div class="block-viewer-stage" data-viewer-stage><div class="block-viewer-loading">Preparando WebGL 2…</div></div><p class="block-viewer-disclaimer"><strong>Experimental · Esperando Paper:</strong> inicia un servidor y entra con un alumno para recibir el mundo real.</p>`;
 		const main = $(".portal-main");
 		main?.insertBefore(host, main.children[2] || null);
 	}
@@ -501,7 +501,7 @@ function loadBlockViewer() {
 	if (window.educraftBlockViewerPromise) return window.educraftBlockViewerPromise;
 	window.educraftBlockViewerPromise = new Promise((resolve, reject) => {
 		const script = document.createElement("script");
-		script.src = "block-viewer.js?v=20260812-experimental1";
+		script.src = "block-viewer.js?v=20260812-textures2";
 		script.onload = resolve;
 		script.onerror = reject;
 		document.head.append(script);
