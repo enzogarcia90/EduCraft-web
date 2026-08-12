@@ -22,8 +22,10 @@ const state = {
 	aiIntegrity: null,
 	aiIntegritySettings: null,
 	sysAdmin: null,
-	sysAdminSocket: null,
-	sysAdminLiveRetry: 0,
+	dashboardSocket: null,
+	dashboardLiveRetry: 0,
+	dashboardSyncRunning: false,
+	dashboardSyncPending: false,
 	sysAdminServerError: null,
 	sysServerConsoleId: "",
 	policy: null,
@@ -538,16 +540,11 @@ async function requireDashboardSession() {
 		if (currentPage === "profesor") {
 			await loadAIIntegrity();
 			await loadBookSubmissions();
-			window.setInterval(() => {
-				if (document.visibilityState === "visible" && state.token) {
-					loadAIIntegrity();
-					loadBookSubmissions();
-				}
-			}, 30000);
 		}
 		if (currentPage === "administracion") {
 			await loadSysAdmin();
 		}
+		connectDashboardLive();
 	} catch (_) {
 		logout();
 	}
@@ -750,22 +747,21 @@ async function loadSysAdmin() {
 		setMessage($("#sysAdminMessage"), `Datos de backend cargados. Servidores: ${error.message}`, "error");
 	}
 	renderSysAdmin(null, serverError);
-	connectSysAdminLive();
 }
 
-function connectSysAdminLive() {
-	if (currentPage !== "administracion" || !state.token || !$("#sysBackendRack")) {
+function connectDashboardLive() {
+	if (!state.token || currentPage === "login" || currentPage === "registro") {
 		return;
 	}
-	if (state.sysAdminSocket && state.sysAdminSocket.readyState <= WebSocket.OPEN) {
+	if (state.dashboardSocket && state.dashboardSocket.readyState <= WebSocket.OPEN) {
 		return;
 	}
-	const socket = new WebSocket(`${webSocketBase()}/dashboard/sysadmin/live`, ["educraft.jwt", state.token]);
-	state.sysAdminSocket = socket;
+	const socket = new WebSocket(`${webSocketBase()}/dashboard/live`, ["educraft.jwt", state.token]);
+	state.dashboardSocket = socket;
 	socket.addEventListener("open", () => {
-		if (state.sysAdminLiveRetry) {
-			clearTimeout(state.sysAdminLiveRetry);
-			state.sysAdminLiveRetry = 0;
+		if (state.dashboardLiveRetry) {
+			clearTimeout(state.dashboardLiveRetry);
+			state.dashboardLiveRetry = 0;
 		}
 	});
 	socket.addEventListener("message", (event) => {
@@ -775,28 +771,70 @@ function connectSysAdminLive() {
 		} catch (_) {
 			return;
 		}
-		if (message?.type === "sysadmin_overview" && message.data) {
-			state.sysAdmin = message.data;
+		if (message?.type === "dashboard_sync") {
+			if (message.sysadmin && currentPage === "administracion") {
+				state.sysAdmin = message.sysadmin;
+			}
+			refreshDashboardFromLive();
+		}
+		if (message?.type === "dashboard_connected" && currentPage === "administracion") {
 			renderSysAdmin(null, state.sysAdminServerError);
 		}
 	});
-	socket.addEventListener("close", scheduleSysAdminLiveReconnect);
+	socket.addEventListener("close", scheduleDashboardLiveReconnect);
 	socket.addEventListener("error", () => {
 		socket.close();
 	});
 }
 
-function scheduleSysAdminLiveReconnect() {
-	if (state.sysAdminSocket) {
-		state.sysAdminSocket = null;
+function scheduleDashboardLiveReconnect() {
+	if (state.dashboardSocket) {
+		state.dashboardSocket = null;
 	}
-	if (currentPage !== "administracion" || state.sysAdminLiveRetry) {
+	if (!state.token || state.dashboardLiveRetry) {
 		return;
 	}
-	state.sysAdminLiveRetry = setTimeout(() => {
-		state.sysAdminLiveRetry = 0;
-		connectSysAdminLive();
+	state.dashboardLiveRetry = setTimeout(() => {
+		state.dashboardLiveRetry = 0;
+		connectDashboardLive();
 	}, 5000);
+}
+
+async function refreshDashboardFromLive() {
+	if (document.visibilityState !== "visible" || !state.token) {
+		return;
+	}
+	if (state.dashboardSyncRunning) {
+		state.dashboardSyncPending = true;
+		return;
+	}
+	state.dashboardSyncRunning = true;
+	try {
+		const loaders = [loadSummary, loadPortalContext];
+		if (currentPage === "tic" || currentPage === "profesor") loaders.push(loadStudents, loadTeacherActions);
+		if (currentPage === "tic") loaders.push(loadTeachers, loadSchedule);
+		if (currentPage === "profesor") loaders.push(loadModerationAlerts, loadStudentEvents, loadActivities, loadAIIntegrity, loadBookSubmissions);
+		if (currentPage === "administracion") loaders.push(loadSysAdminSnapshot);
+		await Promise.allSettled(loaders.map((loader) => loader()));
+	} finally {
+		state.dashboardSyncRunning = false;
+		if (state.dashboardSyncPending) {
+			state.dashboardSyncPending = false;
+			window.setTimeout(refreshDashboardFromLive, 100);
+		}
+	}
+}
+
+async function loadSysAdminSnapshot() {
+	if (!$("#sysBackendRack")) return;
+	try {
+		const servers = await request("/dashboard/sysadmin/servers");
+		state.classServers = servers.items || [];
+		state.sysAdminServerError = null;
+	} catch (error) {
+		state.sysAdminServerError = error;
+	}
+	renderSysAdmin(null, state.sysAdminServerError);
 }
 
 function webSocketBase() {
@@ -2449,6 +2487,15 @@ function storeSession(response) {
 }
 
 function clearSession() {
+	if (state.dashboardSocket) {
+		state.dashboardSocket.onclose = null;
+		state.dashboardSocket.close();
+		state.dashboardSocket = null;
+	}
+	if (state.dashboardLiveRetry) {
+		clearTimeout(state.dashboardLiveRetry);
+		state.dashboardLiveRetry = 0;
+	}
 	state.token = "";
 	state.refreshToken = "";
 	state.me = null;
