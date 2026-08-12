@@ -2280,6 +2280,38 @@ body.portal-auth .auth-visual::after { opacity: .78; }
 .book-submission-body pre { max-height: 420px; margin: 0; padding: 18px; overflow: auto; border: 1px solid #dce5e0; background: #f5f7f5; color: #1c2925; font: 15px/1.65 Georgia, serif; white-space: pre-wrap; overflow-wrap: anywhere; }
 .book-submission-empty { padding: 28px; border: 1px dashed var(--portal-line); color: var(--portal-muted); text-align: center; }
 
+.dashboard-settings-button { position: fixed; right: 20px; bottom: 20px; z-index: 80; padding: 11px 16px; border: 1px solid #315047; border-radius: 999px; background: #07110f; box-shadow: 0 10px 28px rgba(0,0,0,.22); color: #fff; cursor: pointer; font-weight: 900; }
+.dashboard-settings-button:hover { border-color: #cdff55; color: #cdff55; }
+.dashboard-settings-dialog { width: min(620px, calc(100vw - 28px)); max-height: 88vh; padding: 0; overflow: auto; border: 1px solid #bfd0c8; border-radius: 8px; background: #fff; color: #13211d; box-shadow: 0 30px 90px rgba(0,0,0,.3); }
+.dashboard-settings-dialog::backdrop { background: rgba(2,10,8,.72); backdrop-filter: blur(5px); }
+.dashboard-settings-card { padding: 26px; }
+.settings-head, .settings-toggle, .experimental-title, .block-viewer-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.settings-head h2, .block-viewer-head h2 { margin: 2px 0 0; }
+.settings-close { width: 42px; height: 42px; border: 1px solid #dce5e0; border-radius: 50%; background: #f5f8f6; color: #13211d; cursor: pointer; font-size: 28px; }
+.settings-list { display: grid; margin-top: 20px; border-top: 1px solid #e2e9e5; }
+.settings-toggle { padding: 16px 2px; border-bottom: 1px solid #e2e9e5; cursor: pointer; }
+.settings-toggle > span:first-child { display: grid; gap: 5px; }
+.settings-toggle small, .settings-note { color: #64736d; line-height: 1.45; }
+.experimental-settings { margin-top: 22px; padding: 18px; border: 1px solid #e6bd58; background: #fff8df; }
+.experimental-title span { padding: 5px 8px; background: #7d5700; color: #fff; font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.settings-note { margin: 18px 0 0; font-size: 12px; }
+.experimental-block-viewer { padding: 20px; border: 2px solid #e3b84f; border-radius: 5px; background: #fffaf0; box-shadow: var(--portal-shadow); }
+.block-viewer-head { margin-bottom: 14px; }
+.block-viewer-head p { margin: 5px 0 0; color: #64736d; }
+.block-viewer-head > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
+.block-viewer-stage { position: relative; width: 100%; height: min(62vh, 620px); min-height: 360px; overflow: hidden; border: 3px solid #13211d; background: #6bafe4; }
+.block-viewer-canvas { display: block; width: 100%; height: 100%; outline: none; cursor: grab; }
+.block-viewer-canvas:active { cursor: grabbing; }
+.block-viewer-loading { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-weight: 900; }
+.block-viewer-disclaimer { margin: 12px 0 0; color: #75540c; font-size: 13px; }
+.experimental-block-viewer:fullscreen { padding: 18px; overflow: auto; background: #07110f; }
+.experimental-block-viewer:fullscreen .block-viewer-stage { height: calc(100vh - 130px); }
+.dashboard-compact .portal-main { gap: 12px; padding: 20px; }
+.dashboard-compact .portal-grid { gap: 10px; }
+.dashboard-compact .portal-grid article, .dashboard-compact .portal-panel { padding: 16px; }
+.dashboard-reduced-motion *, .dashboard-reduced-motion *::before, .dashboard-reduced-motion *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+.dashboard-hide-hints .ai-disclosure, .dashboard-hide-hints .book-privacy-note, .dashboard-hide-hints .integrity-warning { display: none; }
+
 @media (max-width: 980px) {
 	body.portal-app .portal-layout { grid-template-columns: 1fr; }
 	body.portal-app .portal-sidebar { position: relative; top: 0; min-height: auto; padding: 28px 22px; border-right: 0; border-bottom: 1px solid rgba(205,255,85,.18); }
@@ -2295,4 +2327,8 @@ body.portal-auth .auth-visual::after { opacity: .78; }
 	body.portal-app .portal-main { padding-inline: 12px; }
 	.book-submission summary { align-items: flex-start; flex-wrap: wrap; }
 	.book-integrity { margin-left: 28px; }
+	.block-viewer-head, .settings-toggle { align-items: flex-start; }
+	.block-viewer-head { flex-direction: column; }
+	.block-viewer-stage { min-height: 300px; height: 52vh; }
+	.dashboard-settings-button { right: 12px; bottom: 12px; }
 }

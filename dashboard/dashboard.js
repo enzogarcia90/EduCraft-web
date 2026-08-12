@@ -6,6 +6,15 @@ const STORAGE_KEYS = {
 	scheduleRows: "educraft.dashboard.scheduleRows"
 };
 
+const PREFERENCE_KEY = "educraft.dashboard.preferences.v1";
+const defaultPreferences = {
+	realtime: true,
+	compactMode: false,
+	reducedMotion: false,
+	showHints: true,
+	experimentalBlockViewer: false
+};
+
 const state = {
 	token: localStorage.getItem(STORAGE_KEYS.access) || "",
 	refreshToken: localStorage.getItem(STORAGE_KEYS.refresh) || "",
@@ -39,6 +48,7 @@ const state = {
 	scheduleImportRows: []
 };
 let sessionRefreshPromise = null;
+let blockViewer = null;
 
 const apiBase = (window.EDUCRAFT_API_BASE_URL || "http://127.0.0.1:8080").replace(/\/+$/, "");
 const currentPage = document.body.dataset.dashboardPage || "login";
@@ -313,6 +323,7 @@ function validateRegisterPayload(payload) {
 }
 
 function bindDashboard() {
+	bindDashboardSettings();
 	$("#logoutButton")?.addEventListener("click", logout);
 	bindTeacherPages();
 	bindTicPages();
@@ -380,6 +391,122 @@ function bindDashboard() {
 	renderTeacherActions();
 	renderActivityTemplates();
 	renderActivityChat();
+}
+
+function dashboardPreferences() {
+	try {
+		return { ...defaultPreferences, ...JSON.parse(localStorage.getItem(PREFERENCE_KEY) || "{}") };
+	} catch (_) {
+		return { ...defaultPreferences };
+	}
+}
+
+function saveDashboardPreferences(preferences) {
+	localStorage.setItem(PREFERENCE_KEY, JSON.stringify(preferences));
+	applyDashboardPreferences(preferences);
+}
+
+function bindDashboardSettings() {
+	if ($("#dashboardSettingsButton")) return;
+	const button = document.createElement("button");
+	button.id = "dashboardSettingsButton";
+	button.className = "dashboard-settings-button";
+	button.type = "button";
+	button.setAttribute("aria-label", "Abrir ajustes del dashboard");
+	button.textContent = "⚙ Ajustes";
+	document.body.append(button);
+
+	const dialog = document.createElement("dialog");
+	dialog.id = "dashboardSettingsDialog";
+	dialog.className = "dashboard-settings-dialog";
+	dialog.innerHTML = `
+		<form method="dialog" class="dashboard-settings-card">
+			<div class="settings-head"><div><p class="eyebrow">Preferencias</p><h2>Ajustes del dashboard</h2></div><button class="settings-close" value="close" aria-label="Cerrar">×</button></div>
+			<div class="settings-list">
+				${settingsToggle("realtime", "Tiempo real", "Mantiene los paneles sincronizados mediante WSS.")}
+				${settingsToggle("compactMode", "Modo compacto", "Reduce espacios para mostrar más información.")}
+				${settingsToggle("reducedMotion", "Reducir movimiento", "Desactiva transiciones y animaciones decorativas.")}
+				${settingsToggle("showHints", "Ayudas contextuales", "Muestra explicaciones y avisos de uso.")}
+			</div>
+			<section class="experimental-settings">
+				<div class="experimental-title"><span>Experimental</span><strong>Funciones en pruebas</strong></div>
+				${settingsToggle("experimentalBlockViewer", "Visor 3D de bloques", "Activa un visor WebGL 2 para observar construcciones. Puede consumir más GPU.", true)}
+			</section>
+			<p class="settings-note">Los ajustes se guardan solo en este navegador. Las funciones experimentales están desactivadas por defecto.</p>
+		</form>`;
+	document.body.append(dialog);
+	button.addEventListener("click", () => dialog.showModal());
+	dialog.addEventListener("click", (event) => {
+		if (event.target === dialog) dialog.close();
+	});
+	for (const input of dialog.querySelectorAll("[data-preference]")) {
+		input.addEventListener("change", () => {
+			const preferences = dashboardPreferences();
+			preferences[input.dataset.preference] = input.checked;
+			saveDashboardPreferences(preferences);
+		});
+	}
+	applyDashboardPreferences(dashboardPreferences());
+}
+
+function settingsToggle(key, title, description, experimental = false) {
+	return `<label class="settings-toggle${experimental ? " is-experimental" : ""}"><span><strong>${title}</strong><small>${description}</small></span><span class="switch"><input type="checkbox" data-preference="${key}"><span></span></span></label>`;
+}
+
+function applyDashboardPreferences(preferences) {
+	document.body.classList.toggle("dashboard-compact", preferences.compactMode);
+	document.body.classList.toggle("dashboard-reduced-motion", preferences.reducedMotion);
+	document.body.classList.toggle("dashboard-hide-hints", !preferences.showHints);
+	for (const input of document.querySelectorAll("[data-preference]")) {
+		input.checked = Boolean(preferences[input.dataset.preference]);
+	}
+	if (!preferences.realtime && state.dashboardSocket) {
+		state.dashboardSocket.close();
+		state.dashboardSocket = null;
+	}
+	if (preferences.realtime && state.token) connectDashboardLive();
+	setExperimentalBlockViewer(Boolean(preferences.experimentalBlockViewer));
+}
+
+function setExperimentalBlockViewer(enabled) {
+	let host = $("#experimentalBlockViewer");
+	if (!enabled || currentPage !== "profesor") {
+		if (blockViewer?.destroy) blockViewer.destroy();
+		blockViewer = null;
+		host?.remove();
+		return;
+	}
+	if (!host) {
+		host = document.createElement("section");
+		host.id = "experimentalBlockViewer";
+		host.className = "experimental-block-viewer";
+		host.innerHTML = `<div class="block-viewer-head"><div><p class="eyebrow">Experimental</p><h2>Visor 3D de bloques</h2><p>Vista preliminar WebGL 2 · WASD o flechas · arrastra para mirar</p></div><div><button type="button" class="portal-ghost" data-viewer-reset>Recentrar</button><button type="button" class="portal-ghost" data-viewer-fullscreen>Pantalla completa</button></div></div><div class="block-viewer-stage" data-viewer-stage><div class="block-viewer-loading">Preparando WebGL 2…</div></div><p class="block-viewer-disclaimer"><strong>Experimental:</strong> escena de demostración local. El streaming de bloques y alumnos desde Paper se conectará en la siguiente fase.</p>`;
+		const main = $(".portal-main");
+		main?.insertBefore(host, main.children[2] || null);
+	}
+	loadBlockViewer().then(() => {
+		if (!blockViewer && window.EduCraftBlockViewer && document.body.contains(host)) {
+			blockViewer = new window.EduCraftBlockViewer(host.querySelector("[data-viewer-stage]"));
+			host.querySelector("[data-viewer-reset]")?.addEventListener("click", () => blockViewer?.reset());
+			host.querySelector("[data-viewer-fullscreen]")?.addEventListener("click", () => host.requestFullscreen?.());
+		}
+	}).catch(() => {
+		const loading = host.querySelector(".block-viewer-loading");
+		if (loading) loading.textContent = "WebGL 2 no está disponible en este dispositivo.";
+	});
+}
+
+function loadBlockViewer() {
+	if (window.EduCraftBlockViewer) return Promise.resolve();
+	if (window.educraftBlockViewerPromise) return window.educraftBlockViewerPromise;
+	window.educraftBlockViewerPromise = new Promise((resolve, reject) => {
+		const script = document.createElement("script");
+		script.src = "block-viewer.js?v=20260812-experimental1";
+		script.onload = resolve;
+		script.onerror = reject;
+		document.head.append(script);
+	});
+	return window.educraftBlockViewerPromise;
 }
 
 function bindTeacherPages() {
@@ -750,7 +877,7 @@ async function loadSysAdmin() {
 }
 
 function connectDashboardLive() {
-	if (!state.token || currentPage === "login" || currentPage === "registro") {
+	if (!dashboardPreferences().realtime || !state.token || currentPage === "login" || currentPage === "registro") {
 		return;
 	}
 	if (state.dashboardSocket && state.dashboardSocket.readyState <= WebSocket.OPEN) {
@@ -776,6 +903,11 @@ function connectDashboardLive() {
 				state.sysAdmin = message.sysadmin;
 			}
 			refreshDashboardFromLive();
+			if (message.worldView && blockViewer?.setSnapshot) {
+				blockViewer.setSnapshot(message.worldView);
+				const disclaimer = $("#experimentalBlockViewer .block-viewer-disclaimer");
+				if (disclaimer && message.worldView.servers?.length) disclaimer.innerHTML = `<strong>Experimental · En directo:</strong> datos del servidor ${escapeHtml(message.worldView.servers[0].serverName || "Paper")} mediante WSS.`;
+			}
 		}
 		if (message?.type === "dashboard_connected" && currentPage === "administracion") {
 			renderSysAdmin(null, state.sysAdminServerError);
