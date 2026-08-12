@@ -503,7 +503,7 @@ function loadBlockViewer() {
 	if (window.educraftBlockViewerPromise) return window.educraftBlockViewerPromise;
 	window.educraftBlockViewerPromise = new Promise((resolve, reject) => {
 		const script = document.createElement("script");
-		script.src = "block-viewer.js?v=20260812-viewer4";
+		script.src = "block-viewer.js?v=20260812-viewer5";
 		script.onload = resolve;
 		script.onerror = reject;
 		document.head.append(script);
@@ -926,8 +926,9 @@ function applyWorldViewSnapshot(snapshot) {
 	const disclaimer = $("#experimentalBlockViewer .block-viewer-disclaimer");
 	if (!disclaimer || !server) return;
 	const players = server.players?.length || 0;
+	const blocks = server.blocks?.length || 0;
 	disclaimer.innerHTML = players
-		? `<strong>Experimental · En directo:</strong> ${escapeHtml(server.serverName || "Paper")} · ${players} alumno${players === 1 ? "" : "s"}.`
+		? `<strong>Experimental · En directo:</strong> ${escapeHtml(server.serverName || "Paper")} · ${players} alumno${players === 1 ? "" : "s"} · ${blocks} bloques recibidos.`
 		: `<strong>Experimental · Paper conectado:</strong> esperando a que entre un alumno en ${escapeHtml(server.serverName || "Paper")}.`;
 }
 

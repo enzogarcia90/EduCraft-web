@@ -98,7 +98,7 @@
 			this.viewLocation = gl.getUniformLocation(this.program, "uView");
 			this.initTextures();
 			gl.enable(gl.DEPTH_TEST);
-			gl.enable(gl.CULL_FACE);
+			gl.disable(gl.CULL_FACE);
 			gl.clearColor(0, 0, 0, 0);
 		}
 
@@ -129,7 +129,7 @@
 		}
 
 		reset() {
-			this.position = [12, 10, 18];
+			this.position = [10, 8, 14];
 			this.yaw = -.62;
 			this.pitch = -.28;
 			this.canvas.focus();
@@ -165,7 +165,7 @@
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.textureIndexBuffer);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blocks.map((block) => block.texture || 0)), gl.DYNAMIC_DRAW);
 			this.instanceCount = blocks.length;
-			this.position = [12, 10, 18];
+			this.position = [10, 8, 14];
 			return true;
 		}
 
