@@ -36,6 +36,7 @@ const state = {
 	studentImportRows: [],
 	scheduleImportRows: []
 };
+let sessionRefreshPromise = null;
 
 const apiBase = (window.EDUCRAFT_API_BASE_URL || "http://127.0.0.1:8080").replace(/\/+$/, "");
 const currentPage = document.body.dataset.dashboardPage || "login";
@@ -2332,6 +2333,15 @@ async function request(path, options = {}) {
 		headers,
 		body: options.body ? JSON.stringify(options.body) : undefined
 	});
+	if (response.status === 401 && options.auth !== false && !options.sessionRetried && state.refreshToken) {
+		const renewed = await renewDashboardSession();
+		if (renewed) {
+			return request(path, { ...options, sessionRetried: true });
+		}
+		clearSession();
+		location.replace("login.html?session=expired");
+		throw new Error("Sesion caducada. Inicia sesion de nuevo.");
+	}
 	const text = await response.text();
 	let data = {};
 	if (text) {
@@ -2346,6 +2356,32 @@ async function request(path, options = {}) {
 		throw new Error(data.message || data.error || `HTTP ${response.status}`);
 	}
 	return data;
+}
+
+async function renewDashboardSession() {
+	if (!state.refreshToken) {
+		return false;
+	}
+	if (!sessionRefreshPromise) {
+		sessionRefreshPromise = fetch(`${apiBase}/refresh`, {
+			method: "POST",
+			headers: { Accept: "application/json", "Content-Type": "application/json" },
+			body: JSON.stringify({ refreshToken: state.refreshToken })
+		}).then(async (response) => {
+			if (!response.ok) {
+				return false;
+			}
+			const data = await response.json();
+			if (!data.accessToken) {
+				return false;
+			}
+			storeSession(data);
+			return true;
+		}).catch(() => false).finally(() => {
+			sessionRefreshPromise = null;
+		});
+	}
+	return sessionRefreshPromise;
 }
 
 function pageForRole(role) {
