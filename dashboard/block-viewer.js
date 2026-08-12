@@ -42,6 +42,8 @@
 			host.replaceChildren(this.canvas);
 			this.gl = this.canvas.getContext("webgl2", { antialias: true, alpha: false, powerPreference: "high-performance" });
 			if (!this.gl) throw new Error("WebGL 2 unavailable");
+			this.gl.clearColor(.42, .7, .92, 1);
+			this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 			this.keys = new Set();
 			this.dragging = false;
 			this.lastPointer = [0, 0];
@@ -134,7 +136,10 @@
 
 		setSnapshot(snapshot) {
 			const server = snapshot?.servers?.[0];
-			if (!server || (!server.blocks?.length && !server.players?.length)) return;
+			if (!server) return false;
+			this.host.dataset.server = server.serverName || "paper";
+			this.host.dataset.live = "true";
+			if (!server.blocks?.length && !server.players?.length) return true;
 			const focus = server.players?.[0] || server.blocks?.[0];
 			const world = focus.world;
 			const origin = [Math.floor(focus.x || 0), Math.floor(focus.y || 0), Math.floor(focus.z || 0)];
@@ -150,7 +155,7 @@
 				blocks.push({ position:[player.x-origin[0], player.y-origin[1], player.z-origin[2]], color:[.25,.5,1], texture:4 });
 				blocks.push({ position:[player.x-origin[0], player.y-origin[1]+1, player.z-origin[2]], color:[1,.8,.3], texture:4 });
 			}
-			if (!blocks.length) return;
+			if (!blocks.length) return true;
 			const gl = this.gl;
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.offsetBuffer);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blocks.flatMap((block) => block.position)), gl.DYNAMIC_DRAW);
@@ -160,8 +165,7 @@
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blocks.map((block) => block.texture || 0)), gl.DYNAMIC_DRAW);
 			this.instanceCount = blocks.length;
 			this.position = [12, 10, 18];
-			this.host.dataset.server = server.serverName || "paper";
-			this.host.dataset.live = "true";
+			return true;
 		}
 
 		resize() {

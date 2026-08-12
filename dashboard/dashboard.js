@@ -39,6 +39,7 @@ const state = {
 	sysServerConsoleId: "",
 	policy: null,
 	livePolicy: null,
+	worldView: null,
 	route: null,
 	actionFilter: "all",
 	actionQuery: "",
@@ -487,6 +488,7 @@ function setExperimentalBlockViewer(enabled) {
 	loadBlockViewer().then(() => {
 		if (!blockViewer && window.EduCraftBlockViewer && document.body.contains(host)) {
 			blockViewer = new window.EduCraftBlockViewer(host.querySelector("[data-viewer-stage]"));
+			if (state.worldView) applyWorldViewSnapshot(state.worldView);
 			host.querySelector("[data-viewer-reset]")?.addEventListener("click", () => blockViewer?.reset());
 			host.querySelector("[data-viewer-fullscreen]")?.addEventListener("click", () => host.requestFullscreen?.());
 		}
@@ -501,7 +503,7 @@ function loadBlockViewer() {
 	if (window.educraftBlockViewerPromise) return window.educraftBlockViewerPromise;
 	window.educraftBlockViewerPromise = new Promise((resolve, reject) => {
 		const script = document.createElement("script");
-		script.src = "block-viewer.js?v=20260812-textures2";
+		script.src = "block-viewer.js?v=20260812-viewer3";
 		script.onload = resolve;
 		script.onerror = reject;
 		document.head.append(script);
@@ -903,10 +905,9 @@ function connectDashboardLive() {
 				state.sysAdmin = message.sysadmin;
 			}
 			refreshDashboardFromLive();
-			if (message.worldView && blockViewer?.setSnapshot) {
-				blockViewer.setSnapshot(message.worldView);
-				const disclaimer = $("#experimentalBlockViewer .block-viewer-disclaimer");
-				if (disclaimer && message.worldView.servers?.length) disclaimer.innerHTML = `<strong>Experimental · En directo:</strong> datos del servidor ${escapeHtml(message.worldView.servers[0].serverName || "Paper")} mediante WSS.`;
+			if (message.worldView) {
+				state.worldView = message.worldView;
+				applyWorldViewSnapshot(message.worldView);
 			}
 		}
 		if (message?.type === "dashboard_connected" && currentPage === "administracion") {
@@ -917,6 +918,17 @@ function connectDashboardLive() {
 	socket.addEventListener("error", () => {
 		socket.close();
 	});
+}
+
+function applyWorldViewSnapshot(snapshot) {
+	if (!blockViewer?.setSnapshot || !blockViewer.setSnapshot(snapshot)) return;
+	const server = snapshot.servers?.[0];
+	const disclaimer = $("#experimentalBlockViewer .block-viewer-disclaimer");
+	if (!disclaimer || !server) return;
+	const players = server.players?.length || 0;
+	disclaimer.innerHTML = players
+		? `<strong>Experimental · En directo:</strong> ${escapeHtml(server.serverName || "Paper")} · ${players} alumno${players === 1 ? "" : "s"}.`
+		: `<strong>Experimental · Paper conectado:</strong> esperando a que entre un alumno en ${escapeHtml(server.serverName || "Paper")}.`;
 }
 
 function scheduleDashboardLiveReconnect() {
