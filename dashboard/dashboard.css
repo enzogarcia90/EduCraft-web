@@ -1634,6 +1634,33 @@ body.portal-app {
 	margin-top: 16px;
 }
 
+.tracking-grid > article {
+	overflow: hidden;
+}
+
+#trackingStudentTableBody {
+	overflow-wrap: anywhere;
+}
+
+#trackingStudentTableBody > tr > td:first-child {
+	word-break: break-word;
+}
+
+.tracking-grid .portal-table {
+	table-layout: fixed;
+}
+
+.tracking-grid .portal-table th:nth-child(1) { width: 52%; }
+.tracking-grid .portal-table th:nth-child(2) { width: 18%; }
+.tracking-grid .portal-table th:nth-child(3) { width: 16%; }
+.tracking-grid .portal-table th:nth-child(4) { width: 14%; }
+
+.tracking-grid .portal-table th,
+.tracking-grid .portal-table td {
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
 .tracking-list {
 	max-height: 430px;
 	overflow: auto;
@@ -2369,6 +2396,12 @@ body.portal-auth .auth-visual::after { opacity: .78; }
 	body.portal-app .portal-sidebar .portal-title { font-size: 46px; }
 	body.portal-app .portal-main { padding: 24px 18px 42px; }
 	body.portal-app .teacher-page-tabs { top: 74px; overflow-x: auto; flex-wrap: nowrap; }
+}
+
+@media (max-width: 1450px) {
+	body.portal-app .tracking-grid {
+		grid-template-columns: 1fr;
+	}
 }
 
 @media (max-width: 660px) {
