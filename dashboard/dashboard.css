@@ -1007,6 +1007,54 @@ body.portal-app * {
 	gap: 10px;
 }
 
+.action-level-head {
+	display: flex;
+	grid-column: 1 / -1;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 2px;
+}
+
+.action-level-head h2,
+.action-level-head p { margin: 0; }
+
+body:not(.show-advanced-actions) #actionFilters { display: none; }
+
+.activity-form-section {
+	display: grid;
+	gap: 14px;
+	margin: 0;
+	padding: 20px;
+	border: 1px solid var(--portal-line);
+	border-radius: 4px;
+	background: #fbfcfb;
+}
+
+.activity-form-section legend {
+	padding: 0 8px;
+	color: var(--portal-ink);
+	font-size: 15px;
+	font-weight: 900;
+}
+
+.action-delivery { min-height: 0; }
+.action-delivery summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; list-style: none; }
+.action-delivery summary::-webkit-details-marker { display: none; }
+.action-delivery summary > span { display: grid; gap: 6px; }
+.action-delivery summary em { color: var(--portal-muted); font-size: 11px; font-style: normal; font-weight: 900; text-transform: uppercase; }
+.technical-details { display: grid; gap: 8px; margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--portal-line); }
+.technical-details div { display: grid; grid-template-columns: 90px 1fr; gap: 10px; }
+.technical-details dt { color: var(--portal-muted); font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.technical-details dd { margin: 0; overflow-wrap: anywhere; font: 12px/1.4 ui-monospace, monospace; }
+.student-row-status { margin-right: 10px; }
+.student-more-button { min-width: 38px; min-height: 34px; padding: 4px 9px !important; font-weight: 900; letter-spacing: 2px; }
+
+.dashboard-toasts { position: fixed; right: 22px; bottom: 22px; z-index: 1000; display: grid; gap: 10px; width: min(380px, calc(100vw - 32px)); }
+.dashboard-toast { padding: 14px 16px; border: 1px solid var(--portal-line); border-left: 4px solid var(--portal-accent); border-radius: 4px; background: #fff; box-shadow: 0 16px 42px rgba(18,39,32,.18); color: var(--portal-ink); font-weight: 800; animation: toast-in 160ms ease-out; }
+.dashboard-toast.error { border-left-color: var(--portal-danger); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+
 .teacher-actions button {
 	display: grid;
 	align-content: start;
@@ -1203,6 +1251,9 @@ body.portal-app * {
 		overflow-x: auto;
 		white-space: nowrap;
 	}
+
+	.action-level-head { align-items: stretch; flex-direction: column; }
+	.dashboard-toasts { right: 16px; bottom: 16px; }
 }
 
 /* 2026 dashboard polish: dense, role-first, operational UI. */

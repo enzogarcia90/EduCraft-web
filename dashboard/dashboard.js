@@ -43,6 +43,7 @@ const state = {
 	route: null,
 	actionFilter: "all",
 	actionQuery: "",
+	actionAdvanced: false,
 	activityChat: [],
 	activityDraft: null,
 	studentImportRows: [],
@@ -88,6 +89,8 @@ const actionCategories = [
 	["estado", "Estado"],
 	["avisos", "Avisos"]
 ];
+const quickTeacherActions = new Set(["send_class_announcement", "mute_chat", "unmute_chat", "freeze_student", "teleport_to_teacher", "teleport_teacher_to_student", "grant_build", "revoke_build"]);
+const disruptiveClassActions = new Set(["mute_chat", "limit_chat", "freeze_student", "clear_inventory", "return_to_spawn", "revoke_build", "revoke_interact", "set_gamemode_adventure", "set_gamemode_survival"]);
 const chartColors = ["#15986f", "#1d6ce3", "#b8652d", "#6f5bc6", "#c84f6a", "#257b84"];
 const activityTemplates = [
 	{
@@ -325,6 +328,7 @@ function validateRegisterPayload(payload) {
 
 function bindDashboard() {
 	bindDashboardSettings();
+	structureActivityEditor();
 	$("#logoutButton")?.addEventListener("click", logout);
 	bindTeacherPages();
 	bindTicPages();
@@ -1360,21 +1364,48 @@ async function disableTeacher(id) {
 
 async function queueAction(actionKey) {
 	const message = $("#actionMessage");
+	const action = teacherActions.find((item) => item.key === actionKey);
+	const targetUserId = $("#targetStudent")?.value || "";
+	if (!targetUserId && disruptiveClassActions.has(actionKey) && !window.confirm(`Vas a ejecutar «${action?.label || actionKey}» para toda la clase. ¿Quieres continuar?`)) return;
 	setMessage(message, "Registrando accion...", "");
 	try {
 		const response = await request("/dashboard/teacher/actions", {
 			method: "POST",
 			body: {
 				actionKey,
-				targetUserId: $("#targetStudent")?.value || "",
+				targetUserId,
 				reason: $("#actionReason")?.value || ""
 			}
 		});
-		setMessage(message, `Accion en cola: ${shortId(response.id)}`, "ok");
+		const target = targetUserId ? selectedStudentLabel() : "toda la clase";
+		setMessage(message, `✓ ${action?.label || "Accion"}: solicitud enviada para ${target}.`, "ok");
+		showToast(`${action?.label || "Accion"}: solicitud enviada.`, "ok");
 		await Promise.all([loadSummary(), loadTeacherActions()]);
 	} catch (error) {
 		setMessage(message, error.message, "error");
+		showToast(`No se pudo completar la accion: ${error.message}`, "error");
 	}
+}
+
+function selectedStudentLabel() {
+	const select = $("#targetStudent");
+	return select?.selectedOptions?.[0]?.textContent || "el alumno";
+}
+
+function showToast(text, type = "") {
+	let region = $("#dashboardToasts");
+	if (!region) {
+		region = document.createElement("div");
+		region.id = "dashboardToasts";
+		region.className = "dashboard-toasts";
+		region.setAttribute("aria-live", "polite");
+		document.body.append(region);
+	}
+	const toast = document.createElement("div");
+	toast.className = `dashboard-toast ${type}`;
+	toast.textContent = text;
+	region.append(toast);
+	setTimeout(() => toast.remove(), 4200);
 }
 
 async function createActivity() {
@@ -1619,12 +1650,11 @@ function renderMinecraftActions(error) {
 		return;
 	}
 	node.innerHTML = state.actions.length ? state.actions.slice(0, 8).map((action) => `
-		<div class="minecraft-action ${escapeHtml(action.status || "queued")}">
-			<strong>${escapeHtml(actionLabel(action.actionKey))}</strong>
-			<span>${escapeHtml(actionTargetLabel(action))}</span>
-			<small>${escapeHtml(actionDeliveryLabel(action))}</small>
-		</div>
-	`).join("") : `<div class="minecraft-action empty"><strong>Sin acciones recientes</strong><span>No hay entregas pendientes para la clase.</span></div>`;
+		<details class="minecraft-action action-delivery ${escapeHtml(action.status || "queued")}">
+			<summary><span><strong>${escapeHtml(actionOutcomeLabel(action))}</strong><small>${escapeHtml(actionTargetLabel(action))}</small></span><em>${escapeHtml(readableStatus(action.status))}</em></summary>
+			<dl class="technical-details"><div><dt>Accion</dt><dd>${escapeHtml(action.actionKey || "-")}</dd></div><div><dt>Servidor</dt><dd>${escapeHtml(action.serverName || "Sin asignar")}</dd></div><div><dt>Resultado</dt><dd>${escapeHtml(action.resultMessage || readableStatus(action.status))}</dd></div></dl>
+		</details>
+	`).join("") : `<div class="minecraft-action empty"><strong>Sin acciones recientes</strong><span>Las acciones realizadas apareceran aqui con un resumen claro.</span></div>`;
 }
 
 function renderModerationAlerts(error) {
@@ -2032,9 +2062,18 @@ function renderStudents() {
 		$("#teacherStudentTableBody").innerHTML = state.students.length ? state.students.slice(0, 12).map((student) => `
 			<tr>
 				<td>${escapeHtml(student.email)}</td>
-				<td>${escapeHtml(readableStatus(student.status))}</td>
+				<td><span class="student-row-status">${escapeHtml(readableStatus(student.status))}</span><button type="button" class="student-more-button" data-student-actions="${escapeHtml(student.id)}" aria-label="Acciones para ${escapeHtml(student.email)}">•••</button></td>
 			</tr>
 		`).join("") : `<tr><td colspan="2">Sin alumnos visibles.</td></tr>`;
+		for (const button of document.querySelectorAll("[data-student-actions]")) {
+			button.addEventListener("click", () => {
+				if ($("#targetStudent")) $("#targetStudent").value = button.dataset.studentActions;
+				state.actionAdvanced = true;
+				document.body.classList.add("show-advanced-actions");
+				renderTeacherActions();
+				$("#teacherActions")?.scrollIntoView({ behavior: "smooth", block: "start" });
+			});
+		}
 	}
 
 	if ($("#targetStudent")) {
@@ -2489,17 +2528,46 @@ function renderTeacherActions() {
 	const filtered = teacherActions.filter((action) => {
 		const inCategory = state.actionFilter === "all" || action.category === state.actionFilter;
 		const haystack = `${action.label} ${action.description} ${action.category}`.toLowerCase();
-		return inCategory && (!query || haystack.includes(query));
+		const visibleByLevel = state.actionAdvanced || query || state.actionFilter !== "all" || quickTeacherActions.has(action.key);
+		return visibleByLevel && inCategory && (!query || haystack.includes(query));
 	});
-	$("#teacherActions").innerHTML = filtered.length ? filtered.map((action) => `
+	$("#teacherActions").innerHTML = `<div class="action-level-head"><div><p class="eyebrow">${state.actionAdvanced ? "Todas las herramientas" : "Uso frecuente"}</p><h2>${state.actionAdvanced ? "Mas acciones" : "Acciones rapidas"}</h2></div><button type="button" class="portal-ghost" data-toggle-advanced-actions aria-expanded="${state.actionAdvanced}">${state.actionAdvanced ? "Ver solo rapidas" : "Mas acciones"}</button></div>` + (filtered.length ? filtered.map((action) => `
 		<button type="button" data-action-key="${escapeHtml(action.key)}">
 			<strong>${escapeHtml(action.label)}</strong>
 			<small>${escapeHtml(action.description)}</small>
 			<em>${escapeHtml(readableCategory(action.category))}</em>
 		</button>
-	`).join("") : `<div class="empty-actions">Sin acciones para ese filtro.</div>`;
+	`).join("") : `<div class="empty-actions">Sin acciones para ese filtro.</div>`);
+	$("[data-toggle-advanced-actions]")?.addEventListener("click", () => {
+		state.actionAdvanced = !state.actionAdvanced;
+		document.body.classList.toggle("show-advanced-actions", state.actionAdvanced);
+		renderTeacherActions();
+	});
 	for (const button of document.querySelectorAll("[data-action-key]")) {
 		button.addEventListener("click", () => queueAction(button.dataset.actionKey));
+	}
+}
+
+function structureActivityEditor() {
+	const form = $("#activityForm");
+	if (!form || form.dataset.structured) return;
+	form.dataset.structured = "true";
+	const groups = [
+		["Informacion basica", [".activity-fields"]],
+		["Diseno de la clase", ["#activityObjectives", "#activitySetup", "#activityScript"]],
+		["Evaluacion", ["#activityDeliverable", "#activityRubric"]],
+		["Solo para el profesor", ["#activityNotes"]]
+	];
+	for (const [title, selectors] of groups) {
+		const section = document.createElement("fieldset");
+		section.className = "activity-form-section";
+		section.innerHTML = `<legend>${title}</legend>`;
+		for (const selector of selectors) {
+			const item = form.querySelector(selector);
+			const node = item?.matches("input, textarea, select") ? item.closest("label") : item;
+			if (node) section.append(node);
+		}
+		form.insertBefore(section, form.querySelector(".builder-actions"));
 	}
 }
 
@@ -2721,6 +2789,14 @@ function actionDeliveryLabel(action) {
 	const server = action.serverName ? ` · ${action.serverName}` : "";
 	const result = action.resultMessage ? ` · ${action.resultMessage}` : "";
 	return `${status}${server}${result}`;
+}
+
+function actionOutcomeLabel(action) {
+	const label = actionLabel(action.actionKey);
+	if (action.status === "failed") return `No se pudo completar: ${label.toLowerCase()}`;
+	if (action.status === "completed") return `${label} completada`;
+	if (action.status === "sent") return `${label} enviada`;
+	return `${label} pendiente`;
 }
 
 function readableActivityStatus(status) {
