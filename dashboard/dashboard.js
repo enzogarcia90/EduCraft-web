@@ -492,9 +492,9 @@ function setExperimentalBlockViewer(enabled) {
 			host.querySelector("[data-viewer-reset]")?.addEventListener("click", () => blockViewer?.reset());
 			host.querySelector("[data-viewer-fullscreen]")?.addEventListener("click", () => host.requestFullscreen?.());
 		}
-	}).catch(() => {
-		const loading = host.querySelector(".block-viewer-loading");
-		if (loading) loading.textContent = "WebGL 2 no está disponible en este dispositivo.";
+	}).catch((error) => {
+		const stage = host.querySelector("[data-viewer-stage]");
+		if (stage) stage.innerHTML = `<div class="block-viewer-loading">No se pudo iniciar WebGL 2: ${escapeHtml(error?.message || "error desconocido")}</div>`;
 	});
 }
 
@@ -503,7 +503,7 @@ function loadBlockViewer() {
 	if (window.educraftBlockViewerPromise) return window.educraftBlockViewerPromise;
 	window.educraftBlockViewerPromise = new Promise((resolve, reject) => {
 		const script = document.createElement("script");
-		script.src = "block-viewer.js?v=20260812-viewer3";
+		script.src = "block-viewer.js?v=20260812-viewer4";
 		script.onload = resolve;
 		script.onerror = reject;
 		document.head.append(script);

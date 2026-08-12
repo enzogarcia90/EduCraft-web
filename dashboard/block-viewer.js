@@ -24,6 +24,7 @@
 		}`;
 	const fragmentSource = `#version 300 es
 		precision mediump float;
+		precision highp sampler2DArray;
 		in vec3 vColor;
 		in float vLight;
 		in vec2 vUV;
@@ -40,9 +41,9 @@
 			this.canvas.className = "block-viewer-canvas";
 			this.canvas.tabIndex = 0;
 			host.replaceChildren(this.canvas);
-			this.gl = this.canvas.getContext("webgl2", { antialias: true, alpha: false, powerPreference: "high-performance" });
+			this.gl = this.canvas.getContext("webgl2", { antialias: true, alpha: true, powerPreference: "high-performance" });
 			if (!this.gl) throw new Error("WebGL 2 unavailable");
-			this.gl.clearColor(.42, .7, .92, 1);
+			this.gl.clearColor(0, 0, 0, 0);
 			this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 			this.keys = new Set();
 			this.dragging = false;
@@ -98,7 +99,7 @@
 			this.initTextures();
 			gl.enable(gl.DEPTH_TEST);
 			gl.enable(gl.CULL_FACE);
-			gl.clearColor(.42, .7, .92, 1);
+			gl.clearColor(0, 0, 0, 0);
 		}
 
 		initTextures() {
