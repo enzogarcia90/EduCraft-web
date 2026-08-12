@@ -1335,8 +1335,36 @@ body[data-page="empresa"] .page-hero {
 	column-gap: clamp(28px, 6vw, 90px);
 }
 
-body[data-page="empresa"] .page-hero > * {
+body[data-page="empresa"] .company-hero-copy {
 	grid-column: 1;
+}
+
+body[data-page="empresa"] .company-hero-mark {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	grid-column: 2;
+	grid-row: 1;
+	width: min(250px, 22vw);
+	aspect-ratio: 1;
+	place-items: center;
+	justify-self: end;
+	border: 1px solid var(--mint);
+	color: var(--mint);
+	transform: rotate(4deg);
+}
+
+body[data-page="empresa"] .company-hero-mark span {
+	font-family: Impact, sans-serif;
+	font-size: clamp(54px, 7vw, 96px);
+	letter-spacing: .04em;
+}
+
+body[data-page="empresa"] .company-hero-mark i {
+	position: absolute;
+	inset: 12px;
+	border: 1px solid rgba(103, 213, 255, .5);
+	transform: rotate(-8deg);
 }
 
 body[data-page="empresa"] .cards-4 {
@@ -1385,4 +1413,5 @@ body[data-page="empresa"] .value-grid article {
 	body[data-page="empresa"] .cards-4 article:last-child,
 	body[data-page="empresa"] .cards-4 article:nth-child(2),
 	body[data-page="empresa"] .cards-4 article:nth-child(3) { grid-column: auto; }
+	body[data-page="empresa"] .company-hero-mark { display: none; }
 }
