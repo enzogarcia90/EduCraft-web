@@ -21,7 +21,7 @@
 		<link rel="sitemap" type="application/xml" href="https://enzogarcia90.github.io/EduCraft-web/sitemap.xml">
 		<title>Profesor | EduCraft</title>
 		<link rel="stylesheet" href="../styles.css">
-		<link rel="stylesheet" href="dashboard.css?v=20260810-rolefix1">
+		<link rel="stylesheet" href="dashboard.css?v=20260812-books1">
 	</head>
 	<body class="portal-app" data-dashboard-page="profesor" data-teacher-default="clases">
 		<header class="portal-header">
@@ -140,29 +140,34 @@
 				<section class="portal-grid two ai-integrity-layout">
 					<article>
 						<div class="builder-head">
-							<div><p class="eyebrow">Integridad</p><h2>Detector IA</h2></div>
+							<div><p class="eyebrow">Integrity</p><h2>Analisis IA con Sapling</h2></div>
 							<span id="aiIntegrityProvider" class="status-chip">Sin proveedor</span>
 						</div>
 						<div class="toggle-row">
-							<div><strong>Deteccion ChatGPT/IA</strong><span>Control del profesor para esta institucion.</span></div>
-							<label class="switch"><input id="aiDetectionToggle" type="checkbox"><span></span></label>
+							<div><strong>Activar Sapling</strong><span>Este interruptor controla solo el envio automatico de libros a Sapling. Integrity y el anticheat permanecen activos.</span></div>
+							<label class="switch"><input id="aiDetectionToggle" type="checkbox" aria-label="Activar analisis de libros con Sapling"><span></span></label>
 						</div>
-						<form id="aiIntegrityForm" class="activity-ai-form chat-mode">
-							<label class="wide"><span>Texto a evaluar</span><textarea id="aiIntegrityText" rows="5" maxlength="6000" placeholder="Pega una entrega para obtener solo metricas agregadas. El contenido no se guarda."></textarea></label>
-							<div class="builder-actions wide"><button class="button primary" type="submit">Analizar porcentaje</button><p id="aiIntegrityMessage" class="portal-message"></p></div>
-						</form>
+						<p class="integrity-warning" role="note"><strong>Resultado orientativo.</strong> La deteccion de texto generado por IA puede producir falsos positivos y falsos negativos. No utilices este porcentaje como unica prueba ni para tomar decisiones academicas importantes sin revisar el trabajo y hablar con el alumno.</p>
+						<p id="aiIntegrityMessage" class="portal-message" role="status"></p>
 					</article>
-					<article><h2>Porcentaje medio</h2><div id="aiAverageChart" class="chart-box"></div></article>
+					<article><h2>Indicador medio</h2><div id="aiAverageChart" class="chart-box"></div></article>
+				</section>
+				<section class="portal-grid one">
+					<article>
+						<div class="builder-head"><div><p class="eyebrow">Entregas</p><h2>Libros firmados</h2></div><span class="status-chip">Texto completo</span></div>
+						<p class="book-privacy-note">Solo se muestran libros entregados dentro del centro. Abre una entrega para consultar el texto escrito por el alumno y la señal de Integrity asociada.</p>
+						<div id="bookSubmissionList" class="book-submission-list"></div>
+					</article>
 				</section>
 				<section class="portal-grid charts-grid">
 					<article><h2>Rangos de IA</h2><div id="aiBucketChart" class="chart-box"></div></article>
 					<article><h2>Tendencia</h2><div id="aiTrendChart" class="chart-box"></div></article>
-					<article><h2>Estado del detector</h2><div id="aiStatusChart" class="chart-box"></div></article>
+					<article><h2>Estado de Sapling</h2><div id="aiStatusChart" class="chart-box"></div></article>
 				</section>
 				</section>
 			</section>
 		</main>
 		<script src="../cliente/educraft-config.js"></script>
-		<script src="dashboard.js?v=20260810-rolefix1"></script>
+		<script src="dashboard.js?v=20260812-books1"></script>
 	</body>
 </html>

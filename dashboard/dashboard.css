@@ -2252,6 +2252,34 @@ body.portal-auth .auth-card { border-top: 5px solid #cdff55; }
 body.portal-auth .login-card::before { display: none; }
 body.portal-auth .auth-visual::after { opacity: .78; }
 
+.integrity-warning {
+	margin: 18px 0 0;
+	padding: 15px 17px;
+	border-left: 4px solid #d99a20;
+	background: #fff7df;
+	color: #665018;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.integrity-warning strong { color: #3e310f; }
+.book-privacy-note { max-width: 850px; color: var(--portal-muted); line-height: 1.55; }
+.book-submission-list { display: grid; gap: 10px; margin-top: 18px; }
+.book-submission { overflow: hidden; border: 1px solid var(--portal-line); border-radius: 3px; background: #fbfcfb; }
+.book-submission summary { display: flex; gap: 18px; align-items: center; justify-content: space-between; padding: 16px 18px; cursor: pointer; list-style: none; }
+.book-submission summary::-webkit-details-marker { display: none; }
+.book-submission summary::before { width: 10px; height: 10px; flex: 0 0 auto; border-right: 2px solid var(--portal-accent); border-bottom: 2px solid var(--portal-accent); content: ""; transform: rotate(-45deg); transition: transform 160ms ease; }
+.book-submission[open] summary::before { transform: rotate(45deg); }
+.book-submission summary > span:first-of-type { display: grid; flex: 1; gap: 4px; }
+.book-submission summary strong { font-size: 16px; }
+.book-submission summary small { color: var(--portal-muted); line-height: 1.35; }
+.book-integrity { padding: 7px 9px; border: 1px solid #b8ddd0; background: #e7f7f0; color: #0b7052; font-size: 12px; font-weight: 900; text-transform: uppercase; }
+.book-integrity.is-warning { border-color: #e7c77c; background: #fff4d3; color: #805b08; }
+.book-submission-body { padding: 18px; border-top: 1px solid var(--portal-line); background: #fff; }
+.book-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 13px; color: var(--portal-muted); font-size: 12px; font-weight: 800; }
+.book-submission-body pre { max-height: 420px; margin: 0; padding: 18px; overflow: auto; border: 1px solid #dce5e0; background: #f5f7f5; color: #1c2925; font: 15px/1.65 Georgia, serif; white-space: pre-wrap; overflow-wrap: anywhere; }
+.book-submission-empty { padding: 28px; border: 1px dashed var(--portal-line); color: var(--portal-muted); text-align: center; }
+
 @media (max-width: 980px) {
 	body.portal-app .portal-layout { grid-template-columns: 1fr; }
 	body.portal-app .portal-sidebar { position: relative; top: 0; min-height: auto; padding: 28px 22px; border-right: 0; border-bottom: 1px solid rgba(205,255,85,.18); }
@@ -2265,4 +2293,6 @@ body.portal-auth .auth-visual::after { opacity: .78; }
 	body.portal-app .portal-session { align-items: flex-end; flex-direction: column; }
 	body.portal-app .portal-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	body.portal-app .portal-main { padding-inline: 12px; }
+	.book-submission summary { align-items: flex-start; flex-wrap: wrap; }
+	.book-integrity { margin-left: 28px; }
 }

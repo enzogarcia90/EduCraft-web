@@ -17,6 +17,7 @@ const state = {
 	actions: [],
 	moderationAlerts: [],
 	studentEvents: [],
+	bookSubmissions: [],
 	activities: [],
 	aiIntegrity: null,
 	aiIntegritySettings: null,
@@ -360,10 +361,6 @@ function bindDashboard() {
 	$("#aiDetectionToggle")?.addEventListener("change", async (event) => {
 		await updateAIIntegritySettings(event.target.checked);
 	});
-	$("#aiIntegrityForm")?.addEventListener("submit", async (event) => {
-		event.preventDefault();
-		await analyzeAIIntegrity();
-	});
 	$("[data-activity-manual-toggle]")?.addEventListener("click", () => {
 		const panel = $("[data-manual-activity]");
 		setManualActivityVisible(panel?.hidden ?? true);
@@ -539,6 +536,13 @@ async function requireDashboardSession() {
 		}
 		if (currentPage === "profesor") {
 			await loadAIIntegrity();
+			await loadBookSubmissions();
+			window.setInterval(() => {
+				if (document.visibilityState === "visible" && state.token) {
+					loadAIIntegrity();
+					loadBookSubmissions();
+				}
+			}, 30000);
 		}
 		if (currentPage === "administracion") {
 			await loadSysAdmin();
@@ -703,6 +707,20 @@ async function loadAIIntegrity() {
 		renderAIIntegrity();
 	} catch (error) {
 		renderAIIntegrity(error);
+	}
+}
+
+async function loadBookSubmissions() {
+	if (!$("#bookSubmissionList")) {
+		return;
+	}
+	try {
+		const response = await request("/dashboard/book-submissions?limit=100");
+		state.bookSubmissions = response.items || [];
+		renderBookSubmissions();
+	} catch (error) {
+		state.bookSubmissions = [];
+		renderBookSubmissions(error);
 	}
 }
 
@@ -1192,43 +1210,19 @@ async function createActivity() {
 
 async function updateAIIntegritySettings(enabled) {
 	const message = $("#aiIntegrityMessage");
-	setMessage(message, enabled ? "Activando detector..." : "Desactivando detector...", "");
+	setMessage(message, enabled ? "Activando Sapling..." : "Apagando Sapling...", "");
 	try {
 		state.aiIntegritySettings = await request("/dashboard/ai-integrity/settings", {
 			method: "PATCH",
 			body: { detectionEnabled: Boolean(enabled) }
 		});
 		await loadAIIntegrity();
-		setMessage(message, enabled ? "Deteccion activada." : "Deteccion desactivada.", "ok");
+		setMessage(message, enabled ? "Sapling activado para los libros firmados." : "Sapling apagado. Integrity sigue activo.", "ok");
 	} catch (error) {
 		setMessage(message, error.message, "error");
 		if ($("#aiDetectionToggle") && state.aiIntegritySettings) {
 			$("#aiDetectionToggle").checked = Boolean(state.aiIntegritySettings.detectionEnabled);
 		}
-	}
-}
-
-async function analyzeAIIntegrity() {
-	const message = $("#aiIntegrityMessage");
-	const text = ($("#aiIntegrityText")?.value || "").trim();
-	if (text.length < 120) {
-		setMessage(message, "Necesita al menos 120 caracteres.", "error");
-		return;
-	}
-	setMessage(message, "Analizando porcentaje...", "");
-	try {
-		const response = await request("/dashboard/ai-integrity/analyze", {
-			method: "POST",
-			body: { text }
-		});
-		if ($("#aiIntegrityText")) {
-			$("#aiIntegrityText").value = "";
-		}
-		await loadAIIntegrity();
-		setMessage(message, response.detectionUsed ? `Analisis registrado: ${response.percent}% IA.` : "Detector desactivado.", "ok");
-	} catch (error) {
-		await loadAIIntegrity();
-		setMessage(message, error.message, "error");
 	}
 }
 
@@ -1746,7 +1740,7 @@ function renderAIIntegrity(error) {
 	const provider = $("#aiIntegrityProvider");
 	if (provider) {
 		const ready = settings.providerReady ? "Listo" : "Sin API";
-		provider.textContent = `${settings.provider || "detector"} · ${ready}`;
+		provider.textContent = `${settings.provider || "Sapling"} · ${ready}`;
 	}
 	if (error) {
 		for (const selector of ["#aiAverageChart", "#aiBucketChart", "#aiTrendChart", "#aiStatusChart"]) {
@@ -1774,6 +1768,35 @@ function renderAIIntegrity(error) {
 		value,
 		color: chartColors[index % chartColors.length]
 	}))));
+}
+
+function renderBookSubmissions(error) {
+	const node = $("#bookSubmissionList");
+	if (!node) {
+		return;
+	}
+	if (error) {
+		node.innerHTML = `<div class="book-submission-empty">${escapeHtml(error.message || "No se pudieron cargar las entregas.")}</div>`;
+		return;
+	}
+	if (!state.bookSubmissions.length) {
+		node.innerHTML = `<div class="book-submission-empty">Todavia no hay libros firmados por alumnos.</div>`;
+		return;
+	}
+	node.innerHTML = state.bookSubmissions.map((item) => {
+		const completed = item.aiStatus === "completed" && Number.isFinite(Number(item.aiScore));
+		const integrity = completed ? `${Math.round(Number(item.aiScore))}% señal IA` : readableAIStatus(item.aiStatus || "pending");
+		return `<details class="book-submission">
+			<summary>
+				<span><strong>${escapeHtml(item.username || "Alumno")}</strong><small>${escapeHtml(item.lessonTitle || item.bookTitle || "Libro firmado")} · ${escapeHtml(formatDateTime(item.createdAt))}</small></span>
+				<span class="book-integrity ${completed && Number(item.aiScore) >= 70 ? "is-warning" : ""}">${escapeHtml(integrity)}</span>
+			</summary>
+			<div class="book-submission-body">
+				<div class="book-meta"><span>Libro: ${escapeHtml(item.bookTitle || "Entrega EduCraft")}</span><span>Servidor: ${escapeHtml(item.serverName || "-")}</span></div>
+				<pre>${escapeHtml(item.bookText || "Sin texto")}</pre>
+			</div>
+		</details>`;
+	}).join("");
 }
 
 function activityPayload() {
@@ -2183,7 +2206,7 @@ function statusSegments(users) {
 	const other = Math.max(0, users.length - active - disabled);
 	return [
 		{ label: "Activos", value: active, color: "#15986f" },
-		{ label: "Desactivados", value: disabled, color: "#b8652d" },
+		{ label: "Sapling apagado", value: disabled, color: "#b8652d" },
 		{ label: "Otros estados", value: other, color: "#8b9a95" }
 	];
 }
@@ -2202,8 +2225,9 @@ function actionCategorySegments() {
 
 function readableAIStatus(status) {
 	const labels = {
+		pending: "Pendiente",
 		completed: "Analizados",
-		disabled: "Desactivado",
+		disabled: "Sapling apagado",
 		provider_unavailable: "Sin API",
 		failed: "Fallidos"
 	};
@@ -2235,7 +2259,7 @@ function renderStudentBreakdown() {
 	node.innerHTML = `
 		<span>Total <strong>${escapeHtml(String(total))}</strong></span>
 		<span>Activos <strong>${escapeHtml(String(active))}</strong></span>
-		<span>Desactivados <strong>${escapeHtml(String(disabled))}</strong></span>
+		<span>Sapling apagado <strong>${escapeHtml(String(disabled))}</strong></span>
 		<span>Centro <strong>${escapeHtml(shortId(state.me?.institutionId))}</strong></span>
 	`;
 }
@@ -2251,7 +2275,7 @@ function renderTeacherBreakdown() {
 	node.innerHTML = `
 		<span>Total <strong>${escapeHtml(String(total))}</strong></span>
 		<span>Activos <strong>${escapeHtml(String(active))}</strong></span>
-		<span>Desactivados <strong>${escapeHtml(String(disabled))}</strong></span>
+		<span>Sapling apagado <strong>${escapeHtml(String(disabled))}</strong></span>
 		<span>Centro <strong>${escapeHtml(shortId(state.me?.institutionId))}</strong></span>
 	`;
 }
