@@ -760,7 +760,7 @@ function connectSysAdminLive() {
 	if (state.sysAdminSocket && state.sysAdminSocket.readyState <= WebSocket.OPEN) {
 		return;
 	}
-	const socket = new WebSocket(`${webSocketBase()}/dashboard/sysadmin/live?access_token=${encodeURIComponent(state.token)}`);
+	const socket = new WebSocket(`${webSocketBase()}/dashboard/sysadmin/live`, ["educraft.jwt", state.token]);
 	state.sysAdminSocket = socket;
 	socket.addEventListener("open", () => {
 		if (state.sysAdminLiveRetry) {
