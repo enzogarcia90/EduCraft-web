@@ -1700,7 +1700,7 @@ function renderActivities() {
 			<p>${escapeHtml(firstLine(activity.objectives))}</p>
 			<footer>
 				<small>${escapeHtml(readableActivityStatus(activity.status))} · ${escapeHtml((activity.programmingMode || "none").toUpperCase())}</small>
-				${activity.status === "published" ? `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="draft">Pasar a borrador</button>` : `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="published">Publicar</button>`}
+				${activity.status === "published" ? `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="draft">Desactivar</button>` : `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="published">Usar esta clase</button>`}
 			</footer>
 		</article>
 	`).join("") : `<article class="activity-card empty"><strong>Sin actividades</strong><p>Elige una plantilla, ajusta el guion y guarda la primera clase.</p></article>`;
