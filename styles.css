@@ -1328,9 +1328,61 @@ h2 { font-size: clamp(34px, 4.8vw, 64px); line-height: .94; }
 .footer { background: #020605; border-top: 1px solid var(--line); }
 .footer-links a:hover { color: var(--mint); }
 
+/* Empresa: small structural refinement */
+body[data-page="empresa"] .page-hero {
+	min-height: 440px;
+	grid-template-columns: minmax(0, 1fr) minmax(220px, .32fr);
+	column-gap: clamp(28px, 6vw, 90px);
+}
+
+body[data-page="empresa"] .page-hero > * {
+	grid-column: 1;
+}
+
+body[data-page="empresa"] .cards-4 {
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+body[data-page="empresa"] .cards-4 article {
+	grid-column: span 6;
+	min-height: 210px;
+}
+
+body[data-page="empresa"] .cards-4 article:first-child,
+body[data-page="empresa"] .cards-4 article:last-child {
+	grid-column: span 7;
+}
+
+body[data-page="empresa"] .cards-4 article:nth-child(2),
+body[data-page="empresa"] .cards-4 article:nth-child(3) {
+	grid-column: span 5;
+}
+
+body[data-page="empresa"] .section.split {
+	grid-template-columns: minmax(0, 1.08fr) minmax(340px, .92fr);
+	align-items: center;
+}
+
+body[data-page="empresa"] .value-grid {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body[data-page="empresa"] .value-grid article {
+	min-height: 190px;
+}
+
 @media (max-width: 660px) {
 	.hero::before { background: rgba(7,17,15,.88); }
 	h1 { font-size: clamp(66px, 24vw, 108px); }
 	.page-hero h1 { font-size: clamp(42px, 14vw, 64px); }
 	.site-header { background: rgba(3,9,8,.96); }
+	body[data-page="empresa"] .page-hero,
+	body[data-page="empresa"] .cards-4,
+	body[data-page="empresa"] .section.split,
+	body[data-page="empresa"] .value-grid { grid-template-columns: 1fr; }
+	body[data-page="empresa"] .cards-4 article,
+	body[data-page="empresa"] .cards-4 article:first-child,
+	body[data-page="empresa"] .cards-4 article:last-child,
+	body[data-page="empresa"] .cards-4 article:nth-child(2),
+	body[data-page="empresa"] .cards-4 article:nth-child(3) { grid-column: auto; }
 }
