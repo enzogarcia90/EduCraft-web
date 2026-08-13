@@ -1645,7 +1645,27 @@ function renderPolicyPanel() {
 		<label class="policy-control"><span><strong>Paquetes de recursos</strong><small>${resourcePack.url ? "Paquete oficial de EduCraft" : "Sin paquete configurado"}</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowResourcePacks" ${(settings.allowResourcePacks ?? resourcePack.enabled) ? "checked" : ""}><span></span></span></label>
 		<label class="policy-control"><span><strong>Mundos locales</strong><small>Permite abrir mundos de un jugador</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowSingleplayerWorlds" ${(settings.allowSingleplayerWorlds ?? live.allowSingleplayerWorlds ?? policy.allowSingleplayerWorlds) ? "checked" : ""}><span></span></span></label>
 		${teacher ? "" : `<label class="policy-control"><span><strong>Skins personalizadas</strong><small>${skin.forceCommon ? "Actualmente se usa la skin comun" : "Los usuarios pueden elegir skin"}</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowCustomSkins" ${settings.allowCustomSkins ? "checked" : ""}><span></span></span></label>`}
+		${teacher ? "" : `<form id="resourcePackConfigForm" class="resource-pack-config"><div><strong>Configurar paquete del centro</strong><small>URL HTTPS del archivo .zip y hash SHA-1. Deja ambos vacios para usar el paquete global.</small></div><label><span>URL del paquete</span><input id="resourcePackUrl" type="url" inputmode="url" placeholder="https://centro.example/pack.zip" value="${escapeHtml(settings.resourcePackUrl || "")}"></label><label><span>Hash SHA-1</span><input id="resourcePackHash" type="text" maxlength="40" pattern="[a-fA-F0-9]{40}" placeholder="40 caracteres hexadecimales" value="${escapeHtml(settings.resourcePackHash || "")}"></label><button class="portal-ghost" type="submit">Guardar paquete</button></form>`}
 		<p id="clientPolicyMessage" class="portal-message" role="status"></p>`;
+	$("#resourcePackConfigForm")?.addEventListener("submit", saveResourcePackConfig);
+}
+
+async function saveResourcePackConfig(event) {
+	event.preventDefault();
+	const form = event.currentTarget;
+	const button = form.querySelector("button");
+	button.disabled = true;
+	setMessage($("#clientPolicyMessage"), "Guardando paquete...", "");
+	try {
+		state.clientPolicySettings = await request("/dashboard/client-policy-settings", { method: "PATCH", body: { resourcePackUrl: $("#resourcePackUrl").value.trim(), resourcePackHash: $("#resourcePackHash").value.trim() } });
+		await loadPortalContext();
+		setMessage($("#clientPolicyMessage"), "✓ Paquete de recursos configurado.", "ok");
+		showToast("Paquete de recursos configurado.", "ok");
+	} catch (error) {
+		button.disabled = false;
+		setMessage($("#clientPolicyMessage"), error.message, "error");
+		showToast(`No se pudo configurar el paquete: ${error.message}`, "error");
+	}
 }
 
 async function updateClientPolicySetting(input) {
