@@ -81,11 +81,7 @@ const teacherActions = [
 	{ key: "set_gamemode_adventure", category: "estado", label: "Modo aventura", description: "Evita roturas accidentales." },
 	{ key: "set_gamemode_survival", category: "estado", label: "Modo supervivencia", description: "Vuelve a supervivencia." },
 	{ key: "enable_pvp", category: "permisos", label: "Activar PVP", description: "Permite el combate entre jugadores." },
-	{ key: "disable_pvp", category: "permisos", label: "Desactivar PVP", description: "Impide el combate entre jugadores." },
-	{ key: "start_seated_class", category: "clase", label: "Iniciar clase sentados", description: "Teletransporta a todos a las vagonetas y bloquea la salida." },
-	{ key: "allow_class_standing", category: "clase", label: "Permitir levantarse", description: "Libera a todos los alumnos de sus asientos." },
-	{ key: "reseat_class", category: "clase", label: "Sentar de nuevo", description: "Devuelve a los alumnos a sus asientos." },
-	{ key: "end_seated_class", category: "clase", label: "Terminar clase", description: "Finaliza la sesión sentada y libera a todos." }
+	{ key: "disable_pvp", category: "permisos", label: "Desactivar PVP", description: "Impide el combate entre jugadores." }
 ];
 const actionCategories = [
 	["all", "Todas"],
@@ -94,12 +90,11 @@ const actionCategories = [
 	["posicion", "Posicion"],
 	["permisos", "Permisos"],
 	["estado", "Estado"],
-	["avisos", "Avisos"],
-	["clase", "Clase"]
+	["avisos", "Avisos"]
 ];
-const quickTeacherActions = new Set(["start_seated_class", "allow_class_standing", "reseat_class", "end_seated_class", "send_class_announcement", "mute_chat", "unmute_chat", "freeze_student", "teleport_teacher_to_student", "grant_build", "revoke_build", "enable_pvp", "disable_pvp"]);
-const disruptiveClassActions = new Set(["start_seated_class", "reseat_class", "mute_chat", "limit_chat", "freeze_student", "clear_inventory", "return_to_spawn", "revoke_build", "revoke_interact", "set_gamemode_adventure", "set_gamemode_survival", "enable_pvp", "disable_pvp"]);
-const classWideActions = new Set(["start_seated_class", "allow_class_standing", "reseat_class", "end_seated_class", "send_class_announcement", "enable_pvp", "disable_pvp"]);
+const quickTeacherActions = new Set(["send_class_announcement", "mute_chat", "unmute_chat", "freeze_student", "teleport_teacher_to_student", "grant_build", "revoke_build", "enable_pvp", "disable_pvp"]);
+const disruptiveClassActions = new Set(["mute_chat", "limit_chat", "freeze_student", "clear_inventory", "return_to_spawn", "revoke_build", "revoke_interact", "set_gamemode_adventure", "set_gamemode_survival", "enable_pvp", "disable_pvp"]);
+const classWideActions = new Set(["send_class_announcement", "enable_pvp", "disable_pvp"]);
 const chartColors = ["#15986f", "#1d6ce3", "#b8652d", "#6f5bc6", "#c84f6a", "#257b84"];
 const activityTemplates = [
 	{
@@ -2065,7 +2060,7 @@ function renderActivities() {
 			<p>${escapeHtml(firstLine(activity.objectives))}</p>
 			<footer>
 				<small>${escapeHtml(readableActivityStatus(activity.status))} · ${escapeHtml((activity.programmingMode || "none").toUpperCase())}</small>
-				${activity.status === "published" ? `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="draft">Desactivar</button>` : `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="published">Usar esta clase</button>`}
+				${activity.status === "published" ? `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="draft">Terminar clase</button>` : `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="published">Iniciar clase</button>`}
 			</footer>
 		</article>
 	`).join("") : `<article class="activity-card empty"><strong>Sin actividades</strong><p>Elige una plantilla, ajusta el guion y guarda la primera clase.</p></article>`;
@@ -2076,7 +2071,7 @@ function renderActivities() {
 
 async function updateActivityStatus(id, status) {
 	try {
-		setMessage($("#activityMessage"), status === "published" ? "Activando la clase y preparando los libros..." : "Desactivando la clase...", "");
+		setMessage($("#activityMessage"), status === "published" ? "Iniciando clase: preparando libros y asientos..." : "Terminando la clase...", "");
 		await request(`/dashboard/activities/${encodeURIComponent(id)}/status`, {
 			method: "PATCH",
 			body: { status }
@@ -2084,7 +2079,7 @@ async function updateActivityStatus(id, status) {
 		await loadActivities();
 		setMessage($("#activityMessage"), status === "published"
 			? "Clase activada. Los alumnos conectados recibirán automáticamente el libro de clase y el libro de respuesta."
-			: "Clase desactivada.", "ok");
+			: "Clase terminada.", "ok");
 	} catch (error) {
 		setMessage($("#activityMessage"), error.message, "error");
 	}
