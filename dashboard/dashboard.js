@@ -2071,11 +2071,15 @@ function renderActivities() {
 
 async function updateActivityStatus(id, status) {
 	try {
+		setMessage($("#activityMessage"), status === "published" ? "Activando la clase y preparando los libros..." : "Desactivando la clase...", "");
 		await request(`/dashboard/activities/${encodeURIComponent(id)}/status`, {
 			method: "PATCH",
 			body: { status }
 		});
 		await loadActivities();
+		setMessage($("#activityMessage"), status === "published"
+			? "Clase activada. Los alumnos conectados recibirán automáticamente el libro de clase y el libro de respuesta."
+			: "Clase desactivada.", "ok");
 	} catch (error) {
 		setMessage($("#activityMessage"), error.message, "error");
 	}
