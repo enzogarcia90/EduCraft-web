@@ -78,7 +78,9 @@ const teacherActions = [
 	{ key: "heal_student", category: "estado", label: "Curar alumno", description: "Restaura salud." },
 	{ key: "feed_student", category: "estado", label: "Restaurar hambre", description: "Rellena comida." },
 	{ key: "set_gamemode_adventure", category: "estado", label: "Modo aventura", description: "Evita roturas accidentales." },
-	{ key: "set_gamemode_survival", category: "estado", label: "Modo supervivencia", description: "Vuelve a supervivencia." }
+	{ key: "set_gamemode_survival", category: "estado", label: "Modo supervivencia", description: "Vuelve a supervivencia." },
+	{ key: "enable_pvp", category: "permisos", label: "Activar PVP", description: "Permite el combate entre jugadores." },
+	{ key: "disable_pvp", category: "permisos", label: "Desactivar PVP", description: "Impide el combate entre jugadores." }
 ];
 const actionCategories = [
 	["all", "Todas"],
@@ -89,8 +91,9 @@ const actionCategories = [
 	["estado", "Estado"],
 	["avisos", "Avisos"]
 ];
-const quickTeacherActions = new Set(["send_class_announcement", "mute_chat", "unmute_chat", "freeze_student", "teleport_to_teacher", "teleport_teacher_to_student", "grant_build", "revoke_build"]);
-const disruptiveClassActions = new Set(["mute_chat", "limit_chat", "freeze_student", "clear_inventory", "return_to_spawn", "revoke_build", "revoke_interact", "set_gamemode_adventure", "set_gamemode_survival"]);
+const quickTeacherActions = new Set(["send_class_announcement", "mute_chat", "unmute_chat", "freeze_student", "teleport_teacher_to_student", "grant_build", "revoke_build", "enable_pvp", "disable_pvp"]);
+const disruptiveClassActions = new Set(["mute_chat", "limit_chat", "freeze_student", "clear_inventory", "return_to_spawn", "revoke_build", "revoke_interact", "set_gamemode_adventure", "set_gamemode_survival", "enable_pvp", "disable_pvp"]);
+const classWideActions = new Set(["send_class_announcement", "enable_pvp", "disable_pvp"]);
 const chartColors = ["#15986f", "#1d6ce3", "#b8652d", "#6f5bc6", "#c84f6a", "#257b84"];
 const activityTemplates = [
 	{
@@ -1365,7 +1368,7 @@ async function disableTeacher(id) {
 async function queueAction(actionKey) {
 	const message = $("#actionMessage");
 	const action = teacherActions.find((item) => item.key === actionKey);
-	const targetUserId = $("#targetStudent")?.value || "";
+	const targetUserId = classWideActions.has(actionKey) ? "" : ($("#targetStudent")?.value || "");
 	if (!targetUserId && disruptiveClassActions.has(actionKey) && !window.confirm(`Vas a ejecutar «${action?.label || actionKey}» para toda la clase. ¿Quieres continuar?`)) return;
 	setMessage(message, "Registrando accion...", "");
 	try {
