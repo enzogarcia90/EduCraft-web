@@ -1687,6 +1687,11 @@ body.portal-app {
 .resource-pack-config small { color: var(--portal-muted); font-size: 12px; line-height: 1.4; }
 .resource-pack-config label { display: grid; gap: 6px; color: var(--portal-muted); font-size: 12px; font-weight: 900; }
 .resource-pack-config input { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid var(--portal-line); background: #fff; color: var(--portal-ink); font: inherit; }
+.resource-pack-drop { padding: 16px; border: 1px dashed var(--portal-accent) !important; background: #fff; cursor: pointer; }
+.resource-pack-drop input { padding: 8px 0; border: 0; }
+.resource-pack-advanced { margin-top: 10px; border: 1px solid var(--portal-line); background: #fff; }
+.resource-pack-advanced > summary { padding: 12px 14px; cursor: pointer; color: var(--portal-muted); font-size: 12px; font-weight: 900; }
+.resource-pack-advanced .resource-pack-config { margin: 0; border: 0; border-top: 1px solid var(--portal-line); }
 
 @media (max-width: 660px) {
 	.class-chat-message { grid-template-columns: 1fr; gap: 7px; }

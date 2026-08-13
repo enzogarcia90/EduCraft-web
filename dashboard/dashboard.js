@@ -1645,9 +1645,41 @@ function renderPolicyPanel() {
 		<label class="policy-control"><span><strong>Paquetes de recursos</strong><small>${resourcePack.url ? "Paquete oficial de EduCraft" : "Sin paquete configurado"}</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowResourcePacks" ${(settings.allowResourcePacks ?? resourcePack.enabled) ? "checked" : ""}><span></span></span></label>
 		<label class="policy-control"><span><strong>Mundos locales</strong><small>Permite abrir mundos de un jugador</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowSingleplayerWorlds" ${(settings.allowSingleplayerWorlds ?? live.allowSingleplayerWorlds ?? policy.allowSingleplayerWorlds) ? "checked" : ""}><span></span></span></label>
 		${teacher ? "" : `<label class="policy-control"><span><strong>Skins personalizadas</strong><small>${skin.forceCommon ? "Actualmente se usa la skin comun" : "Los usuarios pueden elegir skin"}</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowCustomSkins" ${settings.allowCustomSkins ? "checked" : ""}><span></span></span></label>`}
-		${teacher ? "" : `<form id="resourcePackConfigForm" class="resource-pack-config"><div><strong>Configurar paquete del centro</strong><small>URL HTTPS del archivo .zip y hash SHA-1. Deja ambos vacios para usar el paquete global.</small></div><label><span>URL del paquete</span><input id="resourcePackUrl" type="url" inputmode="url" placeholder="https://centro.example/pack.zip" value="${escapeHtml(settings.resourcePackUrl || "")}"></label><label><span>Hash SHA-1</span><input id="resourcePackHash" type="text" maxlength="40" pattern="[a-fA-F0-9]{40}" placeholder="40 caracteres hexadecimales" value="${escapeHtml(settings.resourcePackHash || "")}"></label><button class="portal-ghost" type="submit">Guardar paquete</button></form>`}
+		${teacher ? "" : `<form id="resourcePackUploadForm" class="resource-pack-config"><div><strong>Subir paquete del centro</strong><small>Selecciona el archivo .zip. EduCraft calcula y configura todo automaticamente (maximo 100 MB).</small></div><label class="resource-pack-drop"><span>Archivo ZIP</span><input id="resourcePackFile" name="resourcePack" type="file" accept=".zip,application/zip" required></label><button class="button primary" type="submit">Subir y activar</button></form><details class="resource-pack-advanced"><summary>Configuracion avanzada por URL</summary><form id="resourcePackConfigForm" class="resource-pack-config"><label><span>URL HTTPS del paquete</span><input id="resourcePackUrl" type="url" inputmode="url" placeholder="https://centro.example/pack.zip" value="${escapeHtml(settings.resourcePackUrl || "")}"></label><label><span>Hash SHA-1</span><input id="resourcePackHash" type="text" maxlength="40" pattern="[a-fA-F0-9]{40}" placeholder="40 caracteres hexadecimales" value="${escapeHtml(settings.resourcePackHash || "")}"></label><button class="portal-ghost" type="submit">Guardar URL</button></form></details>`}
 		<p id="clientPolicyMessage" class="portal-message" role="status"></p>`;
 	$("#resourcePackConfigForm")?.addEventListener("submit", saveResourcePackConfig);
+	$("#resourcePackUploadForm")?.addEventListener("submit", uploadResourcePack);
+}
+
+async function uploadResourcePack(event) {
+	event.preventDefault();
+	const form = event.currentTarget;
+	const file = $("#resourcePackFile")?.files?.[0];
+	if (!file) return;
+	if (file.size > 100 * 1024 * 1024) {
+		setMessage($("#clientPolicyMessage"), "El archivo supera el limite de 100 MB.", "error");
+		return;
+	}
+	const button = form.querySelector("button");
+	button.disabled = true;
+	button.textContent = "Subiendo...";
+	setMessage($("#clientPolicyMessage"), "Subiendo y preparando el paquete...", "");
+	try {
+		const body = new FormData();
+		body.append("resourcePack", file);
+		const response = await fetch(`${apiBase}/dashboard/resource-pack`, { method: "POST", headers: { Authorization: `Bearer ${state.token}` }, body });
+		const data = await response.json().catch(() => ({}));
+		if (!response.ok) throw new Error(data.message || `HTTP ${response.status}`);
+		state.clientPolicySettings = data;
+		await loadPortalContext();
+		setMessage($("#clientPolicyMessage"), "✓ Paquete subido y activado.", "ok");
+		showToast("Paquete subido y activado.", "ok");
+	} catch (error) {
+		button.disabled = false;
+		button.textContent = "Subir y activar";
+		setMessage($("#clientPolicyMessage"), error.message, "error");
+		showToast(`No se pudo subir el paquete: ${error.message}`, "error");
+	}
 }
 
 async function saveResourcePackConfig(event) {
