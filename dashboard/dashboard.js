@@ -38,6 +38,7 @@ const state = {
 	sysAdminServerError: null,
 	sysServerConsoleId: "",
 	policy: null,
+	clientPolicySettings: null,
 	livePolicy: null,
 	worldView: null,
 	route: null,
@@ -399,6 +400,9 @@ function bindDashboard() {
 	renderTeacherActions();
 	renderActivityTemplates();
 	renderActivityChat();
+	document.addEventListener("change", (event) => {
+		if (event.target.matches("[data-client-policy-setting]")) updateClientPolicySetting(event.target);
+	});
 }
 
 function dashboardPreferences() {
@@ -703,14 +707,16 @@ async function loadPortalContext() {
 			return null;
 		}
 	};
-	const [policy, livePolicy, route] = await Promise.all([
+	const [policy, livePolicy, route, clientPolicySettings] = await Promise.all([
 		optional("/client/policy"),
 		optional("/client/live-policy"),
-		optional("/minecraft/session-route")
+		optional("/minecraft/session-route"),
+		optional("/dashboard/client-policy-settings")
 	]);
 	state.policy = policy;
 	state.livePolicy = livePolicy;
 	state.route = route;
+	state.clientPolicySettings = clientPolicySettings;
 	renderContextPanels();
 }
 
@@ -1631,12 +1637,33 @@ function renderPolicyPanel() {
 	const live = state.livePolicy || {};
 	const resourcePack = policy.resourcePack || {};
 	const skin = policy.skin || {};
-	renderSignalList("#policyRack", [
-		{ label: "Mundos locales", value: boolLabel(live.allowSingleplayerWorlds ?? policy.allowSingleplayerWorlds) },
-		{ label: "Fin permiso local", value: live.localWorldsExpiresAt ? formatDateTime(live.localWorldsExpiresAt) : "sin permiso temporal" },
-		{ label: "Pack oficial", value: resourcePack.enabled ? (resourcePack.required ? "global obligatorio" : "global activo") : "inactivo" },
-		{ label: "Skin", value: skin.forceCommon ? `comun ${skin.mode || ""}`.trim() : "libre" }
-	], "Politica");
+	const node = $("#policyRack");
+	if (!node) return;
+	const settings = state.clientPolicySettings || {};
+	const teacher = currentPage === "profesor";
+	node.innerHTML = `
+		<label class="policy-control"><span><strong>Paquetes de recursos</strong><small>${resourcePack.url ? "Paquete oficial de EduCraft" : "Sin paquete configurado"}</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowResourcePacks" ${(settings.allowResourcePacks ?? resourcePack.enabled) ? "checked" : ""}><span></span></span></label>
+		<label class="policy-control"><span><strong>Mundos locales</strong><small>Permite abrir mundos de un jugador</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowSingleplayerWorlds" ${(settings.allowSingleplayerWorlds ?? live.allowSingleplayerWorlds ?? policy.allowSingleplayerWorlds) ? "checked" : ""}><span></span></span></label>
+		${teacher ? "" : `<label class="policy-control"><span><strong>Skins personalizadas</strong><small>${skin.forceCommon ? "Actualmente se usa la skin comun" : "Los usuarios pueden elegir skin"}</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowCustomSkins" ${settings.allowCustomSkins ? "checked" : ""}><span></span></span></label>`}
+		<p id="clientPolicyMessage" class="portal-message" role="status"></p>`;
+}
+
+async function updateClientPolicySetting(input) {
+	const key = input.dataset.clientPolicySetting;
+	const previous = !input.checked;
+	input.disabled = true;
+	setMessage($("#clientPolicyMessage"), "Guardando politica...", "");
+	try {
+		state.clientPolicySettings = await request("/dashboard/client-policy-settings", { method: "PATCH", body: { [key]: input.checked } });
+		await loadPortalContext();
+		setMessage($("#clientPolicyMessage"), "✓ Politica del cliente actualizada.", "ok");
+		showToast("Politica del cliente actualizada.", "ok");
+	} catch (error) {
+		input.checked = previous;
+		input.disabled = false;
+		setMessage($("#clientPolicyMessage"), error.message, "error");
+		showToast(`No se pudo actualizar la politica: ${error.message}`, "error");
+	}
 }
 
 function renderRoutePanel() {
