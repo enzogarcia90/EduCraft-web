@@ -81,7 +81,11 @@ const teacherActions = [
 	{ key: "set_gamemode_adventure", category: "estado", label: "Modo aventura", description: "Evita roturas accidentales." },
 	{ key: "set_gamemode_survival", category: "estado", label: "Modo supervivencia", description: "Vuelve a supervivencia." },
 	{ key: "enable_pvp", category: "permisos", label: "Activar PVP", description: "Permite el combate entre jugadores." },
-	{ key: "disable_pvp", category: "permisos", label: "Desactivar PVP", description: "Impide el combate entre jugadores." }
+	{ key: "disable_pvp", category: "permisos", label: "Desactivar PVP", description: "Impide el combate entre jugadores." },
+	{ key: "start_seated_class", category: "clase", label: "Iniciar clase sentados", description: "Teletransporta a todos a las vagonetas y bloquea la salida." },
+	{ key: "allow_class_standing", category: "clase", label: "Permitir levantarse", description: "Libera a todos los alumnos de sus asientos." },
+	{ key: "reseat_class", category: "clase", label: "Sentar de nuevo", description: "Devuelve a los alumnos a sus asientos." },
+	{ key: "end_seated_class", category: "clase", label: "Terminar clase", description: "Finaliza la sesión sentada y libera a todos." }
 ];
 const actionCategories = [
 	["all", "Todas"],
@@ -90,11 +94,12 @@ const actionCategories = [
 	["posicion", "Posicion"],
 	["permisos", "Permisos"],
 	["estado", "Estado"],
-	["avisos", "Avisos"]
+	["avisos", "Avisos"],
+	["clase", "Clase"]
 ];
-const quickTeacherActions = new Set(["send_class_announcement", "mute_chat", "unmute_chat", "freeze_student", "teleport_teacher_to_student", "grant_build", "revoke_build", "enable_pvp", "disable_pvp"]);
-const disruptiveClassActions = new Set(["mute_chat", "limit_chat", "freeze_student", "clear_inventory", "return_to_spawn", "revoke_build", "revoke_interact", "set_gamemode_adventure", "set_gamemode_survival", "enable_pvp", "disable_pvp"]);
-const classWideActions = new Set(["send_class_announcement", "enable_pvp", "disable_pvp"]);
+const quickTeacherActions = new Set(["start_seated_class", "allow_class_standing", "reseat_class", "end_seated_class", "send_class_announcement", "mute_chat", "unmute_chat", "freeze_student", "teleport_teacher_to_student", "grant_build", "revoke_build", "enable_pvp", "disable_pvp"]);
+const disruptiveClassActions = new Set(["start_seated_class", "reseat_class", "mute_chat", "limit_chat", "freeze_student", "clear_inventory", "return_to_spawn", "revoke_build", "revoke_interact", "set_gamemode_adventure", "set_gamemode_survival", "enable_pvp", "disable_pvp"]);
+const classWideActions = new Set(["start_seated_class", "allow_class_standing", "reseat_class", "end_seated_class", "send_class_announcement", "enable_pvp", "disable_pvp"]);
 const chartColors = ["#15986f", "#1d6ce3", "#b8652d", "#6f5bc6", "#c84f6a", "#257b84"];
 const activityTemplates = [
 	{
