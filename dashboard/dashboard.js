@@ -396,6 +396,9 @@ function bindDashboard() {
 	$("#activityReset")?.addEventListener("click", () => fillActivityTemplate(activityTemplates[0], true));
 	$("#sysRefreshButton")?.addEventListener("click", loadSysAdmin);
 	$("#sysVelocityConsoleButton")?.addEventListener("click", loadVelocityConsole);
+	$("#protectedRegionForm")?.addEventListener("submit", createProtectedRegion);
+	$("[data-delete-protected-region]")?.addEventListener("click", deleteProtectedRegion);
+	for (const button of document.querySelectorAll("[data-protection-toggle]")) button.addEventListener("click", () => queueProtectionAction(button.dataset.protectionToggle, {}));
 	renderActionFilters();
 	renderTeacherActions();
 	renderActivityTemplates();
@@ -403,6 +406,43 @@ function bindDashboard() {
 	document.addEventListener("change", (event) => {
 		if (event.target.matches("[data-client-policy-setting]")) updateClientPolicySetting(event.target);
 	});
+}
+
+function protectedRegionPayload() {
+	return {
+		name: $("#protectedRegionName")?.value.trim() || "",
+		world: $("#protectedRegionWorld")?.value.trim() || "world",
+		x1: Number($("#protectedX1")?.value), y1: Number($("#protectedY1")?.value), z1: Number($("#protectedZ1")?.value),
+		x2: Number($("#protectedX2")?.value), y2: Number($("#protectedY2")?.value), z2: Number($("#protectedZ2")?.value)
+	};
+}
+
+async function createProtectedRegion(event) {
+	event.preventDefault();
+	await queueProtectionAction("create_protected_region", protectedRegionPayload());
+}
+
+async function deleteProtectedRegion() {
+	const name = $("#protectedRegionName")?.value.trim();
+	if (!name) { setMessage($("#protectionMessage"), "Indica el nombre de la zona.", "error"); return; }
+	if (!window.confirm(`Vas a eliminar la proteccion «${name}». ¿Quieres continuar?`)) return;
+	await queueProtectionAction("delete_protected_region", { name });
+}
+
+async function queueProtectionAction(actionKey, payload) {
+	const message = $("#protectionMessage");
+	if (actionKey === "disable_structure_protection" && !window.confirm("Vas a pausar todas las zonas protegidas de este servidor. ¿Quieres continuar?")) return;
+	setMessage(message, "Enviando a Paper...", "");
+	try {
+		await request("/dashboard/teacher/actions", { method: "POST", body: { actionKey, reason: JSON.stringify(payload) } });
+		const labels = { create_protected_region: "Zona enviada para crear", delete_protected_region: "Zona enviada para eliminar", enable_structure_protection: "Proteccion enviada para activar", disable_structure_protection: "Proteccion enviada para pausar" };
+		setMessage(message, `✓ ${labels[actionKey]}.`, "ok");
+		showToast(labels[actionKey] + ".", "ok");
+		await loadTeacherActions();
+	} catch (error) {
+		setMessage(message, error.message, "error");
+		showToast(`No se pudo actualizar la proteccion: ${error.message}`, "error");
+	}
 }
 
 function dashboardPreferences() {

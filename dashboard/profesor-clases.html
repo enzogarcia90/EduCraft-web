@@ -21,7 +21,7 @@
 		<link rel="sitemap" type="application/xml" href="https://enzogarcia90.github.io/EduCraft-web/sitemap.xml">
 		<title>Profesor | EduCraft</title>
 		<link rel="stylesheet" href="../styles.css">
-		<link rel="stylesheet" href="dashboard.css?v=20260813-upload1">
+		<link rel="stylesheet" href="dashboard.css?v=20260813-protection1">
 	</head>
 	<body class="portal-app" data-dashboard-page="profesor" data-teacher-default="clases">
 		<header class="portal-header">
@@ -101,6 +101,7 @@
 				</section>
 				</section>
 				<section class="teacher-page-panel" data-teacher-panel="control">
+				<section class="portal-grid one"><article class="structure-protection-panel"><div class="builder-head"><div><p class="eyebrow">Entorno seguro</p><h2>Proteccion de estructuras</h2></div><span class="status-chip">Paper</span></div><p>Protege una zona frente a alumnos, TNT, lava, fuego, explosiones, pistones y criaturas.</p><form id="protectedRegionForm" class="protected-region-form"><label><span>Nombre</span><input id="protectedRegionName" required maxlength="40" pattern="[A-Za-z0-9_-]+" placeholder="laboratorio"></label><label><span>Mundo</span><input id="protectedRegionWorld" required value="world"></label><fieldset><legend>Primera esquina</legend><input id="protectedX1" type="number" required placeholder="X"><input id="protectedY1" type="number" required placeholder="Y"><input id="protectedZ1" type="number" required placeholder="Z"></fieldset><fieldset><legend>Segunda esquina</legend><input id="protectedX2" type="number" required placeholder="X"><input id="protectedY2" type="number" required placeholder="Y"><input id="protectedZ2" type="number" required placeholder="Z"></fieldset><div class="builder-actions"><button class="button primary" type="submit">Crear zona protegida</button><button class="portal-ghost" type="button" data-delete-protected-region>Eliminar por nombre</button><button class="portal-ghost" type="button" data-protection-toggle="enable_structure_protection">Activar proteccion</button><button class="portal-ghost danger" type="button" data-protection-toggle="disable_structure_protection">Pausar proteccion</button></div><p id="protectionMessage" class="portal-message" role="status"></p></form></article></section>
 				<section class="portal-grid one">
 					<article class="class-chat-panel"><div class="builder-head"><div><p class="eyebrow">En directo</p><h2>Chat de la clase</h2></div><span class="status-chip">Actualizacion automatica</span></div><p class="class-chat-help">Mensajes visibles enviados en los servidores de este centro. Los mensajes bloqueados aparecen en Alertas de moderacion.</p><div id="classChatList" class="class-chat-list" role="log" aria-live="polite" aria-label="Mensajes recientes del chat de clase"></div></article>
 				</section>
@@ -171,6 +172,6 @@
 			</section>
 		</main>
 		<script src="../cliente/educraft-config.js"></script>
-		<script src="dashboard.js?v=20260813-upload1"></script>
+		<script src="dashboard.js?v=20260813-protection1"></script>
 	</body>
 </html>
