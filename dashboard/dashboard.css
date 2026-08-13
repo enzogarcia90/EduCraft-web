@@ -1667,6 +1667,21 @@ body.portal-app {
 	padding-right: 2px;
 }
 
+.class-chat-help { margin: 8px 0 16px; color: var(--portal-muted); font-size: 13px; line-height: 1.5; }
+.class-chat-list { display: grid; gap: 0; max-height: 360px; overflow-y: auto; border: 1px solid var(--portal-line); background: #fbfcfb; }
+.class-chat-message { display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 1fr); gap: 18px; padding: 13px 15px; border-bottom: 1px solid var(--portal-line); }
+.class-chat-message:last-child { border-bottom: 0; }
+.class-chat-message > div { display: grid; align-content: start; gap: 4px; }
+.class-chat-message strong { overflow-wrap: anywhere; font-size: 13px; }
+.class-chat-message span { color: var(--portal-muted); font-size: 11px; font-weight: 800; }
+.class-chat-message p { margin: 0; overflow-wrap: anywhere; color: var(--portal-ink); font-size: 14px; line-height: 1.5; }
+.class-chat-empty { display: grid; min-height: 130px; place-content: center; gap: 6px; padding: 24px; color: var(--portal-muted); text-align: center; }
+.class-chat-empty strong { color: var(--portal-ink); }
+
+@media (max-width: 660px) {
+	.class-chat-message { grid-template-columns: 1fr; gap: 7px; }
+}
+
 .activity-ai-panel {
 	display: grid;
 	gap: 12px;

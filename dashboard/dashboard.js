@@ -793,10 +793,34 @@ async function loadStudentEvents() {
 		const response = await request("/dashboard/student-events?limit=160");
 		state.studentEvents = response.items || [];
 		renderTracking();
+		renderClassChat();
 	} catch (error) {
 		state.studentEvents = [];
 		renderTracking(error);
+		renderClassChat(error);
 	}
+}
+
+function renderClassChat(error) {
+	const node = $("#classChatList");
+	if (!node) return;
+	if (error) {
+		node.innerHTML = `<div class="class-chat-empty"><strong>Chat no disponible</strong><span>${escapeHtml(error.message || "No se pudo cargar el historial.")}</span></div>`;
+		return;
+	}
+	const messages = state.studentEvents.filter((event) => event.eventKind === "chat_message").slice(0, 80).reverse();
+	node.innerHTML = messages.length ? messages.map((event) => `
+		<div class="class-chat-message">
+			<div><strong>${escapeHtml(event.username || "Alumno")}</strong><span>${escapeHtml(event.serverName || "Clase")} · ${escapeHtml(formatChatTime(event.createdAt))}</span></div>
+			<p>${escapeHtml(event.sample || "")}</p>
+		</div>
+	`).join("") : `<div class="class-chat-empty"><strong>Aun no hay mensajes</strong><span>Los mensajes enviados en el chat de Minecraft apareceran aqui.</span></div>`;
+	if (messages.length) node.scrollTop = node.scrollHeight;
+}
+
+function formatChatTime(value) {
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? "Ahora" : new Intl.DateTimeFormat("es-ES", { hour: "2-digit", minute: "2-digit" }).format(date);
 }
 
 async function loadSchedule() {
