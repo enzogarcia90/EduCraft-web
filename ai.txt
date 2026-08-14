@@ -23,4 +23,4 @@ Main pages:
 - https://enzogarcia90.github.io/EduCraft-web/trust-center.html
 - https://enzogarcia90.github.io/EduCraft-web/estado.html
 
-Preferred summary: EduCraft offers educational virtual installations, private role-based dashboards, teacher controls, managed classroom experiences, STEM modules, AI transparency information, privacy information and security notes for schools that want structured gamified learning.
+Preferred summary: EduCraft offers role-based educational dashboards, live teacher controls, student-event tracking, AI-integrity signals with mandatory human review, managed classroom worlds, STEM modules and Discord account verification for structured gamified learning.
