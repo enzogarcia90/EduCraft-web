@@ -52,6 +52,7 @@ const state = {
 };
 let sessionRefreshPromise = null;
 let blockViewer = null;
+let consoleTailTimer = null;
 
 const apiBase = (window.EDUCRAFT_API_BASE_URL || "http://127.0.0.1:8080").replace(/\/+$/, "");
 const currentPage = document.body.dataset.dashboardPage || "login";
@@ -396,6 +397,7 @@ function bindDashboard() {
 	$("#activityReset")?.addEventListener("click", () => fillActivityTemplate(activityTemplates[0], true));
 	$("#sysRefreshButton")?.addEventListener("click", loadSysAdmin);
 	$("#sysVelocityConsoleButton")?.addEventListener("click", loadVelocityConsole);
+	if (currentPage === "administracion") startConsoleTail();
 	$("#protectedRegionForm")?.addEventListener("submit", createProtectedRegion);
 	$("[data-delete-protected-region]")?.addEventListener("click", deleteProtectedRegion);
 	for (const button of document.querySelectorAll("[data-protection-toggle]")) button.addEventListener("click", () => queueProtectionAction(button.dataset.protectionToggle, {}));
@@ -988,6 +990,10 @@ async function loadSysAdmin() {
 		setMessage($("#sysAdminMessage"), `Datos de backend cargados. Servidores: ${error.message}`, "error");
 	}
 	renderSysAdmin(null, serverError);
+	if (!serverError && !state.sysServerConsoleId && state.classServers.length) {
+		loadServerConsole(state.classServers[0].id);
+		loadVelocityConsole();
+	}
 }
 
 function connectDashboardLive() {
@@ -2349,20 +2355,20 @@ async function sysClassServerAction(id, action) {
 	}
 }
 
-async function loadServerConsole(id) {
+async function loadServerConsole(id, quiet = false) {
 	state.sysServerConsoleId = id;
 	const target = $("#sysServerConsoleTarget");
 	if (target) {
 		target.textContent = id;
 	}
 	const node = $("#sysServerConsole");
-	if (node) {
+	if (node && !quiet) {
 		node.textContent = "Leyendo consola...";
 	}
 	try {
 		const response = await request(`/dashboard/class-servers/${encodeURIComponent(id)}/console?lines=220`);
 		if (node) {
-			node.textContent = (response.lines || []).join("\n") || "Sin lineas de consola.";
+			updateConsoleNode(node, response.lines, "Sin lineas de consola.");
 		}
 	} catch (error) {
 		if (node) {
@@ -2371,21 +2377,41 @@ async function loadServerConsole(id) {
 	}
 }
 
-async function loadVelocityConsole() {
+async function loadVelocityConsole(quiet = false) {
 	const node = $("#sysVelocityConsole");
-	if (node) {
+	if (node && !quiet) {
 		node.textContent = "Leyendo Velocity...";
 	}
 	try {
 		const response = await request("/dashboard/velocity/console?lines=220");
 		if (node) {
-			node.textContent = (response.lines || []).join("\n") || "Sin lineas de Velocity.";
+			updateConsoleNode(node, response.lines, "Sin lineas de Velocity.");
 		}
 	} catch (error) {
 		if (node) {
 			node.textContent = error.message;
 		}
 	}
+}
+
+function updateConsoleNode(node, lines, emptyText) {
+	const followTail = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
+	const cleanLines = (lines || []).map((line) => {
+		const text = String(line || "");
+		const htmlStart = text.search(/<!doctype|<html/i);
+		return htmlStart >= 0 ? `${text.slice(0, htmlStart).trim()} [detalle HTML omitido]` : text;
+	});
+	node.textContent = cleanLines.join("\n") || emptyText;
+	if (followTail) node.scrollTop = node.scrollHeight;
+}
+
+function startConsoleTail() {
+	if (consoleTailTimer) return;
+	consoleTailTimer = window.setInterval(() => {
+		if (document.hidden) return;
+		if (state.sysServerConsoleId) loadServerConsole(state.sysServerConsoleId, true);
+		loadVelocityConsole(true);
+	}, 5000);
 }
 
 function renderSysServerRack(error) {
