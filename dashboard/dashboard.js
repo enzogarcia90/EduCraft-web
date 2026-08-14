@@ -818,7 +818,7 @@ function renderBilling() {
 			<div><span>Metodo de pago</span><strong>${method}</strong></div>
 		</div>`;
 	const select = $("#billingPlanSelect");
-	select.innerHTML = (billing.plans || []).map((plan) => `<option value="${escapeHtml(plan.key)}" ${plan.key === account.planKey ? "selected" : ""}>${escapeHtml(plan.name)}</option>`).join("");
+	select.innerHTML = (billing.plans || []).map((plan) => `<option value="${escapeHtml(plan.key)}" ${plan.key === account.planKey ? "selected" : ""}>${escapeHtml(`${plan.name} · ${formatMoney(plan.unitAmount, plan.currency)}/${billingIntervalShort(plan.billingInterval)}`)}</option>`).join("");
 	const canStart = configured && billing.canManage && (account.subscriptionStatus === "not_configured" || account.subscriptionStatus === "canceled" || account.subscriptionStatus === "incomplete_expired");
 	$("#billingCheckoutButton").disabled = !canStart || !select.options.length;
 	$("#billingPortalButton").disabled = !configured || !billing.canManage || account.subscriptionStatus === "not_configured";
@@ -900,6 +900,10 @@ function billingFrequency(interval, count) {
 	if (interval === "year") return Number(count || 1) === 1 ? "/ ano" : `/ ${count} anos`;
 	if (interval === "month") return Number(count || 1) === 1 ? "/ mes" : `/ ${count} meses`;
 	return `/ ${interval}`;
+}
+
+function billingIntervalShort(interval) {
+	return interval === "year" ? "año" : interval === "month" ? "mes" : interval || "periodo";
 }
 
 function safeHTTPSURL(value) {
