@@ -2570,9 +2570,22 @@ body.portal-auth .auth-visual::after { opacity: .78; }
 .book-submission summary small { color: var(--portal-muted); line-height: 1.35; }
 .book-integrity { padding: 7px 9px; border: 1px solid #b8ddd0; background: #e7f7f0; color: #0b7052; font-size: 12px; font-weight: 900; text-transform: uppercase; }
 .book-integrity.is-warning { border-color: #e7c77c; background: #fff4d3; color: #805b08; }
+.book-summary-badges { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+.book-review-status { padding: 7px 9px; border: 1px solid #cbd7d2; background: #f1f4f2; color: #53635d; font-size: 12px; font-weight: 900; text-transform: uppercase; }
+.book-review-status.accepted { border-color: #9bd5bd; background: #e5f7ef; color: #08714f; }
+.book-review-status.rejected { border-color: #efb2b2; background: #fff0f0; color: #a42929; }
 .book-submission-body { padding: 18px; border-top: 1px solid var(--portal-line); background: #fff; }
 .book-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 13px; color: var(--portal-muted); font-size: 12px; font-weight: 800; }
 .book-submission-body pre { max-height: 420px; margin: 0; padding: 18px; overflow: auto; border: 1px solid #dce5e0; background: #f5f7f5; color: #1c2925; font: 15px/1.65 Georgia, serif; white-space: pre-wrap; overflow-wrap: anywhere; }
+.book-review-actions { display: grid; gap: 12px; margin-top: 16px; padding: 16px; border: 1px solid #dce5e0; background: #f8faf9; }
+.book-review-actions label { display: grid; gap: 7px; font-weight: 800; }
+.book-review-actions textarea { width: 100%; box-sizing: border-box; resize: vertical; padding: 11px; border: 1px solid #bccbc5; background: #fff; color: inherit; font: inherit; }
+.book-review-actions > div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 9px; }
+.book-review-actions button { padding: 10px 14px; border: 1px solid transparent; cursor: pointer; font-weight: 900; }
+.book-review-actions .review-accept { background: #0b7556; color: #fff; }
+.book-review-actions .review-reject { border-color: #cf6c6c; background: #fff; color: #a42929; }
+.book-review-result { display: grid; gap: 5px; margin-top: 16px; padding: 14px 16px; border-left: 4px solid #0b7556; background: #edf8f4; }
+.book-review-result.rejected { border-color: #c64949; background: #fff2f2; }
 .book-submission-empty { padding: 28px; border: 1px dashed var(--portal-line); color: var(--portal-muted); text-align: center; }
 
 .dashboard-settings-button { position: fixed; right: 20px; bottom: 20px; z-index: 80; padding: 11px 16px; border: 1px solid #315047; border-radius: 999px; background: #07110f; box-shadow: 0 10px 28px rgba(0,0,0,.22); color: #fff; cursor: pointer; font-weight: 900; }

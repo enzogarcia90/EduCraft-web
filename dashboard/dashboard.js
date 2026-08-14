@@ -1735,7 +1735,7 @@ function renderActivityChat(suggestions = []) {
 		return;
 	}
 	const messages = state.activityChat.length ? state.activityChat : [
-		{ role: "assistant", content: "Cuéntame qué clase quieres crear. Por ejemplo: una clase de 30 minutos sobre bucles en Lua para ESO, con reto final y rúbrica simple." }
+		{ role: "assistant", content: "Cuéntame qué clase quieres crear y dime su dificultad del 1 al 10. Por ejemplo: una clase de 30 minutos sobre bucles en Lua para ESO, dificultad 5/10, con reto final y rúbrica simple." }
 	];
 	node.innerHTML = messages.slice(-8).map((item) => `
 		<div class="activity-chat-message ${escapeHtml(item.role)}">
@@ -2197,6 +2197,7 @@ function fillActivityTemplate(template, notify) {
 	$("#activitySubject").value = template.subject;
 	$("#activityLevel").value = template.level;
 	$("#activityDuration").value = template.durationMinutes;
+	$("#activityDifficulty").value = template.difficulty || 5;
 	$("#activityProgrammingMode").value = template.programmingMode;
 	$("#activityStatus").value = "draft";
 	$("#activityObjectives").value = template.objectives;
@@ -2220,6 +2221,7 @@ function fillActivityDraft(activity) {
 	$("#activitySubject").value = activity.subject || "";
 	$("#activityLevel").value = activity.level || "";
 	$("#activityDuration").value = activity.durationMinutes || 30;
+	$("#activityDifficulty").value = activity.difficulty || 5;
 	$("#activityProgrammingMode").value = activity.programmingMode || "lua";
 	$("#activityStatus").value = activity.status || "draft";
 	$("#activityObjectives").value = activity.objectives || "";
@@ -2240,7 +2242,7 @@ function renderActivities() {
 		<article class="activity-card ${escapeHtml(activity.status)}">
 			<div>
 				<strong>${escapeHtml(activity.title)}</strong>
-				<span>${escapeHtml(activity.subject)} · ${escapeHtml(activity.level)} · ${escapeHtml(String(activity.durationMinutes))} min</span>
+				<span>${escapeHtml(activity.subject)} · ${escapeHtml(activity.level)} · ${escapeHtml(String(activity.durationMinutes))} min · Dificultad ${escapeHtml(String(activity.difficulty || 5))}/10</span>
 			</div>
 			<p>${escapeHtml(firstLine(activity.objectives))}</p>
 			<footer>
@@ -2335,17 +2337,48 @@ function renderBookSubmissions(error) {
 	node.innerHTML = state.bookSubmissions.map((item) => {
 		const completed = item.aiStatus === "completed" && Number.isFinite(Number(item.aiScore));
 		const integrity = completed ? `${Math.round(Number(item.aiScore))}% señal IA` : readableAIStatus(item.aiStatus || "pending");
+		const status = item.reviewStatus || "pending";
+		const statusLabel = status === "accepted" ? "Aceptada" : status === "rejected" ? "Devuelta" : "Pendiente";
+		const review = status === "pending" ? `
+			<div class="book-review-actions">
+				<label><span>Motivo o comentario para el alumno</span><textarea data-review-reason="${escapeHtml(item.id)}" maxlength="500" rows="3" placeholder="Explica qué está bien o qué debe revisar..." required></textarea></label>
+				<div><button type="button" class="review-reject" data-review-decision="rejected" data-submission-id="${escapeHtml(item.id)}">Devolver para revisar</button><button type="button" class="review-accept" data-review-decision="accepted" data-submission-id="${escapeHtml(item.id)}">Aceptar y dar recompensa</button></div>
+				<p class="portal-message" data-review-message="${escapeHtml(item.id)}"></p>
+			</div>` : `
+			<div class="book-review-result ${escapeHtml(status)}"><strong>${escapeHtml(statusLabel)}</strong><span>${escapeHtml(item.reviewReason || "Sin comentario")}</span>${item.rewardName ? `<span>Recompensa: ${escapeHtml(item.rewardName)}</span>` : ""}</div>`;
 		return `<details class="book-submission">
 			<summary>
-				<span><strong>${escapeHtml(item.username || "Alumno")}</strong><small>${escapeHtml(item.lessonTitle || item.bookTitle || "Libro firmado")} · ${escapeHtml(formatDateTime(item.createdAt))}</small></span>
-				<span class="book-integrity ${completed && Number(item.aiScore) >= 70 ? "is-warning" : ""}">${escapeHtml(integrity)}</span>
+				<span><strong>${escapeHtml(item.username || "Alumno")}</strong><small>${escapeHtml(item.lessonTitle || item.bookTitle || "Libro firmado")} · Dificultad ${escapeHtml(String(item.difficulty || 5))}/10 · Revisión ${escapeHtml(String(item.revisionNumber || 1))} · ${escapeHtml(formatDateTime(item.createdAt))}</small></span>
+				<span class="book-summary-badges"><span class="book-review-status ${escapeHtml(status)}">${escapeHtml(statusLabel)}</span><span class="book-integrity ${completed && Number(item.aiScore) >= 70 ? "is-warning" : ""}">${escapeHtml(integrity)}</span></span>
 			</summary>
 			<div class="book-submission-body">
 				<div class="book-meta"><span>Libro: ${escapeHtml(item.bookTitle || "Entrega EduCraft")}</span><span>Servidor: ${escapeHtml(item.serverName || "-")}</span></div>
 				<pre>${escapeHtml(item.bookText || "Sin texto")}</pre>
+				${review}
 			</div>
 		</details>`;
 	}).join("");
+	for (const button of document.querySelectorAll("[data-review-decision]")) {
+		button.addEventListener("click", () => reviewBookSubmission(button.dataset.submissionId, button.dataset.reviewDecision));
+	}
+}
+
+async function reviewBookSubmission(id, decision) {
+	const reasonNode = document.querySelector(`[data-review-reason="${CSS.escape(id)}"]`);
+	const messageNode = document.querySelector(`[data-review-message="${CSS.escape(id)}"]`);
+	const reason = reasonNode?.value.trim() || "";
+	if (reason.length < 3) {
+		setMessage(messageNode, "Escribe un motivo de al menos 3 caracteres para el alumno.", "error");
+		reasonNode?.focus();
+		return;
+	}
+	try {
+		setMessage(messageNode, decision === "accepted" ? "Preparando la recompensa..." : "Devolviendo el libro...", "");
+		await request(`/dashboard/book-submissions/${encodeURIComponent(id)}/review`, { method: "POST", body: { decision, reason } });
+		await loadBookSubmissions();
+	} catch (error) {
+		setMessage(messageNode, error.message, "error");
+	}
 }
 
 function activityPayload() {
@@ -2354,6 +2387,7 @@ function activityPayload() {
 		subject: $("#activitySubject").value,
 		level: $("#activityLevel").value,
 		durationMinutes: Number($("#activityDuration").value),
+		difficulty: Number($("#activityDifficulty").value),
 		templateKey: document.querySelector("[data-activity-template].is-active")?.dataset.activityTemplate || "custom",
 		programmingMode: $("#activityProgrammingMode").value,
 		status: $("#activityStatus").value,
