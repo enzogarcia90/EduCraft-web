@@ -27,6 +27,7 @@ const state = {
 	moderationAlerts: [],
 	studentEvents: [],
 	bookSubmissions: [],
+	openBookSubmissions: new Set(),
 	activities: [],
 	aiIntegrity: null,
 	aiIntegritySettings: null,
@@ -2326,7 +2327,6 @@ function renderBookSubmissions(error) {
 	if (!node) {
 		return;
 	}
-	const openSubmissions = new Set(Array.from(node.querySelectorAll("details[open][data-submission-id]"), (detail) => detail.dataset.submissionId));
 	if (error) {
 		node.innerHTML = `<div class="book-submission-empty">${escapeHtml(error.message || "No se pudieron cargar las entregas.")}</div>`;
 		return;
@@ -2347,7 +2347,7 @@ function renderBookSubmissions(error) {
 				<p class="portal-message" data-review-message="${escapeHtml(item.id)}"></p>
 			</div>` : `
 			<div class="book-review-result ${escapeHtml(status)}"><strong>${escapeHtml(statusLabel)}</strong><span>${escapeHtml(item.reviewReason || "Sin comentario")}</span>${item.rewardName ? `<span>Recompensa: ${escapeHtml(item.rewardName)}</span>` : ""}</div>`;
-		return `<details class="book-submission" data-submission-id="${escapeHtml(item.id)}" ${openSubmissions.has(item.id) ? "open" : ""}>
+		return `<details class="book-submission" data-submission-id="${escapeHtml(item.id)}" ${state.openBookSubmissions.has(item.id) ? "open" : ""}>
 			<summary>
 				<span><strong>${escapeHtml(item.username || "Alumno")}</strong><small>${escapeHtml(item.lessonTitle || item.bookTitle || "Libro firmado")} · Dificultad ${escapeHtml(String(item.difficulty || 5))}/10 · Revisión ${escapeHtml(String(item.revisionNumber || 1))} · ${escapeHtml(formatDateTime(item.createdAt))}</small></span>
 				<span class="book-summary-badges"><span class="book-review-status ${escapeHtml(status)}">${escapeHtml(statusLabel)}</span><span class="book-integrity ${completed && Number(item.aiScore) >= 70 ? "is-warning" : ""}">${escapeHtml(integrity)}</span></span>
@@ -2359,6 +2359,15 @@ function renderBookSubmissions(error) {
 			</div>
 		</details>`;
 	}).join("");
+	for (const detail of node.querySelectorAll("details[data-submission-id]")) {
+		detail.addEventListener("toggle", () => {
+			if (detail.open) {
+				state.openBookSubmissions.add(detail.dataset.submissionId);
+			} else {
+				state.openBookSubmissions.delete(detail.dataset.submissionId);
+			}
+		});
+	}
 	for (const button of document.querySelectorAll("[data-review-decision]")) {
 		button.addEventListener("click", () => reviewBookSubmission(button.dataset.submissionId, button.dataset.reviewDecision));
 	}
