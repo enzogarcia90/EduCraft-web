@@ -1705,6 +1705,89 @@ body.portal-app {
 	.class-chat-message { grid-template-columns: 1fr; gap: 7px; }
 }
 
+/* Clearer dashboard hierarchy and section navigation */
+body.portal-app .portal-layout { grid-template-columns: 260px minmax(0, 1fr); }
+body.portal-app .portal-sidebar { padding: 32px 24px; }
+body.portal-app .portal-sidebar .portal-title { font-size: clamp(34px, 3vw, 46px); line-height: .96; }
+body.portal-app .portal-sidebar p:not(.eyebrow) { font-size: 14px; line-height: 1.55; }
+body.portal-app .workspace-head h2 { font-size: clamp(30px, 3vw, 44px); }
+body.portal-app .portal-main { gap: 18px; }
+
+body.portal-app .teacher-page-tabs { gap: 5px; padding: 6px; }
+body.portal-app .teacher-page-tabs a {
+	position: relative;
+	gap: 8px;
+	justify-content: flex-start;
+	min-height: 48px;
+	padding: 9px 12px;
+	font-size: 12px;
+}
+body.portal-app .teacher-page-tabs a::before {
+	display: grid;
+	width: 24px;
+	height: 24px;
+	flex: 0 0 24px;
+	place-items: center;
+	border-radius: 50%;
+	background: #e7efeb;
+	color: #315148;
+	font-size: 12px;
+	content: "•";
+}
+body.portal-app [data-teacher-page="info"]::before,
+body.portal-app [data-tic-page="resumen"]::before { content: "⌂"; }
+body.portal-app [data-teacher-page="clases"]::before { content: "✎"; }
+body.portal-app [data-teacher-page="control"]::before,
+body.portal-app [data-tic-page="operacion"]::before { content: "▶"; }
+body.portal-app [data-teacher-page="seguimiento"]::before { content: "✓"; }
+body.portal-app [data-teacher-page="integridad"]::before { content: "◇"; }
+body.portal-app [data-tic-page="alumnos"]::before { content: "A"; }
+body.portal-app [data-tic-page="profesores"]::before { content: "P"; }
+body.portal-app [data-tic-page="horario"]::before { content: "▦"; }
+body.portal-app .teacher-page-tabs a.is-active::before { background: #cdff55; color: #13211d; }
+body.portal-app .teacher-page-tabs a.is-active::after {
+	position: absolute;
+	right: 9px;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #cdff55;
+	content: "";
+}
+
+.section-guide {
+	display: flex;
+	gap: 14px;
+	align-items: center;
+	padding: 14px 18px;
+	border: 1px solid #cfe0d8;
+	border-left: 4px solid var(--portal-accent);
+	border-radius: 4px;
+	background: #f8fbf9;
+}
+.section-guide > span { flex: 0 0 auto; color: var(--portal-accent-dark); font-size: 10px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
+.section-guide div { display: flex; gap: 10px; align-items: baseline; min-width: 0; }
+.section-guide strong { font-size: 15px; }
+.section-guide p { margin: 0; color: var(--portal-muted); font-size: 13px; line-height: 1.45; }
+
+body.portal-app .portal-table { display: block; max-width: 100%; overflow-x: auto; }
+body.portal-app .portal-grid article > h2,
+body.portal-app .portal-panel > h2 { margin-top: 0; }
+
+@media (max-width: 980px) {
+	body.portal-app .portal-layout { grid-template-columns: 1fr; }
+	body.portal-app .portal-sidebar { padding-block: 22px; }
+	body.portal-app .portal-sidebar .identity-list { margin-top: 18px; }
+}
+
+@media (max-width: 760px) {
+	body.portal-app .workspace-head { align-items: flex-start; }
+	body.portal-app .teacher-page-tabs { grid-template-columns: repeat(5, minmax(132px, 1fr)); }
+	body.portal-app .teacher-page-tabs.tic-page-tabs { grid-template-columns: repeat(5, minmax(132px, 1fr)); }
+	.section-guide { align-items: flex-start; }
+	.section-guide div { display: grid; gap: 3px; }
+}
+
 .activity-ai-panel {
 	display: grid;
 	gap: 12px;

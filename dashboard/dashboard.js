@@ -585,7 +585,10 @@ function setTeacherPage(page, persist) {
 		const active = button.dataset.teacherPage === nextPage;
 		button.classList.toggle("is-active", active);
 		button.setAttribute("aria-selected", active ? "true" : "false");
+		if (active) button.setAttribute("aria-current", "page");
+		else button.removeAttribute("aria-current");
 	}
+	renderSectionGuide("teacher", nextPage);
 	for (const panel of document.querySelectorAll("[data-teacher-panel]")) {
 		panel.hidden = panel.dataset.teacherPanel !== nextPage;
 	}
@@ -631,7 +634,10 @@ function setTicPage(page) {
 		const active = button.dataset.ticPage === nextPage;
 		button.classList.toggle("is-active", active);
 		button.setAttribute("aria-selected", active ? "true" : "false");
+		if (active) button.setAttribute("aria-current", "page");
+		else button.removeAttribute("aria-current");
 	}
+	renderSectionGuide("tic", nextPage);
 	for (const panel of document.querySelectorAll("[data-tic-panel]")) {
 		panel.hidden = panel.dataset.ticPanel !== nextPage;
 	}
@@ -643,6 +649,35 @@ function setTicPage(page) {
 		renderMinecraftActions();
 		renderActionOpsPanel();
 	}
+}
+
+function renderSectionGuide(area, page) {
+	const guides = {
+		teacher: {
+			info: ["Informacion del juego", "Consulta de un vistazo el estado de alumnos, sesiones y servidores."],
+			clases: ["Preparar clases", "Crea una actividad nueva o reutiliza una de tu biblioteca."],
+			control: ["Controlar la clase", "Gestiona alumnos, chat, alertas y acciones mientras la clase esta en marcha."],
+			seguimiento: ["Revisar el progreso", "Comprueba asistencia, entregas, incidencias y actividad de cada alumno."],
+			integridad: ["Revisar entregas", "Consulta libros entregados y usa las señales de IA solo como apoyo orientativo."]
+		},
+		tic: {
+			resumen: ["Resumen del centro", "Comprueba usuarios, licencias, sesiones y estado general."],
+			alumnos: ["Gestionar alumnos", "Crea cuentas, importa listas y revisa los grupos del centro."],
+			profesores: ["Gestionar profesores", "Crea cuentas docentes y consulta su estado."],
+			horario: ["Configurar horario", "Importa el horario completo desde Excel, CSV o Google Sheets."],
+			operacion: ["Supervisar operacion", "Revisa acciones pendientes y su entrega a los servidores."]
+		}
+	};
+	const nav = document.querySelector(area === "teacher" ? "[data-teacher-page]" : "[data-tic-page]")?.closest("nav");
+	const content = guides[area]?.[page];
+	if (!nav || !content) return;
+	let guide = nav.nextElementSibling;
+	if (!guide?.classList.contains("section-guide")) {
+		guide = document.createElement("div");
+		guide.className = "section-guide";
+		nav.insertAdjacentElement("afterend", guide);
+	}
+	guide.innerHTML = `<span>Paso actual</span><div><strong>${escapeHtml(content[0])}</strong><p>${escapeHtml(content[1])}</p></div>`;
 }
 
 async function login(email, password, messageNode) {
