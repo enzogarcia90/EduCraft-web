@@ -2282,6 +2282,7 @@ function renderClassServers(error) {
 	}
 	rack.innerHTML = state.classServers.length ? state.classServers.map((server) => {
 		const stateLabel = server.status?.state || (server.record ? "creado" : "sin crear");
+		const readOnly = server.status?.managedBy === "external";
 		const agentText = server.agentAvailable ? stateLabel : "agente sin configurar";
 		return `
 			<article class="class-server-item">
@@ -2408,9 +2409,9 @@ function renderSysServerRack(error) {
 				<div class="class-server-actions">
 					<button type="button" data-sys-console="${escapeHtml(server.id)}">Consola</button>
 					<button type="button" data-sys-server-action="status" data-sys-server-id="${escapeHtml(server.id)}">Estado</button>
-					<button type="button" data-sys-server-action="start" data-sys-server-id="${escapeHtml(server.id)}">Start</button>
-					<button type="button" data-sys-server-action="restart" data-sys-server-id="${escapeHtml(server.id)}">Restart</button>
-					<button type="button" data-sys-server-action="stop" data-sys-server-id="${escapeHtml(server.id)}">Stop</button>
+					<button type="button" data-sys-server-action="start" data-sys-server-id="${escapeHtml(server.id)}" ${readOnly ? "disabled title=\"Gestionado por Windows\"" : ""}>Start</button>
+					<button type="button" data-sys-server-action="restart" data-sys-server-id="${escapeHtml(server.id)}" ${readOnly ? "disabled title=\"Gestionado por Windows\"" : ""}>Restart</button>
+					<button type="button" data-sys-server-action="stop" data-sys-server-id="${escapeHtml(server.id)}" ${readOnly ? "disabled title=\"Gestionado por Windows\"" : ""}>Stop</button>
 				</div>
 			</article>
 		`;
