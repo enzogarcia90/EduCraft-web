@@ -634,7 +634,7 @@ function bindTicPages() {
 }
 
 function setTicPage(page) {
-	const validPages = new Set(["resumen", "alumnos", "profesores", "horario", "operacion"]);
+	const validPages = new Set(["resumen", "alumnos", "profesores", "horario", "operacion", "facturacion"]);
 	const nextPage = validPages.has(page) ? page : "resumen";
 	for (const button of document.querySelectorAll("[data-tic-page]")) {
 		const active = button.dataset.ticPage === nextPage;
