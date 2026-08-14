@@ -48,7 +48,8 @@ const state = {
 	activityChat: [],
 	activityDraft: null,
 	studentImportRows: [],
-	scheduleImportRows: []
+	scheduleImportRows: [],
+	billing: null
 };
 let sessionRefreshPromise = null;
 let blockViewer = null;
@@ -397,6 +398,9 @@ function bindDashboard() {
 	$("#activityReset")?.addEventListener("click", () => fillActivityTemplate(activityTemplates[0], true));
 	$("#sysRefreshButton")?.addEventListener("click", loadSysAdmin);
 	$("#sysVelocityConsoleButton")?.addEventListener("click", loadVelocityConsole);
+	$("#billingCheckoutButton")?.addEventListener("click", startBillingCheckout);
+	$("#billingPortalButton")?.addEventListener("click", openBillingPortal);
+	$("#billingReloadButton")?.addEventListener("click", loadBilling);
 	if (currentPage === "administracion") startConsoleTail();
 	$("#protectedRegionForm")?.addEventListener("submit", createProtectedRegion);
 	$("[data-delete-protected-region]")?.addEventListener("click", deleteProtectedRegion);
@@ -667,7 +671,8 @@ function renderSectionGuide(area, page) {
 			alumnos: ["Gestionar alumnos", "Crea cuentas, importa listas y revisa los grupos del centro."],
 			profesores: ["Gestionar profesores", "Crea cuentas docentes y consulta su estado."],
 			horario: ["Configurar horario", "Importa el horario completo desde Excel, CSV o Google Sheets."],
-			operacion: ["Supervisar operacion", "Revisa acciones pendientes y su entrega a los servidores."]
+			operacion: ["Supervisar operacion", "Revisa acciones pendientes y su entrega a los servidores."],
+			facturacion: ["Gestionar facturacion", "Consulta el plan, las renovaciones y las facturas del centro."]
 		}
 	};
 	const nav = document.querySelector(area === "teacher" ? "[data-teacher-page]" : "[data-tic-page]")?.closest("nav");
@@ -741,6 +746,7 @@ async function requireDashboardSession() {
 		if (currentPage === "tic") {
 			await loadTeachers();
 			await loadSchedule();
+			if ($("#billingOverview")) await loadBilling();
 		}
 		if (currentPage === "tic" || currentPage === "profesor") {
 			await loadTeacherActions();
@@ -774,6 +780,130 @@ async function loadSummary() {
 	renderSignals();
 	renderOperations();
 	renderTracking();
+}
+
+async function loadBilling() {
+	const message = $("#billingMessage");
+	if (!$("#billingOverview")) return;
+	setMessage(message, "Cargando facturacion...", "");
+	try {
+		state.billing = await request("/api/billing/summary");
+		renderBilling();
+		const checkoutState = new URLSearchParams(location.search).get("checkout");
+		if (checkoutState === "success") setMessage(message, "Pago enviado. El estado se actualizara cuando Stripe confirme el webhook.", "ok");
+		else if (checkoutState === "cancel") setMessage(message, "El proceso de pago se cancelo sin realizar cargos.", "");
+		else setMessage(message, "", "");
+	} catch (error) {
+		setMessage(message, error.message || "No se pudo consultar Stripe.", "error");
+		$("#billingOverview").innerHTML = `<div class="billing-empty"><strong>Facturacion no disponible</strong><p>Prueba de nuevo en unos minutos.</p></div>`;
+	}
+}
+
+function renderBilling() {
+	const billing = state.billing || {};
+	const account = billing.account || {};
+	const configured = Boolean(billing.configured);
+	const status = billingStatus(account.subscriptionStatus);
+	const price = account.unitAmount == null ? "Precio pendiente" : formatMoney(account.unitAmount, account.currency);
+	const frequency = billingFrequency(account.billingInterval, account.billingIntervalCount);
+	const renewal = account.currentPeriodEnd ? formatBillingDate(account.currentPeriodEnd) : "Todavia sin fecha";
+	const method = account.paymentMethodLast4 ? `${String(account.paymentMethodBrand || account.paymentMethodType || "Tarjeta").toUpperCase()} ·•••• ${escapeHtml(account.paymentMethodLast4)}` : "Sin metodo guardado";
+	$("#billingModeChip").textContent = billing.testMode ? "Stripe TEST" : "Stripe";
+	$("#billingOverview").innerHTML = `
+		<div class="billing-plan-copy"><span class="billing-kicker">Plan actual</span><h3>${escapeHtml(billing.planName || "Sin plan")}</h3><div class="billing-price">${escapeHtml(price)} <small>${escapeHtml(frequency)}</small></div></div>
+		<div class="billing-facts">
+			<div><span>Estado</span><strong class="billing-state ${status.className}">${status.label}</strong></div>
+			<div><span>Proxima renovacion</span><strong>${escapeHtml(renewal)}</strong></div>
+			<div><span>Renovacion automatica</span><strong>${account.cancelAtPeriodEnd ? "Cancelacion programada" : "Activada"}</strong></div>
+			<div><span>Metodo de pago</span><strong>${method}</strong></div>
+		</div>`;
+	const select = $("#billingPlanSelect");
+	select.innerHTML = (billing.plans || []).map((plan) => `<option value="${escapeHtml(plan.key)}" ${plan.key === account.planKey ? "selected" : ""}>${escapeHtml(plan.name)}</option>`).join("");
+	const canStart = configured && billing.canManage && (account.subscriptionStatus === "not_configured" || account.subscriptionStatus === "canceled" || account.subscriptionStatus === "incomplete_expired");
+	$("#billingCheckoutButton").disabled = !canStart || !select.options.length;
+	$("#billingPortalButton").disabled = !configured || !billing.canManage || account.subscriptionStatus === "not_configured";
+	$("#billingConfigNotice").hidden = configured;
+	$("#billingActions").classList.toggle("is-readonly", !billing.canManage);
+	renderBillingInvoices(billing.invoices || []);
+}
+
+function renderBillingInvoices(invoices) {
+	const host = $("#billingInvoices");
+	if (!invoices.length) { host.innerHTML = `<div class="billing-empty"><strong>Aun no hay facturas</strong><p>Las facturas confirmadas por Stripe apareceran aqui.</p></div>`; return; }
+	host.innerHTML = invoices.map((invoice) => {
+		const status = billingInvoiceStatus(invoice.status);
+		const links = [];
+		if (safeHTTPSURL(invoice.hostedInvoiceUrl)) links.push(`<a class="portal-ghost" href="${escapeHtml(invoice.hostedInvoiceUrl)}" target="_blank" rel="noopener">Ver factura</a>`);
+		if (safeHTTPSURL(invoice.invoicePdfUrl)) links.push(`<a class="portal-ghost" href="${escapeHtml(invoice.invoicePdfUrl)}" target="_blank" rel="noopener">Descargar PDF</a>`);
+		return `<article class="billing-invoice"><div><span>${escapeHtml(invoice.number || "Factura Stripe")}</span><strong>${escapeHtml(formatMoney(invoice.amountDue, invoice.currency))}</strong><small>${escapeHtml(formatBillingDate(invoice.createdAt))}</small></div><div><span class="billing-state ${status.className}">${status.label}</span><div class="billing-invoice-actions">${links.join("")}</div></div></article>`;
+	}).join("");
+}
+
+async function startBillingCheckout() {
+	const button = $("#billingCheckoutButton");
+	const message = $("#billingMessage");
+	button.disabled = true;
+	setMessage(message, "Preparando pago seguro en Stripe...", "");
+	try {
+		const response = await request("/api/billing/checkout", { method: "POST", body: { plan: $("#billingPlanSelect").value } });
+		if (!safeHTTPSURL(response.url)) throw new Error("Stripe no devolvio una URL segura.");
+		location.assign(response.url);
+	} catch (error) {
+		setMessage(message, error.message || "No se pudo iniciar el pago.", "error");
+		button.disabled = false;
+	}
+}
+
+async function openBillingPortal() {
+	const button = $("#billingPortalButton");
+	const message = $("#billingMessage");
+	button.disabled = true;
+	setMessage(message, "Abriendo el portal seguro...", "");
+	try {
+		const response = await request("/api/billing/portal", { method: "POST" });
+		if (!safeHTTPSURL(response.url)) throw new Error("Stripe no devolvio una URL segura.");
+		location.assign(response.url);
+	} catch (error) {
+		setMessage(message, error.message || "No se pudo abrir el portal.", "error");
+		button.disabled = false;
+	}
+}
+
+function billingStatus(value) {
+	const values = {
+		active: ["Activo", "is-success"], trialing: ["En prueba", "is-info"], past_due: ["Pago pendiente", "is-warning"],
+		unpaid: ["Impagado", "is-danger"], canceled: ["Cancelado", "is-muted"], incomplete: ["Pago incompleto", "is-warning"],
+		incomplete_expired: ["Pago caducado", "is-muted"], paused: ["Pausado", "is-warning"], not_configured: ["Sin contratar", "is-muted"]
+	};
+	const item = values[value] || ["Pendiente", "is-muted"];
+	return { label: item[0], className: item[1] };
+}
+
+function billingInvoiceStatus(value) {
+	const values = { paid: ["Pagada", "is-success"], open: ["Pendiente", "is-warning"], draft: ["Borrador", "is-info"], void: ["Anulada", "is-muted"], uncollectible: ["Incobrable", "is-danger"] };
+	const item = values[value] || [value || "Pendiente", "is-muted"];
+	return { label: item[0], className: item[1] };
+}
+
+function formatMoney(amount, currency) {
+	try { return new Intl.NumberFormat("es-ES", { style: "currency", currency: String(currency || "EUR").toUpperCase() }).format(Number(amount || 0) / 100); }
+	catch (_) { return `${(Number(amount || 0) / 100).toFixed(2)} ${String(currency || "EUR").toUpperCase()}`; }
+}
+
+function formatBillingDate(value) {
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? "Sin fecha" : new Intl.DateTimeFormat("es-ES", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+}
+
+function billingFrequency(interval, count) {
+	if (!interval) return "";
+	if (interval === "year") return Number(count || 1) === 1 ? "/ ano" : `/ ${count} anos`;
+	if (interval === "month") return Number(count || 1) === 1 ? "/ mes" : `/ ${count} meses`;
+	return `/ ${interval}`;
+}
+
+function safeHTTPSURL(value) {
+	try { return new URL(value).protocol === "https:"; } catch (_) { return false; }
 }
 
 async function loadPortalContext() {

@@ -2407,6 +2407,57 @@ body.portal-app .portal-sidebar .portal-title {
 }
 
 body.portal-app .portal-sidebar p:not(.eyebrow) { color: #aab9b2; }
+
+/* Billing: interfaz nativa; Stripe conserva los datos financieros sensibles. */
+.billing-overview {
+	display: grid;
+	grid-template-columns: minmax(220px, .72fr) minmax(0, 1.28fr);
+	gap: 28px;
+	padding: clamp(24px, 4vw, 42px);
+	border: 1px solid rgba(21, 152, 111, .18);
+	border-radius: 26px;
+	background: linear-gradient(135deg, rgba(21, 152, 111, .11), rgba(205, 255, 85, .06)), var(--surface, #fff);
+	box-shadow: 0 20px 50px rgba(15, 42, 33, .08);
+}
+.billing-kicker, .billing-facts span, .billing-invoice small { display: block; color: var(--muted, #65756e); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+.billing-plan-copy h3 { margin: 8px 0 14px; font-size: clamp(28px, 4vw, 44px); line-height: 1; }
+.billing-price { color: #0d5f49; font-size: clamp(24px, 3vw, 36px); font-weight: 800; }
+.billing-price small { font-size: 14px; font-weight: 600; color: var(--muted, #65756e); }
+.billing-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.billing-facts > div { padding: 16px; border: 1px solid rgba(18, 72, 55, .1); border-radius: 16px; background: rgba(255,255,255,.7); }
+.billing-facts strong { display: block; margin-top: 7px; overflow-wrap: anywhere; }
+.billing-state { display: inline-flex !important; width: fit-content; align-items: center; min-height: 27px; padding: 5px 10px; border-radius: 999px; font-size: 12px; }
+.billing-state.is-success { color: #08724f; background: #dff8ec; }
+.billing-state.is-info { color: #185f9f; background: #e4f1ff; }
+.billing-state.is-warning { color: #8c5400; background: #fff0ca; }
+.billing-state.is-danger { color: #a12632; background: #ffe3e6; }
+.billing-state.is-muted { color: #58645f; background: #edf1ef; }
+.billing-layout { margin-top: 20px; }
+.billing-plan-field { display: grid; gap: 8px; margin: 20px 0; }
+.billing-plan-field select { width: 100%; }
+.billing-safe-note { margin: 20px 0 0; color: var(--muted, #65756e); font-size: 13px; line-height: 1.55; }
+.billing-actions-card.is-readonly .billing-plan-field, .billing-actions-card.is-readonly .builder-actions { opacity: .55; }
+.billing-security-list { display: grid; gap: 12px; margin: 20px 0 0; padding: 0; list-style: none; }
+.billing-security-list li { padding: 13px 14px 13px 42px; position: relative; border-radius: 14px; background: rgba(21, 152, 111, .07); }
+.billing-security-list li::before { content: "✓"; position: absolute; left: 16px; color: #15986f; font-weight: 900; }
+.billing-history { margin-top: 20px; }
+.billing-invoices { display: grid; gap: 10px; margin-top: 18px; }
+.billing-invoice { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 17px; border: 1px solid rgba(18,72,55,.1); border-radius: 16px; background: rgba(255,255,255,.68); }
+.billing-invoice > div { display: grid; gap: 5px; }
+.billing-invoice > div:last-child { justify-items: end; }
+.billing-invoice-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 7px; }
+.billing-invoice-actions .portal-ghost { min-height: 34px; padding: 7px 10px; font-size: 12px; }
+.billing-empty { grid-column: 1 / -1; padding: 24px; text-align: center; color: var(--muted, #65756e); }
+.billing-empty strong { display: block; color: var(--ink, #163128); font-size: 18px; }
+.billing-empty p { margin: 6px 0 0; }
+.billing-notice { padding: 14px 16px; margin: 0 0 18px; border: 1px solid #efcf83; border-radius: 14px; background: #fff5da; color: #725000; }
+@media (max-width: 760px) {
+	.billing-overview { grid-template-columns: 1fr; }
+	.billing-facts { grid-template-columns: 1fr; }
+	.billing-invoice { align-items: flex-start; flex-direction: column; }
+	.billing-invoice > div:last-child { justify-items: start; }
+	.billing-invoice-actions { justify-content: start; }
+}
 body.portal-app .portal-sidebar .identity-list { margin-top: 30px; padding-top: 18px; border-top: 1px solid rgba(205,255,85,.16); }
 body.portal-app .portal-sidebar .identity-list div { border-color: rgba(255,255,255,.08); }
 body.portal-app .portal-sidebar .identity-list dt,

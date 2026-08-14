@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="EduCraft">
+		<meta name="application-name" content="EduCraft">
+		<meta name="robots" content="noindex,nofollow">
+		<meta name="theme-color" content="#15986f">
+		<link rel="icon" type="image/png" sizes="32x32" href="../assets/educraft-icon-32.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="../assets/educraft-icon-180.png">
+		<title>Facturacion | EduCraft</title>
+		<link rel="stylesheet" href="../styles.css">
+		<link rel="stylesheet" href="dashboard.css?v=20260814-billing1">
+	</head>
+	<body class="portal-app" data-dashboard-page="tic" data-tic-default="facturacion">
+		<header class="portal-header">
+			<a class="portal-brand" href="../index.html"><span class="brand-mark" aria-hidden="true"><img src="../assets/educraft-icon-192.png" alt=""></span><span><strong>EduCraft</strong><small>Panel TIC</small></span></a>
+			<div class="portal-session"><span id="sessionLabel">Validando sesion</span><button id="logoutButton" class="portal-ghost" type="button">Salir</button></div>
+		</header>
+		<main class="portal-layout">
+			<aside class="portal-sidebar">
+				<p class="eyebrow">Institucion</p>
+				<h1 class="portal-title">Facturacion</h1>
+				<p>Gestiona el plan del centro, sus renovaciones y las facturas confirmadas por Stripe.</p>
+				<div id="identityPanel" class="identity-list"></div>
+			</aside>
+			<section class="portal-main">
+				<div class="workspace-head">
+					<div><p class="eyebrow">Cuenta del centro</p><h2>Plan, pagos y facturas</h2></div>
+					<span id="billingModeChip" class="status-chip">Stripe TEST</span>
+				</div>
+				<nav class="teacher-page-tabs tic-page-tabs" aria-label="Secciones TIC">
+					<a href="tic.html" data-tic-page="resumen">Resumen</a>
+					<a href="tic-alumnos.html" data-tic-page="alumnos">Alumnos</a>
+					<a href="tic-profesores.html" data-tic-page="profesores">Profesores</a>
+					<a href="tic-horario.html" data-tic-page="horario">Horario</a>
+					<a href="tic-operacion.html" data-tic-page="operacion">Operacion</a>
+					<a href="tic-facturacion.html" data-tic-page="facturacion">Facturacion</a>
+				</nav>
+				<section class="teacher-page-panel" data-tic-panel="facturacion">
+					<p id="billingConfigNotice" class="billing-notice" hidden>Stripe todavia no esta configurado en el servidor. El resto de EduCraft sigue disponible.</p>
+					<section id="billingOverview" class="billing-overview" aria-live="polite">
+						<div class="billing-empty"><strong>Cargando facturacion</strong><p>Consultando el estado seguro del centro.</p></div>
+					</section>
+					<section class="portal-grid two billing-layout">
+						<article id="billingActions" class="billing-actions-card">
+							<div class="builder-head"><div><p class="eyebrow">Suscripcion</p><h2>Gestionar plan</h2></div><button id="billingReloadButton" class="portal-ghost" type="button">Actualizar</button></div>
+							<label class="billing-plan-field"><span>Plan disponible</span><select id="billingPlanSelect" aria-label="Plan de EduCraft"></select></label>
+							<div class="builder-actions"><button id="billingCheckoutButton" class="button primary" type="button" disabled>Contratar plan</button><button id="billingPortalButton" class="portal-ghost" type="button" disabled>Gestionar facturacion</button></div>
+							<p class="billing-safe-note">El pago y los datos bancarios se gestionan en Stripe. EduCraft nunca almacena el numero completo de tarjeta ni el CVC.</p>
+							<p id="billingMessage" class="portal-message" role="status"></p>
+						</article>
+						<article>
+							<p class="eyebrow">Seguridad</p><h2>Control financiero</h2>
+							<ul class="billing-security-list"><li>Acceso limitado a administradores autorizados.</li><li>La licencia cambia solo tras webhooks firmados.</li><li>Las operaciones actuales usan Stripe Test Mode.</li></ul>
+						</article>
+					</section>
+					<section class="portal-panel billing-history">
+						<div class="builder-head"><div><p class="eyebrow">Historial</p><h2>Facturas</h2></div><span class="status-chip">Sin datos sensibles</span></div>
+						<div id="billingInvoices" class="billing-invoices"></div>
+					</section>
+				</section>
+			</section>
+		</main>
+		<script src="../cliente/educraft-config.js"></script>
+		<script src="dashboard.js?v=20260814-billing1"></script>
+	</body>
+</html>
