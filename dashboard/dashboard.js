@@ -2282,7 +2282,6 @@ function renderClassServers(error) {
 	}
 	rack.innerHTML = state.classServers.length ? state.classServers.map((server) => {
 		const stateLabel = server.status?.state || (server.record ? "creado" : "sin crear");
-		const readOnly = server.status?.managedBy === "external";
 		const agentText = server.agentAvailable ? stateLabel : "agente sin configurar";
 		return `
 			<article class="class-server-item">
@@ -2400,6 +2399,7 @@ function renderSysServerRack(error) {
 	}
 	rack.innerHTML = state.classServers.length ? state.classServers.map((server) => {
 		const stateLabel = server.status?.state || (server.record ? "creado" : "sin crear");
+		const readOnly = server.status?.managedBy === "external";
 		return `
 			<article class="class-server-item sys-server-item">
 				<div>
