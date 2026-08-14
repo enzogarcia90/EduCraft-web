@@ -792,6 +792,7 @@ async function loadBilling() {
 		const checkoutState = new URLSearchParams(location.search).get("checkout");
 		if (checkoutState === "success") setMessage(message, "Pago enviado. El estado se actualizara cuando Stripe confirme el webhook.", "ok");
 		else if (checkoutState === "cancel") setMessage(message, "El proceso de pago se cancelo sin realizar cargos.", "");
+		else if (!["not_configured", "canceled", "incomplete_expired"].includes(state.billing?.account?.subscriptionStatus)) setMessage(message, "Ya tienes un plan activo. Usa Cambiar o gestionar plan para elegir Academy, School o Campus sin crear una suscripcion duplicada.", "ok");
 		else setMessage(message, "", "");
 	} catch (error) {
 		setMessage(message, error.message || "No se pudo consultar Stripe.", "error");
@@ -820,8 +821,13 @@ function renderBilling() {
 	const select = $("#billingPlanSelect");
 	select.innerHTML = (billing.plans || []).map((plan) => `<option value="${escapeHtml(plan.key)}" ${plan.key === account.planKey ? "selected" : ""}>${escapeHtml(`${plan.name} · ${formatMoney(plan.unitAmount, plan.currency)}/${billingIntervalShort(plan.billingInterval)}`)}</option>`).join("");
 	const canStart = configured && billing.canManage && (account.subscriptionStatus === "not_configured" || account.subscriptionStatus === "canceled" || account.subscriptionStatus === "incomplete_expired");
-	$("#billingCheckoutButton").disabled = !canStart || !select.options.length;
-	$("#billingPortalButton").disabled = !configured || !billing.canManage || account.subscriptionStatus === "not_configured";
+	const checkoutButton = $("#billingCheckoutButton");
+	const portalButton = $("#billingPortalButton");
+	select.disabled = !canStart;
+	checkoutButton.disabled = !canStart || !select.options.length;
+	checkoutButton.textContent = canStart ? "Contratar plan" : "Plan ya contratado";
+	portalButton.disabled = !configured || !billing.canManage || account.subscriptionStatus === "not_configured";
+	portalButton.textContent = canStart ? "Gestionar facturacion" : "Cambiar o gestionar plan";
 	$("#billingConfigNotice").hidden = configured;
 	$("#billingActions").classList.toggle("is-readonly", !billing.canManage);
 	renderBillingInvoices(billing.invoices || []);
