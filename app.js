@@ -2,6 +2,42 @@ const canvas = document.getElementById("heroScene");
 const reducePageMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 initPageMotion();
+initMobileNavigation();
+
+function initMobileNavigation() {
+	const header = document.querySelector(".site-header");
+	const nav = header?.querySelector(".nav");
+	const actions = header?.querySelector(".header-actions");
+	if (!header || !nav || !actions) return;
+
+	const toggle = document.createElement("button");
+	toggle.className = "nav-toggle";
+	toggle.type = "button";
+	toggle.setAttribute("aria-expanded", "false");
+	toggle.setAttribute("aria-controls", "mobile-navigation");
+	toggle.setAttribute("aria-label", "Abrir menú");
+	toggle.innerHTML = '<span aria-hidden="true"></span><span class="nav-toggle-label">Menú</span>';
+	nav.id = "mobile-navigation";
+	header.insertBefore(toggle, nav);
+
+	function setOpen(open) {
+		header.classList.toggle("nav-open", open);
+		toggle.setAttribute("aria-expanded", String(open));
+		toggle.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
+		toggle.querySelector(".nav-toggle-label").textContent = open ? "Cerrar" : "Menú";
+	}
+
+	toggle.addEventListener("click", () => setOpen(!header.classList.contains("nav-open")));
+	header.addEventListener("click", (event) => {
+		if (event.target.closest(".nav a, .header-actions a")) setOpen(false);
+	});
+	window.addEventListener("keydown", (event) => {
+		if (event.key === "Escape") setOpen(false);
+	});
+	window.matchMedia("(min-width: 981px)").addEventListener("change", (event) => {
+		if (event.matches) setOpen(false);
+	});
+}
 
 if (canvas) {
 	const ctx = canvas.getContext("2d");
