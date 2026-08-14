@@ -2410,8 +2410,24 @@ function updateConsoleNode(node, lines, emptyText) {
 		return true;
 	});
 	if (proxyErrors) visibleLines.push(`[EduCraft] ${proxyErrors} avisos HTTP 502 del reinicio agrupados. El backend ya esta disponible.`);
-	node.textContent = visibleLines.join("\n") || emptyText;
+	node.innerHTML = visibleLines.length ? visibleLines.map(renderLogLine).join("") : `<div class="log-empty">${escapeHtml(emptyText)}</div>`;
 	if (followTail) node.scrollTop = node.scrollHeight;
+}
+
+function renderLogLine(line) {
+	const text = String(line || "");
+	const marker = text.match(/^---\s+(.+?)\s+---$/);
+	if (marker) return `<div class="log-file-marker"><span>${escapeHtml(marker[1])}</span></div>`;
+	const parsed = text.match(/^\[([^\]]+)\]\s+\[([^\]/]+)(?:\/([^\]]+))?\]:\s?(.*)$/);
+	if (!parsed) {
+		const stack = /^\s*(at |Caused by:|\.\.\. \d+ more)/.test(text);
+		return `<div class="log-line ${stack ? "is-stack" : "is-plain"}"><span class="log-message">${escapeHtml(text || " ")}</span></div>`;
+	}
+	const [, time, source, levelRaw = "INFO", message] = parsed;
+	const level = levelRaw.toUpperCase();
+	const levelClass = level === "ERROR" || level === "SEVERE" ? "error" : level === "WARN" || level === "WARNING" ? "warn" : level === "DEBUG" ? "debug" : "info";
+	const stack = /^\s*(at |Caused by:|\.\.\. \d+ more)/.test(message);
+	return `<div class="log-line level-${levelClass}${stack ? " is-stack" : ""}"><time>${escapeHtml(time)}</time><span class="log-level">${escapeHtml(level)}</span><span class="log-source" title="${escapeHtml(source)}">${escapeHtml(source)}</span><span class="log-message">${escapeHtml(message || " ")}</span></div>`;
 }
 
 function startConsoleTail() {

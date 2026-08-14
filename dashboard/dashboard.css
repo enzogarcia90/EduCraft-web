@@ -1788,6 +1788,51 @@ body.portal-app .portal-panel > h2 { margin-top: 0; }
 	.section-guide div { display: grid; gap: 3px; }
 }
 
+/* Readable live log terminal */
+.log-terminal {
+	max-height: 560px;
+	padding: 8px 0;
+	overflow: auto;
+	background: #07100d;
+	color: #d9e4df;
+	font: 12px/1.55 "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+	white-space: normal;
+	tab-size: 4;
+}
+.log-line {
+	display: grid;
+	grid-template-columns: 72px 62px minmax(120px, 210px) minmax(320px, 1fr);
+	gap: 10px;
+	align-items: baseline;
+	min-width: 760px;
+	padding: 4px 14px;
+	border-left: 3px solid transparent;
+}
+.log-line:nth-child(even) { background: rgba(255,255,255,.018); }
+.log-line:hover { background: rgba(103,213,255,.07); }
+.log-line time { color: #748b82; font-variant-numeric: tabular-nums; }
+.log-level { font-size: 10px; font-weight: 950; letter-spacing: .08em; }
+.log-source { overflow: hidden; color: #8fa69d; text-overflow: ellipsis; white-space: nowrap; }
+.log-message { color: #dce7e2; overflow-wrap: anywhere; white-space: pre-wrap; }
+.level-info .log-level { color: #67d5ff; }
+.level-info { border-left-color: rgba(103,213,255,.28); }
+.level-warn { border-left-color: #ffc857; background: rgba(255,200,87,.055); }
+.level-warn .log-level, .level-warn .log-message { color: #ffd77d; }
+.level-error { border-left-color: #ff6b6b; background: rgba(255,107,107,.07); }
+.level-error .log-level, .level-error .log-message { color: #ff9898; }
+.level-debug .log-level { color: #b597ff; }
+.log-line.is-stack { padding-block: 2px; opacity: .68; }
+.log-line.is-stack .log-message { color: #aabbb4; }
+.log-line.is-plain { display: block; min-width: 760px; padding-left: 161px; }
+.log-file-marker { position: sticky; top: 0; z-index: 2; padding: 8px 14px; border-block: 1px solid #294239; background: #101e19; color: #cdff55; font-weight: 900; letter-spacing: .06em; }
+.log-file-marker span::before { margin-right: 8px; color: #67d5ff; content: "◆"; }
+.log-empty { padding: 30px 16px; color: #80948c; text-align: center; }
+
+@media (max-width: 760px) {
+	.log-line { grid-template-columns: 66px 54px 150px minmax(280px, 1fr); gap: 7px; min-width: 650px; padding-inline: 10px; }
+	.log-line.is-plain { min-width: 650px; padding-left: 137px; }
+}
+
 .activity-ai-panel {
 	display: grid;
 	gap: 12px;
