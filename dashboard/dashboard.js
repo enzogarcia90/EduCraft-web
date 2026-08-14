@@ -2401,7 +2401,16 @@ function updateConsoleNode(node, lines, emptyText) {
 		const htmlStart = text.search(/<!doctype|<html/i);
 		return htmlStart >= 0 ? `${text.slice(0, htmlStart).trim()} [detalle HTML omitido]` : text;
 	});
-	node.textContent = cleanLines.join("\n") || emptyText;
+	let proxyErrors = 0;
+	const visibleLines = cleanLines.filter((line) => {
+		if (line.includes("[EduCraftPaper]") && line.includes("HTTP 502")) {
+			proxyErrors += 1;
+			return false;
+		}
+		return true;
+	});
+	if (proxyErrors) visibleLines.push(`[EduCraft] ${proxyErrors} avisos HTTP 502 del reinicio agrupados. El backend ya esta disponible.`);
+	node.textContent = visibleLines.join("\n") || emptyText;
 	if (followTail) node.scrollTop = node.scrollHeight;
 }
 
