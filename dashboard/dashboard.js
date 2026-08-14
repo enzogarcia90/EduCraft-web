@@ -1773,6 +1773,10 @@ function renderIdentity() {
 }
 
 function renderMetrics(metrics) {
+	const grid = $("#metricsGrid");
+	if (!grid) {
+		return;
+	}
 	const labels = {
 		institutions: "Centros",
 		activeInstitutions: "Centros activos",
@@ -1794,7 +1798,7 @@ function renderMetrics(metrics) {
 		"queuedActions"
 	];
 	const entries = preferred.filter((key) => hasOwn(metrics, key)).map((key) => [key, metrics[key]]);
-	$("#metricsGrid").innerHTML = entries.length ? entries.map(([key, value]) => `
+	grid.innerHTML = entries.length ? entries.map(([key, value]) => `
 		<article><strong>${escapeHtml(String(value))}</strong><span>${escapeHtml(labels[key] || key)}</span></article>
 	`).join("") : `<article><strong>-</strong><span>Sin metricas para este rol</span></article>`;
 }
