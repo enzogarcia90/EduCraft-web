@@ -411,6 +411,69 @@ body.portal-app * {
 	margin-top: 16px;
 }
 
+.register-plan-intro {
+	margin: 0;
+	color: var(--portal-muted);
+	font-size: 14px;
+	line-height: 1.55;
+}
+
+.register-plan-options {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.register-plan-options label {
+	display: flex;
+	gap: 10px;
+	align-items: flex-start;
+	padding: 14px;
+	border: 1px solid var(--portal-line);
+	border-radius: 10px;
+	background: #fbfcfb;
+	cursor: pointer;
+}
+
+.register-plan-options input,
+.register-trial-consent input {
+	flex: 0 0 auto;
+	width: 18px;
+	min-height: 18px;
+	margin-top: 2px;
+}
+
+.register-plan-options strong,
+.register-plan-options small {
+	display: block;
+}
+
+.register-plan-options small {
+	margin-top: 5px;
+	color: var(--portal-muted);
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.register-plan-options label:has(input:checked) {
+	border-color: var(--portal-accent);
+	box-shadow: 0 0 0 3px rgba(21, 152, 111, .12);
+}
+
+.register-trial-consent {
+	display: flex;
+	gap: 10px;
+	align-items: flex-start;
+	padding: 14px;
+	border: 1px solid #d5b65a;
+	border-radius: 10px;
+	background: #fff9e8;
+}
+
+@media (max-width: 760px) {
+	.register-plan-options { grid-template-columns: 1fr; }
+}
+
 .portal-form label span,
 .identity-list dt {
 	display: block;

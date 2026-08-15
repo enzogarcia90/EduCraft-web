@@ -39,7 +39,7 @@
 				<p class="eyebrow">Nueva institucion</p>
 				<h2>Datos de alta</h2>
 				<div class="register-progress" aria-live="polite">
-					<span id="registerStepText">Paso 1/5</span>
+					<span id="registerStepText">Paso 1/6</span>
 					<div><i id="registerProgressBar"></i></div>
 				</div>
 				<form id="registerForm" class="portal-form">
@@ -79,7 +79,17 @@
 						<label><span>SIS o gestion academica</span><input id="registerSIS" type="text" placeholder="Alexia, Educamos, Google Classroom..." required></label>
 						<label><span>SSO previsto</span><input id="registerSSO" type="text" placeholder="Google, Microsoft, LDAP, ninguno..." required></label>
 					</fieldset>
-					<fieldset class="register-step confirmations" data-register-step="4">
+					<fieldset class="register-step register-plan-step" data-register-step="4">
+						<legend>Plan y prueba de 30 dias</legend>
+						<p class="register-plan-intro">Elige el plan que se activara al terminar la prueba. Stripe solicitara un metodo de pago, pero no realizara el primer cargo hasta dentro de 30 dias.</p>
+						<div class="register-plan-options">
+							<label><input name="registerPlan" type="radio" value="academy"><span><strong>EduCraft Academy</strong><small>399 € al año despues de la prueba</small></span></label>
+							<label><input name="registerPlan" type="radio" value="school" checked><span><strong>EduCraft School</strong><small>699 € al año despues de la prueba</small></span></label>
+							<label><input name="registerPlan" type="radio" value="school_plus"><span><strong>EduCraft Campus</strong><small>999 € al año despues de la prueba</small></span></label>
+						</div>
+						<label class="register-trial-consent"><input id="registerTrialConsent" type="checkbox" required><span>Entiendo que la suscripcion se renovara automaticamente y Stripe cobrara el plan elegido al finalizar los 30 dias, salvo que el centro cancele antes desde Facturacion.</span></label>
+					</fieldset>
+					<fieldset class="register-step confirmations" data-register-step="5">
 						<legend>Confirmaciones obligatorias</legend>
 						<label><input id="registerAuthority" type="checkbox" required><span>Tengo autorizacion del centro para solicitar el alta.</span></label>
 						<label><input id="registerDomainOwnership" type="checkbox" required><span>El centro controla el dominio y los emails indicados.</span></label>
@@ -92,7 +102,7 @@
 					<div class="register-nav">
 						<button id="registerPrev" class="portal-ghost" type="button">Anterior</button>
 						<button id="registerNext" class="button primary" type="button">Siguiente</button>
-						<button id="registerSubmit" class="button primary" type="submit" hidden>Crear cuenta</button>
+						<button id="registerSubmit" class="button primary" type="submit" hidden>Crear cuenta e iniciar prueba</button>
 					</div>
 				</form>
 				<p id="registerMessage" class="portal-message" role="status"></p>
@@ -100,6 +110,6 @@
 			</section>
 		</main>
 		<script src="../cliente/educraft-config.js"></script>
-		<script src="dashboard.js?v=20260813-protection1"></script>
+		<script src="dashboard.js?v=20260815-trial1"></script>
 	</body>
 </html>

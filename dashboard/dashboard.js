@@ -203,16 +203,24 @@ function bindRegister() {
 			return;
 		}
 		setMessage(message, "Creando centro...", "");
+		let accountCreated = false;
 		try {
 			await request("/register", {
 				method: "POST",
 				auth: false,
 				body: payload
 			});
-			setMessage(message, "Registro completado. Continuando...", "ok");
-			await login(email, password, message);
+			accountCreated = true;
+			setMessage(message, "Centro creado. Abriendo la prueba segura en Stripe...", "ok");
+			await login(email, password, message, { redirect: false });
+			const plan = document.querySelector('input[name="registerPlan"]:checked')?.value || "school";
+			const checkout = await request("/api/billing/checkout", { method: "POST", body: { plan } });
+			if (!safeHTTPSURL(checkout.url)) throw new Error("Stripe no devolvio una URL segura.");
+			location.assign(checkout.url);
 		} catch (error) {
-			setMessage(message, friendlyLoginError(error), "error");
+			setMessage(message, accountCreated
+				? "El centro ya esta creado, pero no se pudo abrir Stripe. Entra en tu cuenta y activa la prueba desde Facturacion."
+				: friendlyLoginError(error), "error");
 		}
 	});
 }
@@ -303,6 +311,7 @@ function registerPayload(email, password) {
 		termsAccepted: $("#registerTerms").checked,
 		privacyAccepted: $("#registerPrivacy").checked,
 		dpaAccepted: $("#registerDPA").checked,
+		trialConsent: $("#registerTrialConsent").checked,
 		password
 	};
 }
@@ -326,6 +335,9 @@ function validateRegisterPayload(payload) {
 	}
 	if (payload.password.length < 10 || !/[a-z]/.test(payload.password) || !/[A-Z]/.test(payload.password) || !/[0-9]/.test(payload.password)) {
 		return "La contrasena necesita 10 caracteres, mayuscula, minuscula y numero.";
+	}
+	if (!payload.trialConsent) {
+		return "Confirma las condiciones de la prueba y la renovacion automatica.";
 	}
 	if (!payload.authorityConfirmed || !payload.domainOwnershipConfirmed || !payload.minorsConfirmed || !payload.termsAccepted || !payload.privacyAccepted || !payload.dpaAccepted) {
 		return "Acepta todas las confirmaciones obligatorias.";
@@ -688,7 +700,7 @@ function renderSectionGuide(area, page) {
 	guide.innerHTML = `<span>Paso actual</span><div><strong>${escapeHtml(content[0])}</strong><p>${escapeHtml(content[1])}</p></div>`;
 }
 
-async function login(email, password, messageNode) {
+async function login(email, password, messageNode, options = {}) {
 	setMessage(messageNode, "Validando credenciales...", "");
 	const response = await request("/login", {
 		method: "POST",
@@ -701,7 +713,8 @@ async function login(email, password, messageNode) {
 		clearSession();
 		throw new Error("portal_access_denied");
 	}
-	location.replace(destination);
+	if (options.redirect !== false) location.replace(destination);
+	return response;
 }
 
 async function restoreAndRedirect() {
@@ -809,13 +822,14 @@ function renderBilling() {
 	const price = account.unitAmount == null ? "Precio pendiente" : formatMoney(account.unitAmount, account.currency);
 	const frequency = billingFrequency(account.billingInterval, account.billingIntervalCount);
 	const renewal = account.currentPeriodEnd ? formatBillingDate(account.currentPeriodEnd) : "Todavia sin fecha";
+	const renewalLabel = account.subscriptionStatus === "trialing" ? "Fin de prueba y primer cobro" : "Proxima renovacion";
 	const method = account.paymentMethodLast4 ? `${String(account.paymentMethodBrand || account.paymentMethodType || "Tarjeta").toUpperCase()} ·•••• ${escapeHtml(account.paymentMethodLast4)}` : "Sin metodo guardado";
 	$("#billingModeChip").textContent = billing.testMode ? "Stripe TEST" : "Stripe";
 	$("#billingOverview").innerHTML = `
 		<div class="billing-plan-copy"><span class="billing-kicker">Plan actual</span><h3>${escapeHtml(billing.planName || "Sin plan")}</h3><div class="billing-price">${escapeHtml(price)} <small>${escapeHtml(frequency)}</small></div></div>
 		<div class="billing-facts">
 			<div><span>Estado</span><strong class="billing-state ${status.className}">${status.label}</strong></div>
-			<div><span>Proxima renovacion</span><strong>${escapeHtml(renewal)}</strong></div>
+			<div><span>${renewalLabel}</span><strong>${escapeHtml(renewal)}</strong></div>
 			<div><span>Renovacion automatica</span><strong>${account.cancelAtPeriodEnd ? "Cancelacion programada" : "Activada"}</strong></div>
 			<div><span>Metodo de pago</span><strong>${method}</strong></div>
 		</div>`;
@@ -826,7 +840,9 @@ function renderBilling() {
 	const portalButton = $("#billingPortalButton");
 	select.disabled = !canStart;
 	checkoutButton.disabled = !canStart || !select.options.length;
-	checkoutButton.textContent = canStart ? "Contratar plan" : "Plan ya contratado";
+	checkoutButton.textContent = canStart
+		? (account.subscriptionStatus === "not_configured" ? "Iniciar prueba de 30 dias" : "Contratar plan")
+		: "Plan ya contratado";
 	portalButton.disabled = !configured || !billing.canManage || account.subscriptionStatus === "not_configured";
 	portalButton.textContent = canStart ? "Gestionar facturacion" : "Cambiar o gestionar plan";
 	$("#billingConfigNotice").hidden = configured;
