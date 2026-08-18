@@ -952,6 +952,51 @@ article p,
 	gap: 18px;
 }
 
+.contact-form-section {
+	display: grid;
+	grid-template-columns: minmax(240px, .72fr) minmax(0, 1.28fr);
+	gap: clamp(32px, 6vw, 88px);
+	align-items: start;
+}
+
+.contact-form {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 20px;
+	padding: clamp(24px, 4vw, 42px);
+	border: 1px solid var(--line);
+	background: linear-gradient(145deg, rgba(18,36,31,.96), rgba(9,23,20,.96));
+	box-shadow: var(--shadow);
+}
+
+.form-field { display: grid; gap: 8px; }
+.form-field-wide { grid-column: 1 / -1; }
+.form-field label,
+.form-consent { color: var(--ink); font-weight: 850; }
+.form-field input,
+.form-field select,
+.form-field textarea {
+	width: 100%;
+	min-height: 48px;
+	padding: 12px 14px;
+	border: 1px solid #31453f;
+	border-radius: 2px;
+	background: #07110f;
+	color: var(--ink);
+	font: inherit;
+}
+.form-field textarea { min-height: 150px; resize: vertical; }
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus { border-color: var(--mint); outline: 3px solid rgba(205,255,85,.14); }
+.form-field small,
+.form-submit small { color: var(--muted); line-height: 1.45; }
+.form-consent { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; line-height: 1.5; }
+.form-consent input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--mint); }
+.form-consent a { color: var(--mint); }
+.form-submit { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.form-honey { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; }
+
 .footer {
 	display: flex;
 	align-items: center;
@@ -1109,7 +1154,8 @@ article p,
 	}
 
 	.intro-grid,
-	.split {
+	.split,
+	.contact-form-section {
 		grid-template-columns: 1fr;
 	}
 
@@ -1138,6 +1184,9 @@ article p,
 	.nav {
 		gap: 5px;
 	}
+
+	.contact-form { grid-template-columns: 1fr; padding: 22px 18px; }
+	.form-field-wide { grid-column: auto; }
 
 	.notice-band,
 	.control-row {
