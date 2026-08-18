@@ -348,6 +348,7 @@ function validateRegisterPayload(payload) {
 function bindDashboard() {
 	bindDashboardSettings();
 	structureActivityEditor();
+	enhanceCentreDashboard();
 	$("#logoutButton")?.addEventListener("click", logout);
 	bindTeacherPages();
 	bindTicPages();
@@ -425,6 +426,51 @@ function bindDashboard() {
 	document.addEventListener("change", (event) => {
 		if (event.target.matches("[data-client-policy-setting]")) updateClientPolicySetting(event.target);
 	});
+}
+
+function enhanceCentreDashboard() {
+	if (currentPage !== "tic" && currentPage !== "profesor") return;
+	const isTeacher = currentPage === "profesor";
+	const items = isTeacher ? [
+		["clases", "Preparar clases", "Crea o reutiliza una actividad", "Crear clase"],
+		["control", "Controlar el aula", "Chat, permisos y acciones en directo", "Abrir control"],
+		["seguimiento", "Ver el progreso", "Asistencia, entregas e incidencias", "Revisar progreso"],
+		["integridad", "Revisar entregas", "Libros y señales orientativas de IA", "Ver entregas"],
+		["info", "Comprobar el sistema", "Alumnos, sesiones y servidor", "Ver estado"]
+	] : [
+		["resumen", "Ver el centro", "Usuarios, licencias y estado general", "Ver resumen"],
+		["alumnos", "Gestionar alumnado", "Altas, importación y grupos", "Añadir alumnos"],
+		["profesores", "Gestionar profesorado", "Cuentas docentes y accesos", "Añadir profesor"],
+		["horario", "Cargar el horario", "Importa Excel, CSV o Google Sheets", "Subir horario"],
+		["operacion", "Revisar servidores", "Acciones pendientes y entregas", "Ver operación"],
+		["facturacion", "Plan y facturas", "Renovaciones y pagos del centro", "Ver facturación"]
+	];
+	const nav = document.querySelector(isTeacher ? ".teacher-page-tabs:not(.tic-page-tabs)" : ".tic-page-tabs");
+	if (!nav || nav.dataset.enhanced) return;
+	nav.dataset.enhanced = "true";
+	nav.classList.add("role-task-nav");
+	for (const [page, title, description] of items) {
+		const link = nav.querySelector(`[data-${isTeacher ? "teacher" : "tic"}-page="${page}"]`);
+		if (link) link.innerHTML = `<span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(description)}</small></span>`;
+	}
+	const quickItems = isTeacher ? items.slice(0, 3) : items.slice(1, 4);
+	const quick = document.createElement("section");
+	quick.className = "role-quick-start";
+	quick.setAttribute("aria-label", "Tareas frecuentes");
+	quick.innerHTML = `<div><p class="eyebrow">Accesos rápidos</p><h2>¿Qué necesitas hacer?</h2></div><div>${quickItems.map(([page, title, description, action], index) => {
+		const source = nav.querySelector(`[data-${isTeacher ? "teacher" : "tic"}-page="${page}"]`);
+		return `<a href="${escapeHtml(source?.getAttribute("href") || "#")}" data-quick-page="${page}"><span>${index + 1}</span><strong>${escapeHtml(action)}</strong><small>${escapeHtml(description)}</small></a>`;
+	}).join("")}</div>`;
+	nav.insertAdjacentElement("beforebegin", quick);
+	if (isTeacher) {
+		for (const link of quick.querySelectorAll("[data-quick-page]")) {
+			link.addEventListener("click", (event) => {
+				event.preventDefault();
+				setTeacherPage(link.dataset.quickPage, true);
+				nav.scrollIntoView({ behavior: dashboardPreferences().reducedMotion ? "auto" : "smooth", block: "start" });
+			});
+		}
+	}
 }
 
 function protectedRegionPayload() {
@@ -691,13 +737,20 @@ function renderSectionGuide(area, page) {
 	const nav = document.querySelector(area === "teacher" ? "[data-teacher-page]" : "[data-tic-page]")?.closest("nav");
 	const content = guides[area]?.[page];
 	if (!nav || !content) return;
+	const workspace = document.querySelector(".workspace-head");
+	if (workspace) {
+		const eyebrow = workspace.querySelector(".eyebrow");
+		const title = workspace.querySelector("h2");
+		if (eyebrow) eyebrow.textContent = area === "teacher" ? "Panel del profesor" : "Gestión del centro";
+		if (title) title.textContent = content[0];
+	}
 	let guide = nav.nextElementSibling;
 	if (!guide?.classList.contains("section-guide")) {
 		guide = document.createElement("div");
 		guide.className = "section-guide";
 		nav.insertAdjacentElement("afterend", guide);
 	}
-	guide.innerHTML = `<span>Paso actual</span><div><strong>${escapeHtml(content[0])}</strong><p>${escapeHtml(content[1])}</p></div>`;
+	guide.innerHTML = `<span>Estás aquí</span><div><strong>${escapeHtml(content[0])}</strong><p>${escapeHtml(content[1])}</p></div>`;
 }
 
 async function login(email, password, messageNode, options = {}) {
