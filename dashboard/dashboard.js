@@ -3217,7 +3217,20 @@ function clearSession() {
 	localStorage.removeItem(STORAGE_KEYS.expires);
 }
 
-function logout() {
+async function logout() {
+	if (state.token) {
+		try {
+			await fetch(`${apiBase}/logout`, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${state.token}`,
+					Accept: "application/json"
+				}
+			});
+		} catch (_) {
+			// ignore network errors during logout
+		}
+	}
 	clearSession();
 	location.replace("login.html");
 }
@@ -3343,7 +3356,10 @@ function shortId(value) {
 }
 
 function escapeHtml(value) {
-	return value
+	if (value === null || value === undefined) {
+		return "";
+	}
+	return String(value)
 		.replaceAll("&", "&amp;")
 		.replaceAll("<", "&lt;")
 		.replaceAll(">", "&gt;")

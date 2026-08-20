@@ -3,6 +3,34 @@ const reducePageMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 initPageMotion();
 initMobileNavigation();
+initContactForm();
+
+function initContactForm() {
+	const form = document.querySelector("[data-contact-form]");
+	if (!form) return;
+	const button = form.querySelector('button[type="submit"]');
+	const status = form.querySelector(".form-status");
+	form.addEventListener("submit", async (event) => {
+		event.preventDefault();
+		if (button.disabled) return;
+		if (!form.reportValidity()) return;
+		button.disabled = true;
+		status.hidden = false;
+		status.className = "form-status form-field-wide";
+		status.textContent = "Enviando solicitud…";
+		const data = new FormData(form);
+		const payload = Object.fromEntries(["name", "email", "organization", "profile", "message", "website"].map((key) => [key, String(data.get(key) || "")]));
+		try {
+			const response = await fetch(form.action, {method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json"}, body: JSON.stringify(payload)});
+			if (!response.ok) throw new Error(`request failed: ${response.status}`);
+			window.location.assign("gracias.html");
+		} catch (_) {
+			status.classList.add("is-error");
+			status.textContent = "No hemos podido enviar la solicitud. Inténtalo de nuevo en unos minutos o escríbenos por correo.";
+			button.disabled = false;
+		}
+	});
+}
 
 function initMobileNavigation() {
 	const header = document.querySelector(".site-header");

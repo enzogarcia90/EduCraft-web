@@ -995,6 +995,9 @@ article p,
 .form-consent input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--mint); }
 .form-consent a { color: var(--mint); }
 .form-submit { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.form-submit button:disabled { cursor: wait; opacity: .65; }
+.form-status { margin: 0; padding: 12px 14px; border: 1px solid var(--mint); color: var(--mint); }
+.form-status.is-error { border-color: #ff8a78; color: #ffb4a8; }
 .form-honey { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; }
 
 .footer {
