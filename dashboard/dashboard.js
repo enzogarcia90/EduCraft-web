@@ -56,7 +56,7 @@ let sessionRefreshPromise = null;
 let blockViewer = null;
 let consoleTailTimer = null;
 
-const apiBase = (window.EDUCRAFT_API_BASE_URL || "http://127.0.0.1:8080").replace(/\/+$/, "");
+const apiBase = (window.EDUCRAFT_API_BASE_URL || "").replace(/\/+$/, "");
 const currentPage = document.body.dataset.dashboardPage || "login";
 const companyRoles = new Set(["owner", "lead_developer", "developer", "support"]);
 const ticRoles = new Set(["institution_administrator", "institution_admin", "director"]);
@@ -1902,18 +1902,12 @@ function renderSysAdmin(error, serverError) {
 	const database = data.database || {};
 	renderSignalList("#sysBackendRack", [
 		{ label: "Estado", value: error ? "error" : backend.status || "sin datos" },
-		{ label: "Runtime", value: `${backend.goVersion || "-"} · ${backend.os || "-"} / ${backend.arch || "-"}` },
-		{ label: "Uptime", value: formatDuration(backend.uptimeSeconds || 0) },
-		{ label: "Goroutines", value: String(backend.goroutines || 0) },
-		{ label: "Memoria", value: `${backend.memoryMb || 0} MB` }
-	], "Backend");
+		{ label: "Disponibilidad", value: error ? "requiere atención" : "operativa" }
+	], "Servicio");
 	renderSignalList("#sysDatabaseRack", [
 		{ label: "Estado", value: database.status || "sin datos" },
-		{ label: "Conexiones", value: String(database.openConnections || 0) },
-		{ label: "En uso", value: String(database.acquiredConnections || 0) },
-		{ label: "Idle", value: String(database.idleConnections || 0) },
-		{ label: "Detector IA", value: `${data.ai?.detectorProvider || "n/a"} · ${data.ai?.detectorReady ? "listo" : "sin API"}` }
-	], "DB");
+		{ label: "Servicios auxiliares", value: data.ai?.detectorReady ? "disponibles" : "limitados" }
+	], "Datos");
 	renderSysServerRack(serverError || error);
 }
 
@@ -2723,7 +2717,7 @@ function renderSysServerRack(error) {
 				</div>
 			</article>
 		`;
-	}).join("") : `<div class="empty-state">Sin servidores creados en el VPS Agent.</div>`;
+	}).join("") : `<div class="empty-state">Sin entornos de clase creados.</div>`;
 	for (const button of document.querySelectorAll("[data-sys-console]")) {
 		button.addEventListener("click", () => loadServerConsole(button.dataset.sysConsole));
 	}

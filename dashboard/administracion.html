@@ -42,8 +42,8 @@
 				</div>
 				<section id="metricsGrid" class="portal-metrics"></section>
 				<section class="portal-grid two sysadmin-status">
-					<article><h2>Backend</h2><div id="sysBackendRack" class="signal-list"></div></article>
-					<article><h2>Base de datos</h2><div id="sysDatabaseRack" class="signal-list"></div></article>
+					<article><h2>Servicio</h2><div id="sysBackendRack" class="signal-list"></div></article>
+					<article><h2>Datos</h2><div id="sysDatabaseRack" class="signal-list"></div></article>
 				</section>
 				<section class="portal-grid charts-grid">
 					<article><h2>Usuarios por rol</h2><div id="roleChart" class="chart-box"></div></article>
@@ -56,19 +56,19 @@
 				</section>
 				<section class="portal-grid two sysadmin-layout">
 					<article>
-						<div class="builder-head"><div><p class="eyebrow">VPS Agent</p><h2>Servers por clase</h2></div><button id="sysRefreshButton" class="portal-ghost" type="button">Recargar</button></div>
+						<div class="builder-head"><div><p class="eyebrow">Infraestructura</p><h2>Entornos por clase</h2></div><button id="sysRefreshButton" class="portal-ghost" type="button">Recargar</button></div>
 						<div id="sysServerRack" class="class-server-rack"></div>
 						<p id="sysAdminMessage" class="portal-message"></p>
 					</article>
 					<article>
-						<div class="builder-head"><div><p class="eyebrow">Velocity</p><h2>Logs del proxy</h2></div><span class="status-chip">En directo · 5 s</span></div>
-						<div id="sysVelocityConsole" class="sys-console log-terminal" role="log" aria-label="Logs recientes de Velocity">Sin datos.</div>
+						<div class="builder-head"><div><p class="eyebrow">Conectividad</p><h2>Registro operativo</h2></div><span class="status-chip">En directo · 5 s</span></div>
+						<div id="sysVelocityConsole" class="sys-console log-terminal" role="log" aria-label="Registro operativo reciente">Sin datos.</div>
 					</article>
 				</section>
 				<section class="portal-grid">
 					<article>
-						<div class="builder-head"><div><p class="eyebrow">Paper</p><h2>Logs por servidor</h2></div><span id="sysServerConsoleTarget" class="status-chip">Sin servidor</span></div>
-						<div id="sysServerConsole" class="sys-console log-terminal" role="log" aria-label="Logs recientes de Paper">Selecciona un servidor.</div>
+						<div class="builder-head"><div><p class="eyebrow">Entorno de clase</p><h2>Registro por entorno</h2></div><span id="sysServerConsoleTarget" class="status-chip">Sin entorno</span></div>
+						<div id="sysServerConsole" class="sys-console log-terminal" role="log" aria-label="Registro reciente del entorno">Selecciona un entorno.</div>
 					</article>
 				</section>
 			</section>
