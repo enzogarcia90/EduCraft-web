@@ -8,7 +8,7 @@
 		"SaaS",
 		"educational platform"
 	],
-	"description": "EduCraft ofrece aulas virtuales educativas con control docente en vivo, seguimiento de entregas, integridad IA orientativa, mundos gestionados y contenido STEM.",
+	"description": "EduCraft ofrece aulas virtuales educativas con control docente en vivo, seguimiento de entregas, IA de apoyo con decisión siempre humana, mundos gestionados y contenido STEM.",
 	"audience": [
 		"colegios",
 		"institutos",
@@ -25,7 +25,7 @@
 		"dashboards privados por rol",
 		"acciones educativas de aula",
 		"control docente en vivo",
-		"deteccion orientativa de IA",
+		"IA de apoyo con revision docente",
 		"seguimiento de entregas",
 		"proteccion de mundos",
 		"verificacion con Discord",

@@ -142,14 +142,14 @@
 				<section class="portal-grid two ai-integrity-layout">
 					<article>
 						<div class="builder-head">
-							<div><p class="eyebrow">Integrity</p><h2>Analisis IA con Sapling</h2></div>
+							<div><p class="eyebrow">Apoyo docente</p><h2>Revision asistida por IA</h2></div>
 							<span id="aiIntegrityProvider" class="status-chip">Sin proveedor</span>
 						</div>
 						<div class="toggle-row">
-							<div><strong>Activar Sapling</strong><span>Este interruptor controla solo el envio automatico de libros a Sapling. Integrity y el anticheat permanecen activos.</span></div>
-							<label class="switch"><input id="aiDetectionToggle" type="checkbox" aria-label="Activar analisis de libros con Sapling"><span></span></label>
+							<div><strong>Permitir apoyo de IA</strong><span>El centro controla si el texto de las entregas puede enviarse al proveedor configurado para obtener un indicador orientativo.</span></div>
+							<label class="switch"><input id="aiDetectionToggle" type="checkbox" aria-label="Permitir apoyo de IA para revisar entregas"><span></span></label>
 						</div>
-						<p class="integrity-warning" role="note"><strong>Resultado orientativo.</strong> La deteccion de texto generado por IA puede producir falsos positivos y falsos negativos. No utilices este porcentaje como unica prueba ni para tomar decisiones academicas importantes sin revisar el trabajo y hablar con el alumno.</p>
+						<p class="integrity-warning" role="note"><strong>Apoyo, nunca veredicto.</strong> La IA puede equivocarse o reflejar sesgos. Este indicador no califica, no demuestra autoria y no debe usarse para sancionar. Revisa el trabajo completo, escucha al alumno y toma siempre la decision final como docente.</p>
 						<p id="aiIntegrityMessage" class="portal-message" role="status"></p>
 					</article>
 					<article><h2>Indicador medio</h2><div id="aiAverageChart" class="chart-box"></div></article>
@@ -157,14 +157,14 @@
 				<section class="portal-grid one">
 					<article>
 						<div class="builder-head"><div><p class="eyebrow">Entregas</p><h2>Libros firmados</h2></div><span class="status-chip">Texto completo</span></div>
-						<p class="book-privacy-note">Solo se muestran libros entregados dentro del centro. Abre una entrega para consultar el texto escrito por el alumno y la señal de Integrity asociada.</p>
+						<p class="book-privacy-note">Solo el personal autorizado del centro puede consultar estas entregas. El indicador de IA es opcional, orientativo y debe interpretarse junto al trabajo completo y el contexto del alumno.</p>
 						<div id="bookSubmissionList" class="book-submission-list"></div>
 					</article>
 				</section>
 				<section class="portal-grid charts-grid">
-					<article><h2>Rangos de IA</h2><div id="aiBucketChart" class="chart-box"></div></article>
+					<article><h2>Indicadores orientativos</h2><div id="aiBucketChart" class="chart-box"></div></article>
 					<article><h2>Tendencia</h2><div id="aiTrendChart" class="chart-box"></div></article>
-					<article><h2>Estado de Sapling</h2><div id="aiStatusChart" class="chart-box"></div></article>
+					<article><h2>Estado del apoyo de IA</h2><div id="aiStatusChart" class="chart-box"></div></article>
 				</section>
 				</section>
 			</section>

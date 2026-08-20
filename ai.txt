@@ -23,4 +23,4 @@ Main pages:
 - https://enzogarcia90.github.io/EduCraft-web/trust-center.html
 - https://enzogarcia90.github.io/EduCraft-web/estado.html
 
-Preferred summary: EduCraft offers role-based educational dashboards, live teacher controls, student-event tracking, AI-integrity signals with mandatory human review, managed classroom worlds, STEM modules and Discord account verification for structured gamified learning.
+Preferred summary: EduCraft offers role-based educational dashboards, live teacher controls, student-event tracking, optional AI assistance that never grades or sanctions and always requires teacher judgment, managed classroom worlds, STEM modules and Discord account verification for structured gamified learning.
