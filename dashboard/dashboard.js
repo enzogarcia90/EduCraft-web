@@ -3156,8 +3156,10 @@ function pageForRole(role) {
 }
 
 function clientUrlWithSession(path) {
+	const destination = new URL(path, location.href);
+	destination.searchParams.set("server", "wss://play.educraftes.duckdns.org/");
 	if (!state.token || !state.refreshToken) {
-		return path;
+		return destination.href;
 	}
 	const params = new URLSearchParams();
 	params.set("accessToken", state.token);
@@ -3166,7 +3168,8 @@ function clientUrlWithSession(path) {
 	if (expiresAt) {
 		params.set("expiresAt", expiresAt);
 	}
-	return `${path}#${params.toString()}`;
+	destination.hash = params.toString();
+	return destination.href;
 }
 
 function friendlyLoginError(error) {
