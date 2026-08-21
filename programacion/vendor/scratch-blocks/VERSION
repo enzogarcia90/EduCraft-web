@@ -1,0 +1,7 @@
+scratch-blocks media assets 2.1.19
+Source: https://www.npmjs.com/package/scratch-blocks/v/2.1.19
+License: Apache-2.0 (see LICENSE)
+
+The editor runtime uses Blockly 13.2.1 with its Zelos renderer. The standalone
+Scratch Blocks module was evaluated but not shipped because toolbox injection
+failed with "Invalid colour: undefined" in isolated browser tests.

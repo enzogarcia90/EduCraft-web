@@ -117,18 +117,18 @@ const activityTemplates = [
 	},
 	{
 		key: "scratch-build",
-		title: "Algoritmos con bloques Scratch",
+		title: "Algoritmos visuales por bloques",
 		subject: "Pensamiento computacional",
 		level: "Primaria avanzada / ESO",
 		durationMinutes: 25,
 		programmingMode: "scratch",
-		tag: "Scratch",
+		tag: "Bloques",
 		objectives: "Construir una secuencia de instrucciones.\nUsar repeticion para evitar pasos duplicados.\nTraducir bloques simples a comportamiento dentro del mundo.",
-		setupSteps: "1. Abrir Programacion desde pausa.\n2. Cambiar a modo Scratch.\n3. Preparar una meta visible en el mapa.\n4. Dar una plantilla y pedir una variacion propia.",
+		setupSteps: "1. Abrir EduCraft Studio.\n2. Seleccionar Bloques.\n3. Ejecutar la plantilla en el mundo de pruebas.\n4. Dar un reto y pedir una variacion propia.",
 		activityScript: "Inicio (5 min): explicar decir, avanzar, repetir y saltar.\nPractica (8 min): ejecutar una secuencia guiada.\nReto (8 min): llegar a una marca usando repetir.\nCierre (4 min): detectar que instrucciones se repiten.",
-		studentDeliverable: "Programa Scratch textual que use al menos un repetir y una accion de movimiento.",
+		studentDeliverable: "Proyecto de bloques conectado que use al menos un repetir, una accion de movimiento y una prueba completada.",
 		assessmentRubric: "4 puntos: secuencia ordenada.\n3 puntos: usa repetir correctamente.\n2 puntos: ajusta el programa tras probarlo.\n1 punto: explica el patron repetido.",
-		teacherNotes: "Ejemplo:\ndecir inicio\nrepetir 3 avanzar 1\nsaltar\ndecir listo"
+		teacherNotes: "Ejemplo visual: al comenzar → decir inicio → repetir 3 [colocar piedra → avanzar] → decir listo."
 	},
 	{
 		key: "chemistry-lab",
@@ -144,6 +144,21 @@ const activityTemplates = [
 		studentDeliverable: "Ficha con elementos usados, compuesto observado, captura del montaje y explicacion de seguridad.",
 		assessmentRubric: "3 puntos: identifica elementos.\n3 puntos: registra observacion con evidencia.\n2 puntos: respeta normas de laboratorio.\n2 puntos: comunica el resultado con claridad.",
 		teacherNotes: "Conviene tener acciones de aula listas: modo aventura, bloquear construccion y anuncio de clase."
+	},
+	{
+		key: "web-first-project",
+		title: "Mi primera web interactiva",
+		subject: "Tecnologia y programacion",
+		level: "ESO / iniciacion",
+		durationMinutes: 45,
+		programmingMode: "web",
+		tag: "Web",
+		objectives: "Distinguir estructura, estilo y comportamiento.\nCrear una pagina con HTML semantico.\nAplicar CSS y comprobar una interaccion JavaScript.",
+		setupSteps: "1. Abrir EduCraft Studio desde la clase.\n2. Seleccionar HTML · CSS · JS.\n3. Explicar las tres pestañas.\n4. Probar primero la plantilla sin modificarla.",
+		activityScript: "Inicio (8 min): identificar HTML, CSS y JavaScript.\nPractica (12 min): cambiar titulo, colores y texto.\nReto (18 min): crear un boton con una respuesta propia.\nCierre (7 min): probar el proyecto de otra pareja y explicar un cambio.",
+		studentDeliverable: "Proyecto EduCraft con HTML, CSS y JavaScript, una interaccion funcional y una explicacion breve de cada archivo.",
+		assessmentRubric: "3 puntos: HTML claro y semantico.\n3 puntos: CSS propio y legible.\n3 puntos: interaccion JavaScript funcional.\n1 punto: explica la separacion entre archivos.",
+		teacherNotes: "La vista previa bloquea red, formularios y acceso al dashboard. No pedir datos personales ni recursos externos."
 	}
 ];
 
@@ -597,7 +612,7 @@ function setExperimentalBlockViewer(enabled) {
 		host = document.createElement("section");
 		host.id = "experimentalBlockViewer";
 		host.className = "experimental-block-viewer";
-		host.innerHTML = `<div class="block-viewer-head"><div><p class="eyebrow">Experimental</p><h2>Visor 3D de bloques</h2><p>Vista WebGL 2 · WASD o flechas · arrastra para mirar</p></div><div><button type="button" class="portal-ghost" data-viewer-reset>Recentrar</button><button type="button" class="portal-ghost" data-viewer-fullscreen>Pantalla completa</button></div></div><div class="block-viewer-stage" data-viewer-stage><div class="block-viewer-loading">Preparando WebGL 2…</div></div><p class="block-viewer-disclaimer"><strong>Experimental · Esperando Paper:</strong> inicia un servidor y entra con un alumno para recibir el mundo real.</p>`;
+		host.innerHTML = `<div class="block-viewer-head"><div><p class="eyebrow">Experimental</p><h2>Visor 3D de bloques</h2><p>Arrastra para girar · rueda para acercar · WASD o flechas para desplazarte</p></div><div><button type="button" class="portal-ghost" data-viewer-reset>Ver todo</button><button type="button" class="portal-ghost" data-viewer-fullscreen>Pantalla completa</button></div></div><div class="block-viewer-stage" data-viewer-stage><div class="block-viewer-loading">Preparando WebGL 2…</div></div><p class="block-viewer-disclaimer"><strong>Experimental · Esperando Paper:</strong> inicia un servidor y entra con un alumno para recibir el mundo real.</p>`;
 		const main = $(".portal-main");
 		main?.insertBefore(host, main.children[2] || null);
 	}
@@ -619,7 +634,7 @@ function loadBlockViewer() {
 	if (window.educraftBlockViewerPromise) return window.educraftBlockViewerPromise;
 	window.educraftBlockViewerPromise = new Promise((resolve, reject) => {
 		const script = document.createElement("script");
-		script.src = "block-viewer.js?v=20260812-viewer5";
+		script.src = "block-viewer.js?v=20260821-viewer6";
 		script.onload = resolve;
 		script.onerror = reject;
 		document.head.append(script);
@@ -2311,6 +2326,7 @@ function renderActivities() {
 			<p>${escapeHtml(firstLine(activity.objectives))}</p>
 			<footer>
 				<small>${escapeHtml(readableActivityStatus(activity.status))} · ${escapeHtml((activity.programmingMode || "none").toUpperCase())}</small>
+				${activity.programmingMode !== "none" ? `<a class="activity-studio-link" href="../programacion/?activity=${encodeURIComponent(activity.id)}&title=${encodeURIComponent(activity.title || "Proyecto EduCraft")}" target="_blank" rel="noopener">Abrir Studio</a>` : ""}
 				${activity.status === "published" ? `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="draft">Terminar clase</button>` : `<button type="button" data-activity-status="${escapeHtml(activity.id)}" data-status="published">Iniciar clase</button>`}
 			</footer>
 		</article>

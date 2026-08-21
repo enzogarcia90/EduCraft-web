@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta name="theme-color" content="#102a24">
+	<title>EduCraft Studio</title>
+	<link rel="stylesheet" href="studio.css?v=20260821-studio1">
+</head>
+<body>
+	<header class="studio-topbar">
+		<a class="studio-brand" href="../"><span class="brand-cube" aria-hidden="true"></span><span><strong>EduCraft Studio</strong><small>Programa, prueba y aprende</small></span></a>
+		<label class="project-name"><span>Proyecto</span><input id="projectName" maxlength="80" value="Mi proyecto"></label>
+		<div class="top-actions">
+			<span id="saveState" class="save-state">Guardado en este dispositivo</span>
+			<button id="newProject" type="button" class="button-secondary">Nuevo</button>
+			<button id="downloadProject" type="button" class="button-secondary">Descargar</button>
+			<button id="cloudSave" type="button" class="button-secondary" hidden>Guardar en la clase</button>
+			<label class="button-secondary file-button">Abrir<input id="openProject" type="file" accept="application/json,.educraft"></label>
+		</div>
+	</header>
+
+	<nav class="mode-tabs" aria-label="Entorno de programación">
+		<button type="button" class="is-active" data-mode="blocks"><span>01</span> Bloques</button>
+		<button type="button" data-mode="web"><span>02</span> HTML · CSS · JS</button>
+	</nav>
+
+	<main>
+		<section id="blocksMode" class="studio-mode is-active" aria-label="Programación por bloques">
+			<div class="blocks-toolbar">
+				<div><strong>Construye tu algoritmo</strong><span>Arrastra bloques, conéctalos y observa el resultado paso a paso.</span></div>
+				<div class="run-actions">
+					<label>Velocidad <input id="runSpeed" type="range" min="1" max="10" value="6"></label>
+					<button id="resetBlocks" type="button" class="button-secondary">Reiniciar</button>
+					<button id="stopBlocks" type="button" class="button-danger" disabled>Detener</button>
+					<button id="runBlocks" type="button" class="button-primary">Ejecutar</button>
+				</div>
+			</div>
+			<div class="blocks-layout">
+				<div id="blocklyWorkspace" class="blockly-workspace" aria-label="Editor de bloques"></div>
+				<aside class="simulation-panel">
+					<div class="panel-heading"><div><span>Vista previa</span><strong>Mundo de pruebas</strong></div><span id="runBadge" class="status-badge">Listo</span></div>
+					<div id="simulationStage" class="simulation-stage" role="img" aria-label="Simulación del programa">
+						<div class="stage-grid"></div><div id="trailLayer" class="trail-layer"></div><div id="builder" class="builder" aria-label="Constructor EduCraft"><span></span></div>
+					</div>
+					<div class="simulation-stats"><span>X <strong id="actorX">0</strong></span><span>Y <strong id="actorY">0</strong></span><span>Dirección <strong id="actorDirection">90°</strong></span><span>Bloques <strong id="placedCount">0</strong></span></div>
+					<div class="console-head"><strong>Consola</strong><button id="clearBlockConsole" type="button">Limpiar</button></div>
+					<div id="blockConsole" class="console" role="log" aria-live="polite"><p class="console-muted">Pulsa Ejecutar para probar el algoritmo.</p></div>
+					<details class="generated-code"><summary>Ver programa generado</summary><pre id="generatedProgram">[]</pre></details>
+				</aside>
+			</div>
+		</section>
+
+		<section id="webMode" class="studio-mode" aria-label="Editor web">
+			<div class="web-toolbar">
+				<div><strong>Laboratorio web</strong><span>Edita HTML, CSS y JavaScript. La vista previa se ejecuta aislada del resto de EduCraft.</span></div>
+				<div class="run-actions"><label><input id="autoPreview" type="checkbox" checked> Actualización automática</label><button id="runWeb" type="button" class="button-primary">Actualizar vista</button></div>
+			</div>
+			<div class="web-layout">
+				<section class="code-panel">
+					<div class="file-tabs" role="tablist"><button type="button" class="is-active" data-file="html">index.html</button><button type="button" data-file="css">styles.css</button><button type="button" data-file="js">script.js</button></div>
+					<div class="editor-shell"><div id="lineNumbers" class="line-numbers" aria-hidden="true">1</div><textarea id="codeEditor" spellcheck="false" aria-label="Editor de código"></textarea></div>
+					<footer><span id="cursorPosition">Ln 1, Col 1</span><span id="languageMode">HTML</span></footer>
+				</section>
+				<section class="preview-panel">
+					<div class="preview-head"><div class="browser-dots" aria-hidden="true"><i></i><i></i><i></i></div><span>Vista previa segura</span><button id="openPreview" type="button">Abrir grande</button></div>
+					<iframe id="webPreview" title="Vista previa del proyecto web" sandbox="allow-scripts"></iframe>
+					<div class="console-head"><strong>Consola JavaScript</strong><button id="clearWebConsole" type="button">Limpiar</button></div>
+					<div id="webConsole" class="console web-console" role="log" aria-live="polite"><p class="console-muted">Los mensajes y errores aparecerán aquí.</p></div>
+				</section>
+			</div>
+		</section>
+	</main>
+
+	<div id="toast" class="toast" role="status" aria-live="polite"></div>
+	<script src="vendor/blockly/blockly_compressed.js"></script>
+	<script src="vendor/blockly/msg/es.js"></script>
+	<script src="../cliente/educraft-config.js"></script>
+	<script type="module" src="studio.js?v=20260821-studio1"></script>
+</body>
+</html>

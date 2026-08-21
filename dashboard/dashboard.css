@@ -2134,6 +2134,9 @@ body.portal-app .portal-panel > h2 { margin-top: 0; }
 	gap: 12px;
 }
 
+.activity-studio-link { display: inline-flex; align-items: center; justify-content: center; padding: 8px 11px; border: 1px solid #176b55; border-radius: 6px; color: #176b55; font-size: 12px; font-weight: 850; text-decoration: none; }
+.activity-studio-link:hover { background: #e7f4ee; }
+
 .builder-head h2 {
 	margin: 0;
 	font-size: 24px;
@@ -2684,8 +2687,9 @@ body.portal-auth .auth-visual::after { opacity: .78; }
 .block-viewer-head { margin-bottom: 14px; }
 .block-viewer-head p { margin: 5px 0 0; color: #64736d; }
 .block-viewer-head > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
-.block-viewer-stage { position: relative; width: 100%; height: min(62vh, 620px); min-height: 360px; overflow: hidden; border: 3px solid #13211d; background: #6bafe4; }
-.block-viewer-canvas { display: block; width: 100%; height: 100%; outline: none; cursor: grab; background: #6bafe4; }
+.block-viewer-stage { position: relative; width: 100%; height: min(62vh, 620px); min-height: 360px; overflow: hidden; border: 3px solid #13211d; background: linear-gradient(#69afe5 0 66%, #c8dfaa 66%); }
+.block-viewer-canvas { display: block; width: 100%; height: 100%; outline: none; cursor: grab; touch-action: none; background: linear-gradient(#69afe5 0 66%, #c8dfaa 66%); }
+.block-viewer-canvas:focus-visible { box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 6px #176b55; }
 .block-viewer-canvas:active { cursor: grabbing; }
 .block-viewer-loading { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-weight: 900; }
 .block-viewer-disclaimer { margin: 12px 0 0; color: #75540c; font-size: 13px; }

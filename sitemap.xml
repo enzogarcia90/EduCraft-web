@@ -121,6 +121,12 @@
 		<priority>0.6</priority>
 	</url>
 	<url>
+		<loc>https://enzogarcia90.github.io/EduCraft-web/programacion/</loc>
+		<lastmod>2026-08-21</lastmod>
+		<changefreq>weekly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
 		<loc>https://enzogarcia90.github.io/EduCraft-web/ai.json</loc>
 		<lastmod>2026-08-02</lastmod>
 		<changefreq>weekly</changefreq>
