@@ -1531,6 +1531,7 @@ function parseScheduleRows(text) {
 	const teacherIndex = findColumn(table.headers, ["profesor", "docente", "teacher"]);
 	const roomIndex = findColumn(table.headers, ["aula", "sala", "room"]);
 	const notesIndex = findColumn(table.headers, ["notas", "observaciones", "notes"]);
+	const durationIndex = findColumn(table.headers, ["duracion", "duración", "minutos", "duration", "durationminutes"]);
 	if (dayIndex < 0 && timeIndex >= 0) {
 		return parseScheduleMatrixRows(table, timeIndex);
 	}
@@ -1544,7 +1545,8 @@ function parseScheduleRows(text) {
 		subject: cleanCell(row[subjectIndex]),
 		teacher: cleanCell(row[teacherIndex]),
 		room: cleanCell(row[roomIndex]),
-		notes: cleanCell(row[notesIndex])
+		notes: cleanCell(row[notesIndex]),
+		durationMinutes: Math.max(15, Math.min(240, Number.parseInt(cleanCell(row[durationIndex]), 10) || 60))
 	})).filter((row) => row.day && row.time);
 }
 
