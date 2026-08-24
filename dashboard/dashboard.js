@@ -28,6 +28,7 @@ const state = {
 	studentEvents: [],
 	bookSubmissions: [],
 	openBookSubmissions: new Set(),
+	bookReviewDrafts: new Map(),
 	activities: [],
 	aiIntegrity: null,
 	aiIntegritySettings: null,
@@ -2408,6 +2409,17 @@ function renderBookSubmissions(error) {
 	if (!node) {
 		return;
 	}
+	let focusedDraft = null;
+	for (const textarea of node.querySelectorAll("textarea[data-review-reason]")) {
+		state.bookReviewDrafts.set(textarea.dataset.reviewReason, textarea.value);
+		if (document.activeElement === textarea) {
+			focusedDraft = {
+				id: textarea.dataset.reviewReason,
+				start: textarea.selectionStart,
+				end: textarea.selectionEnd
+			};
+		}
+	}
 	if (error) {
 		node.innerHTML = `<div class="book-submission-empty">${escapeHtml(error.message || "No se pudieron cargar las entregas.")}</div>`;
 		return;
@@ -2421,9 +2433,10 @@ function renderBookSubmissions(error) {
 		const integrity = completed ? `${Math.round(Number(item.aiScore))}% señal IA` : readableAIStatus(item.aiStatus || "pending");
 		const status = item.reviewStatus || "pending";
 		const statusLabel = status === "accepted" ? "Aceptada" : status === "rejected" ? "Devuelta" : "Pendiente";
+		const reviewDraft = state.bookReviewDrafts.get(item.id) || "";
 		const review = status === "pending" ? `
 			<div class="book-review-actions">
-				<label><span>Motivo o comentario para el alumno</span><textarea data-review-reason="${escapeHtml(item.id)}" maxlength="500" rows="3" placeholder="Explica qué está bien o qué debe revisar..." required></textarea></label>
+				<label><span>Motivo o comentario para el alumno</span><textarea data-review-reason="${escapeHtml(item.id)}" maxlength="500" rows="3" placeholder="Explica qué está bien o qué debe revisar..." required>${escapeHtml(reviewDraft)}</textarea></label>
 				<div><button type="button" class="review-reject" data-review-decision="rejected" data-submission-id="${escapeHtml(item.id)}">Devolver para revisar</button><button type="button" class="review-accept" data-review-decision="accepted" data-submission-id="${escapeHtml(item.id)}">Aceptar y dar recompensa</button></div>
 				<p class="portal-message" data-review-message="${escapeHtml(item.id)}"></p>
 			</div>` : `
@@ -2452,6 +2465,16 @@ function renderBookSubmissions(error) {
 	for (const button of document.querySelectorAll("[data-review-decision]")) {
 		button.addEventListener("click", () => reviewBookSubmission(button.dataset.submissionId, button.dataset.reviewDecision));
 	}
+	for (const textarea of node.querySelectorAll("textarea[data-review-reason]")) {
+		textarea.addEventListener("input", () => state.bookReviewDrafts.set(textarea.dataset.reviewReason, textarea.value));
+	}
+	if (focusedDraft) {
+		const textarea = node.querySelector(`[data-review-reason="${CSS.escape(focusedDraft.id)}"]`);
+		if (textarea) {
+			textarea.focus({ preventScroll: true });
+			textarea.setSelectionRange(focusedDraft.start, focusedDraft.end);
+		}
+	}
 }
 
 async function reviewBookSubmission(id, decision) {
@@ -2466,6 +2489,7 @@ async function reviewBookSubmission(id, decision) {
 	try {
 		setMessage(messageNode, decision === "accepted" ? "Preparando la recompensa..." : "Devolviendo el libro...", "");
 		await request(`/dashboard/book-submissions/${encodeURIComponent(id)}/review`, { method: "POST", body: { decision, reason } });
+		state.bookReviewDrafts.delete(id);
 		await loadBookSubmissions();
 	} catch (error) {
 		setMessage(messageNode, error.message, "error");
