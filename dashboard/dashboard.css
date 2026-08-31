@@ -3129,3 +3129,79 @@ body.portal-app .dashboard-settings-button { border: 0; background: var(--campus
 	body.portal-app .portal-metrics article { border-radius: 13px; }
 	body.portal-app .teacher-page-tabs { top: 64px; border-radius: 0; }
 }
+
+/* Rounded campus geometry for every dashboard surface and interactive control. */
+body.portal-auth,
+body.portal-app {
+	--campus-radius-xs: 9px;
+	--campus-radius-sm: 12px;
+	--campus-radius: 18px;
+	--campus-radius-lg: 26px;
+}
+
+body.portal-auth .portal-form fieldset,
+body.portal-auth .portal-form input,
+body.portal-auth .portal-form select,
+body.portal-auth .portal-form textarea,
+body.portal-auth .turnstile-panel,
+body.portal-auth .register-plan-options label,
+body.portal-auth .register-trial-consent,
+body.portal-auth .portal-ghost,
+body.portal-auth .button,
+body.portal-app .portal-form fieldset,
+body.portal-app .portal-form input,
+body.portal-app .portal-form select,
+body.portal-app .portal-form textarea,
+body.portal-app .portal-ghost,
+body.portal-app .button,
+body.portal-app .portal-table button,
+body.portal-app .teacher-actions button,
+body.portal-app .class-server-actions button,
+body.portal-app .segmented-filters button { border-radius: var(--campus-radius-sm); }
+
+body.portal-app .workspace-head,
+body.portal-app .portal-panel,
+body.portal-app .portal-grid article,
+body.portal-app .portal-metrics article,
+body.portal-app .activity-ai-panel,
+body.portal-app .activity-builder,
+body.portal-app .role-quick-start,
+body.portal-app .experimental-block-viewer,
+body.portal-app .billing-overview,
+body.portal-app .dashboard-settings-dialog { border-radius: var(--campus-radius); }
+
+body.portal-app .teacher-page-tabs,
+body.portal-app .portal-table,
+body.portal-app .class-server-item,
+body.portal-app .minecraft-action,
+body.portal-app .activity-card,
+body.portal-app .activity-template,
+body.portal-app .import-note,
+body.portal-app .resource-pack-config,
+body.portal-app .book-submission,
+body.portal-app .book-review-actions,
+body.portal-app .book-review-result,
+body.portal-app .integrity-warning,
+body.portal-app .dashboard-toast,
+body.portal-app .sys-console,
+body.portal-app .class-chat-list { border-radius: var(--campus-radius-sm); }
+
+body.portal-app .teacher-page-tabs a,
+body.portal-app .teacher-page-tabs button,
+body.portal-app .compact-rack span,
+body.portal-app .status-chip,
+body.portal-app .book-integrity,
+body.portal-app .book-review-status,
+body.portal-app .billing-state { border-radius: 999px; }
+
+body.portal-app .portal-metrics article::after,
+body.portal-app .feature-grid article::after { border-radius: var(--campus-radius); }
+
+body.portal-app .billing-facts > div,
+body.portal-app .billing-security-list li,
+body.portal-app .billing-invoice,
+body.portal-app .billing-notice { border-radius: var(--campus-radius-sm); }
+
+@media (max-width: 660px) {
+	body.portal-app .teacher-page-tabs { border-radius: 0; }
+}
