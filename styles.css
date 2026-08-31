@@ -1524,3 +1524,71 @@ body[data-page="empresa"] .value-grid article {
 	.nav a, .footer-links a { min-height: 44px; }
 	.header-action:hover, .button:hover { transform: none; box-shadow: none; }
 }
+
+/* 2026-09 rounded campus system: shared geometry for the complete public site. */
+:root {
+	--radius-xs: 8px;
+	--radius-sm: 12px;
+	--radius-md: 18px;
+	--radius-lg: 26px;
+}
+
+.brand-mark,
+.brand-mark img { border-radius: var(--radius-sm); }
+
+.nav a,
+.header-action,
+.button,
+.nav-toggle { border-radius: var(--radius-sm); }
+
+.feature-grid article,
+.value-grid article,
+.plans article,
+.cards-4 article,
+.contact-card,
+.contact-form-section,
+.fact-panel,
+.check-panel,
+.metric-card,
+.product-strip,
+.legal-note,
+.spoiler-card,
+.control-panel,
+.roadmap-public article,
+.timeline article,
+.flow-list li { border-radius: var(--radius-md); }
+
+.feature-grid article::after,
+.value-grid article::after,
+.plans article::after,
+.cards-4 article::after,
+.stats-band div::after { border-radius: var(--radius-sm); }
+
+.feature-grid article span,
+.timeline article > span,
+.flow-list strong,
+.tag,
+.demo-dot { border-radius: var(--radius-xs); }
+
+.demo-screen,
+.demo-panel { border-radius: var(--radius-lg); }
+
+.demo-row,
+.demo-pill,
+.demo-cube,
+.data-table,
+.data-table > div,
+.control-row,
+.form-status { border-radius: var(--radius-sm); }
+
+.form-field input,
+.form-field select,
+.form-field textarea { border-radius: var(--radius-sm); }
+
+.notice-band { border-radius: 0 0 var(--radius-md) var(--radius-md); }
+
+.page-hero::after { border-radius: var(--radius-lg); }
+
+@media (max-width: 980px) {
+	.site-header .nav { border-radius: 0 0 var(--radius-md) var(--radius-md); }
+}
