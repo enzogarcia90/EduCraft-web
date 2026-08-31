@@ -57,6 +57,7 @@ let sessionRefreshPromise = null;
 let blockViewer = null;
 let consoleTailTimer = null;
 let registerTurnstileWidgetId = null;
+let loginTurnstileWidgetId = null;
 
 const apiBase = (window.EDUCRAFT_API_BASE_URL || "").replace(/\/+$/, "");
 const currentPage = document.body.dataset.dashboardPage || "login";
@@ -191,12 +192,20 @@ async function init() {
 }
 
 function bindLogin() {
+	initLoginTurnstile();
 	$("#loginForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const message = $("#authMessage");
 		try {
-			await login($("#emailInput").value, $("#passwordInput").value, message);
+			const checkoutPlan = new URLSearchParams(location.search).get("checkout");
+			await login($("#emailInput").value, $("#passwordInput").value, message, { redirect: !checkoutPlan });
+			if (checkoutPlan) {
+				const checkout = await request("/api/billing/checkout", { method: "POST", body: { plan: checkoutPlan } });
+				if (!safeHTTPSURL(checkout.url)) throw new Error("Stripe no devolvio una URL segura.");
+				location.assign(checkout.url);
+			}
 		} catch (error) {
+			resetLoginTurnstile();
 			setMessage(message, friendlyLoginError(error), "error");
 		}
 	});
@@ -228,12 +237,9 @@ function bindRegister() {
 				body: payload
 			});
 			accountCreated = true;
-			setMessage(message, "Centro creado. Abriendo la prueba segura en Stripe...", "ok");
-			await login(email, password, message, { redirect: false });
 			const plan = document.querySelector('input[name="registerPlan"]:checked')?.value || "school";
-			const checkout = await request("/api/billing/checkout", { method: "POST", body: { plan } });
-			if (!safeHTTPSURL(checkout.url)) throw new Error("Stripe no devolvio una URL segura.");
-			location.assign(checkout.url);
+			location.replace(`login.html?email=${encodeURIComponent(email)}&registered=1&checkout=${encodeURIComponent(plan)}`);
+			return;
 		} catch (error) {
 			resetRegisterTurnstile();
 			setMessage(message, accountCreated
@@ -241,6 +247,32 @@ function bindRegister() {
 				: friendlyLoginError(error), "error");
 		}
 	});
+}
+
+function initLoginTurnstile(attempt = 0) {
+	const node = $("#loginTurnstile");
+	const sitekey = window.EDUCRAFT_TURNSTILE_SITE_KEY || "";
+	if (!node || loginTurnstileWidgetId !== null) return;
+	if (!window.turnstile) {
+		if (attempt < 40) window.setTimeout(() => initLoginTurnstile(attempt + 1), 150);
+		else node.textContent = "No se pudo cargar la verificacion.";
+		return;
+	}
+	node.replaceChildren();
+	loginTurnstileWidgetId = window.turnstile.render(node, {
+		sitekey, action: "login", theme: "dark", appearance: "always", execution: "render", "refresh-expired": "auto",
+		callback: () => setMessage($("#loginTurnstileStatus"), "Verificacion completada automaticamente.", "ok"),
+		"error-callback": (code) => setMessage($("#loginTurnstileStatus"), `Cloudflare no pudo verificar (${code || "error"}).`, "error")
+	});
+}
+
+function loginTurnstileToken() {
+	if (!window.turnstile || loginTurnstileWidgetId === null) return "";
+	return window.turnstile.getResponse(loginTurnstileWidgetId) || "";
+}
+
+function resetLoginTurnstile() {
+	if (window.turnstile && loginTurnstileWidgetId !== null) window.turnstile.reset(loginTurnstileWidgetId);
 }
 
 function initRegisterTurnstile(attempt = 0) {
@@ -835,11 +867,13 @@ function renderSectionGuide(area, page) {
 }
 
 async function login(email, password, messageNode, options = {}) {
+	const turnstileToken = loginTurnstileToken();
+	if (!turnstileToken) throw new Error("Completa la verificacion de seguridad.");
 	setMessage(messageNode, "Validando credenciales...", "");
 	const response = await request("/login", {
 		method: "POST",
 		auth: false,
-		body: { email: email.trim(), password }
+		body: { email: email.trim(), password, turnstileToken }
 	});
 	storeSession(response);
 	const destination = pageForRole(response.role);

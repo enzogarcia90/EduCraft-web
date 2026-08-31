@@ -46,6 +46,7 @@
 				<form id="loginForm" class="portal-form">
 					<label><span>Correo electronico</span><input id="emailInput" type="email" autocomplete="username" inputmode="email" spellcheck="false" placeholder="nombre@centro.es" required></label>
 					<label><span>Contraseña</span><span class="password-input-row"><input id="passwordInput" type="password" autocomplete="current-password" placeholder="Introduce tu contraseña" required><button id="passwordVisibilityButton" type="button" aria-controls="passwordInput" aria-pressed="false">Mostrar</button></span></label>
+					<div class="turnstile-panel"><strong>Verificacion de seguridad</strong><div id="loginTurnstile"><span class="turnstile-loading">Preparando comprobacion...</span></div><small id="loginTurnstileStatus" role="status">Se completara automaticamente.</small></div>
 					<button class="button primary" type="submit">Entrar</button>
 				</form>
 				<p id="authMessage" class="portal-message" role="status"></p>
@@ -53,6 +54,7 @@
 			</section>
 		</main>
 		<script src="../cliente/educraft-config.js"></script>
-		<script src="dashboard.js?v=20260831-loginreadability1"></script>
+		<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+		<script src="dashboard.js?v=20260831-loginturnstile1"></script>
 	</body>
 </html>
