@@ -194,6 +194,7 @@ async function init() {
 function bindLogin() {
 	initLoginTurnstile();
 	initGoogleSignIn();
+	$("#passwordVisibilityButton")?.addEventListener("click", togglePasswordVisibility);
 	$("#loginForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const message = $("#authMessage");
@@ -566,7 +567,6 @@ function bindDashboard() {
 		setMessage($("#activityMessage"), "Borrador listo para revisar y guardar.", "ok");
 	});
 	$("#activityReset")?.addEventListener("click", () => fillActivityTemplate(activityTemplates[0], true));
-	$("#passwordVisibilityButton")?.addEventListener("click", togglePasswordVisibility);
 	$("#sysRefreshButton")?.addEventListener("click", loadSysAdmin);
 	$("#sysVelocityConsoleButton")?.addEventListener("click", loadVelocityConsole);
 	$("#sysBackendConsoleButton")?.addEventListener("click", () => loadBackendConsole());
