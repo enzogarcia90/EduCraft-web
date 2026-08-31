@@ -41,9 +41,15 @@
 					<span class="status-chip">Privado</span>
 				</div>
 				<section id="metricsGrid" class="portal-metrics"></section>
+				<section id="sysRuntimeMetrics" class="portal-metrics sysadmin-metrics" aria-label="Metricas tecnicas en directo"></section>
 				<section class="portal-grid two sysadmin-status">
 					<article><h2>Servicio</h2><div id="sysBackendRack" class="signal-list"></div></article>
 					<article><h2>Datos</h2><div id="sysDatabaseRack" class="signal-list"></div></article>
+				</section>
+				<section class="portal-grid three sysadmin-detail-grid">
+					<article><h2>Actividad y colas</h2><div id="sysQueueRack" class="signal-list"></div></article>
+					<article><h2>Seguridad</h2><div id="sysSecurityRack" class="signal-list"></div></article>
+					<article><h2>Inteligencia artificial</h2><div id="sysAIRack" class="signal-list"></div></article>
 				</section>
 				<section class="portal-grid charts-grid">
 					<article><h2>Usuarios por rol</h2><div id="roleChart" class="chart-box"></div></article>
@@ -74,6 +80,6 @@
 			</section>
 		</main>
 		<script src="../cliente/educraft-config.js"></script>
-		<script src="dashboard.js?v=20260815-trial1"></script>
+		<script src="dashboard.js?v=20260831-adminstats1"></script>
 	</body>
 </html>

@@ -1918,14 +1918,57 @@ function renderSysAdmin(error, serverError) {
 	const data = state.sysAdmin || {};
 	const backend = data.backend || {};
 	const database = data.database || {};
+	const queues = data.queues || {};
+	const security = data.security || {};
+	const ai = data.ai || {};
+	const servers = state.classServers || [];
+	const runningServers = servers.filter((server) => ["running", "online", "ready"].includes(String(server.status?.state || "").toLowerCase())).length;
+	const runtimeMetrics = $("#sysRuntimeMetrics");
+	if (runtimeMetrics) {
+		runtimeMetrics.innerHTML = [
+			{ label: "Tiempo activo", value: formatDuration(backend.uptimeSeconds) },
+			{ label: "Memoria backend", value: `${backend.memoryMb ?? 0} MB` },
+			{ label: "Procesos Go", value: backend.goroutines ?? 0 },
+			{ label: "Conexiones BD", value: database.openConnections ?? 0 },
+			{ label: "Sesiones activas", value: security.activeSessions ?? 0 },
+			{ label: "Entornos online", value: `${runningServers}/${servers.length}` }
+		].map((item) => `<article><strong>${escapeHtml(String(item.value))}</strong><span>${escapeHtml(item.label)}</span></article>`).join("");
+	}
 	renderSignalList("#sysBackendRack", [
 		{ label: "Estado", value: error ? "error" : backend.status || "sin datos" },
-		{ label: "Disponibilidad", value: error ? "requiere atención" : "operativa" }
+		{ label: "Disponibilidad", value: error ? "requiere atención" : "operativa" },
+		{ label: "Tiempo activo", value: formatDuration(backend.uptimeSeconds) },
+		{ label: "Memoria asignada", value: `${backend.memoryMb ?? 0} MB` },
+		{ label: "Goroutines", value: backend.goroutines ?? 0 },
+		{ label: "Runtime", value: backend.goVersion || "sin datos" },
+		{ label: "Plataforma", value: backend.os && backend.arch ? `${backend.os}/${backend.arch}` : "sin datos" },
+		{ label: "Actualizado", value: formatDateTime(data.generatedAt) }
 	], "Servicio");
 	renderSignalList("#sysDatabaseRack", [
 		{ label: "Estado", value: database.status || "sin datos" },
-		{ label: "Servicios auxiliares", value: data.ai?.detectorReady ? "disponibles" : "limitados" }
+		{ label: "Conexiones abiertas", value: database.openConnections ?? 0 },
+		{ label: "Conexiones en uso", value: database.acquiredConnections ?? 0 },
+		{ label: "Conexiones libres", value: database.idleConnections ?? 0 },
+		{ label: "Servicios auxiliares", value: ai.detectorReady ? "disponibles" : "limitados" }
 	], "Datos");
+	renderSignalList("#sysQueueRack", [
+		{ label: "Acciones docentes pendientes", value: queues.queuedActions ?? 0 },
+		{ label: "Alertas de moderacion abiertas", value: queues.moderationAlerts ?? 0 },
+		{ label: "Eventos de alumnos (24 h)", value: queues.studentEvents24h ?? 0 },
+		{ label: "Analisis de IA (24 h)", value: queues.aiScans24h ?? 0 }
+	], "Actividad");
+	renderSignalList("#sysSecurityRack", [
+		{ label: "Sesiones autenticadas activas", value: security.activeSessions ?? 0 },
+		{ label: "Usuarios desactivados", value: security.disabledUsers ?? 0 },
+		{ label: "Acceso del panel", value: "solo equipo EduCraft" },
+		{ label: "Canal", value: "HTTPS + JWT" }
+	], "Seguridad");
+	renderSignalList("#sysAIRack", [
+		{ label: "Detector", value: ai.detectorProvider || "no configurado" },
+		{ label: "Disponibilidad", value: ai.detectorReady ? "preparado" : "limitado" },
+		{ label: "Analisis en 24 h", value: queues.aiScans24h ?? 0 },
+		{ label: "Estado de datos", value: error ? "sin actualizar" : "en directo" }
+	], "IA");
 	renderSysServerRack(serverError || error);
 }
 

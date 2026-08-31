@@ -810,6 +810,34 @@ body.portal-app * {
 	align-content: start;
 }
 
+body.portal-app .portal-metrics.sysadmin-metrics {
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+body.portal-app .portal-grid.sysadmin-detail-grid {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sysadmin-detail-grid article {
+	align-content: start;
+}
+
+@media (max-width: 1050px) {
+	body.portal-app .portal-metrics.sysadmin-metrics {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	body.portal-app .portal-grid.sysadmin-detail-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 620px) {
+	body.portal-app .portal-metrics.sysadmin-metrics {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
 .sys-server-item {
 	grid-template-columns: minmax(180px, 1fr) minmax(240px, auto);
 }
