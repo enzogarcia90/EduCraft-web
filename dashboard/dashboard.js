@@ -208,7 +208,6 @@ function bindLogin() {
 
 function bindRegister() {
 	initRegisterStepper();
-	initRegisterTurnstile();
 	$("#registerForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const message = $("#registerMessage");
@@ -306,6 +305,9 @@ function setRegisterStep(index) {
 	$("#registerPrev").disabled = registerStepState.index === 0;
 	$("#registerNext").hidden = registerStepState.index === steps.length - 1;
 	$("#registerSubmit").hidden = registerStepState.index !== steps.length - 1;
+	if (registerStepState.index === steps.length - 1) {
+		window.requestAnimationFrame(() => initRegisterTurnstile());
+	}
 	setMessage($("#registerMessage"), "", "");
 }
 
