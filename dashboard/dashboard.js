@@ -56,6 +56,7 @@ const state = {
 let sessionRefreshPromise = null;
 let blockViewer = null;
 let consoleTailTimer = null;
+let registerTurnstileWidgetId = null;
 
 const apiBase = (window.EDUCRAFT_API_BASE_URL || "").replace(/\/+$/, "");
 const currentPage = document.body.dataset.dashboardPage || "login";
@@ -207,6 +208,7 @@ function bindLogin() {
 
 function bindRegister() {
 	initRegisterStepper();
+	initRegisterTurnstile();
 	$("#registerForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const message = $("#registerMessage");
@@ -234,11 +236,37 @@ function bindRegister() {
 			if (!safeHTTPSURL(checkout.url)) throw new Error("Stripe no devolvio una URL segura.");
 			location.assign(checkout.url);
 		} catch (error) {
+			resetRegisterTurnstile();
 			setMessage(message, accountCreated
 				? "El centro ya esta creado, pero no se pudo abrir Stripe. Entra en tu cuenta y activa la prueba desde Facturacion."
 				: friendlyLoginError(error), "error");
 		}
 	});
+}
+
+function initRegisterTurnstile(attempt = 0) {
+	const node = $("#registerTurnstile");
+	const sitekey = window.EDUCRAFT_TURNSTILE_SITE_KEY || "";
+	if (!node || registerTurnstileWidgetId !== null) return;
+	if (!sitekey) {
+		node.textContent = "Verificacion no configurada.";
+		return;
+	}
+	if (!window.turnstile) {
+		if (attempt < 40) window.setTimeout(() => initRegisterTurnstile(attempt + 1), 150);
+		else node.textContent = "No se pudo cargar la verificacion. Recarga la pagina.";
+		return;
+	}
+	registerTurnstileWidgetId = window.turnstile.render(node, { sitekey, action: "register", theme: "dark" });
+}
+
+function registerTurnstileToken() {
+	if (!window.turnstile || registerTurnstileWidgetId === null) return "";
+	return window.turnstile.getResponse(registerTurnstileWidgetId) || "";
+}
+
+function resetRegisterTurnstile() {
+	if (window.turnstile && registerTurnstileWidgetId !== null) window.turnstile.reset(registerTurnstileWidgetId);
 }
 
 function initRegisterStepper() {
@@ -328,6 +356,7 @@ function registerPayload(email, password) {
 		privacyAccepted: $("#registerPrivacy").checked,
 		dpaAccepted: $("#registerDPA").checked,
 		trialConsent: $("#registerTrialConsent").checked,
+		turnstileToken: registerTurnstileToken(),
 		password
 	};
 }
@@ -342,6 +371,9 @@ function validateRegisterPayload(payload) {
 		if (!String(payload[field] || "").trim()) {
 			return "Faltan campos obligatorios.";
 		}
+	}
+	if (!payload.turnstileToken) {
+		return "Completa la verificacion de seguridad.";
 	}
 	if (!payload.email.endsWith(`@${payload.domain.replace(/^@/, "").toLowerCase()}`)) {
 		return "El email TIC debe pertenecer al dominio del centro.";

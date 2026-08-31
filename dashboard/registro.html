@@ -98,6 +98,7 @@
 						<label><input id="registerPrivacy" type="checkbox" required><span>Acepto la politica de privacidad.</span></label>
 						<label><input id="registerDPA" type="checkbox" required><span>Acepto el acuerdo de tratamiento de datos.</span></label>
 						<label class="password-row"><span>Contrasena</span><input id="registerPassword" type="password" autocomplete="new-password" minlength="10" required></label>
+						<div class="turnstile-panel"><strong>Verificacion de seguridad</strong><div id="registerTurnstile"></div><small>Cloudflare comprueba que la solicitud no sea automatizada.</small></div>
 					</fieldset>
 					<div class="register-nav">
 						<button id="registerPrev" class="portal-ghost" type="button">Anterior</button>
@@ -110,6 +111,7 @@
 			</section>
 		</main>
 		<script src="../cliente/educraft-config.js"></script>
-		<script src="dashboard.js?v=20260815-trial1"></script>
+		<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+		<script src="dashboard.js?v=20260831-turnstile1"></script>
 	</body>
 </html>

@@ -2716,6 +2716,17 @@ body.portal-auth .login-card .portal-form input:-webkit-autofill:focus {
 	color: #cdff55;
 }
 
+.turnstile-panel {
+	display: grid;
+	gap: 10px;
+	padding: 14px;
+	border: 1px solid var(--portal-line);
+	background: rgba(205, 255, 85, .04);
+}
+
+.turnstile-panel strong { color: var(--portal-ink); font-size: 13px; }
+.turnstile-panel small { color: var(--portal-muted); line-height: 1.4; }
+
 .integrity-warning {
 	margin: 18px 0 0;
 	padding: 15px 17px;
