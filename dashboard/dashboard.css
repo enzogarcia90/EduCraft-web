@@ -2917,3 +2917,215 @@ body.portal-auth .login-card .portal-form input:-webkit-autofill:focus {
 .oauth-divider::after { content: ""; flex: 1; height: 1px; background: rgba(145, 164, 158, .35); }
 .google-signin { display: flex; min-height: 44px; align-items: center; justify-content: center; color: #91a49e; font-size: 13px; }
 .google-signin > div { max-width: 100%; }
+
+/* 2026-09 unified campus workspace: one visual language across auth and dashboards. */
+:root {
+	--campus-navy: #102c27;
+	--campus-navy-soft: #173c35;
+	--campus-green: #18a779;
+	--campus-green-dark: #087456;
+	--campus-lime: #d9ff72;
+	--campus-blue: #3478f6;
+	--campus-canvas: #f3f7f5;
+	--campus-surface: #ffffff;
+	--campus-text: #14241f;
+	--campus-muted: #657871;
+	--campus-line: #dce8e2;
+	--campus-radius: 16px;
+	--campus-shadow: 0 10px 30px rgba(16, 44, 39, .07);
+	--campus-shadow-raised: 0 18px 50px rgba(16, 44, 39, .12);
+}
+
+body.portal-auth,
+body.portal-app {
+	--portal-ink: var(--campus-text);
+	--portal-muted: var(--campus-muted);
+	--portal-line: var(--campus-line);
+	--portal-bg: var(--campus-canvas);
+	--portal-panel: var(--campus-surface);
+	--portal-accent: var(--campus-green);
+	--portal-accent-dark: var(--campus-green-dark);
+	--portal-shadow: var(--campus-shadow);
+	color-scheme: light;
+	background: var(--campus-canvas);
+	color: var(--campus-text);
+	font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body.portal-auth {
+	background:
+		radial-gradient(circle at 8% 12%, rgba(24, 167, 121, .16), transparent 28rem),
+		radial-gradient(circle at 88% 85%, rgba(52, 120, 246, .1), transparent 30rem),
+		var(--campus-canvas);
+}
+
+body.portal-auth .auth-layout { max-width: 1480px; margin: 0 auto; }
+body.portal-auth .auth-visual,
+body.portal-auth .login-visual {
+	border: 0;
+	border-radius: 28px;
+	background:
+		radial-gradient(circle at 84% 18%, rgba(217, 255, 114, .13), transparent 16rem),
+		linear-gradient(145deg, #12362f, #091d19);
+	box-shadow: 0 30px 80px rgba(9, 29, 25, .2);
+	color: #fff;
+}
+body.portal-auth .login-visual::before {
+	right: -80px; bottom: -110px; width: 460px;
+	border: 1px solid rgba(217,255,114,.18); border-radius: 50%;
+	background: transparent; box-shadow: 0 0 0 42px rgba(217,255,114,.025), 0 0 0 84px rgba(52,120,246,.025);
+}
+body.portal-auth .login-visual::after { display: none; }
+body.portal-auth .portal-brand .brand-mark {
+	border-radius: 12px; background: var(--campus-lime); box-shadow: none;
+}
+body.portal-auth .portal-brand small { color: #add0c4; letter-spacing: .12em; }
+body.portal-auth .eyebrow { color: var(--campus-green-dark); letter-spacing: .12em; }
+body.portal-auth .auth-visual .eyebrow { color: var(--campus-lime); }
+body.portal-auth .auth-title {
+	max-width: 780px; color: #fff; font-family: inherit; font-size: clamp(48px, 6.3vw, 92px);
+	font-weight: 850; line-height: .93; letter-spacing: -.055em; text-transform: none;
+}
+body.portal-auth .auth-visual p:not(.eyebrow) { max-width: 590px; color: #c5d8d1; font-size: 18px; }
+body.portal-auth .login-visual-rack { max-width: 680px; gap: 8px; }
+body.portal-auth .login-visual-rack span {
+	display: grid; height: auto; min-height: 72px; align-content: center; gap: 5px; padding: 13px 15px;
+	border: 1px solid rgba(255,255,255,.1); border-radius: 14px; background: rgba(255,255,255,.055);
+	color: #d9e8e3; font-size: 12px; font-weight: 750; backdrop-filter: blur(8px);
+}
+body.portal-auth .login-visual-rack span:nth-child(2),
+body.portal-auth .login-visual-rack span:nth-child(3) { background: rgba(255,255,255,.055); }
+body.portal-auth .login-visual-rack strong { color: var(--campus-lime); font-size: 11px; letter-spacing: .12em; }
+body.portal-auth .auth-card {
+	border: 1px solid rgba(16,44,39,.08); border-top: 0; border-radius: 24px;
+	background: rgba(255,255,255,.94); box-shadow: var(--campus-shadow-raised); backdrop-filter: blur(18px);
+}
+body.portal-auth .login-card::before {
+	display: block; height: 5px; border-radius: 99px;
+	background: linear-gradient(90deg, var(--campus-green), var(--campus-blue));
+}
+body.portal-auth .login-card h2 { color: var(--campus-text); font-size: clamp(28px, 3vw, 38px); letter-spacing: -.035em; }
+body.portal-auth .login-card .portal-form input {
+	min-height: 54px; border: 1px solid #c8d8d0; border-radius: 12px; background: #f9fbfa;
+	color: var(--campus-text); font-size: 16px; font-weight: 550; letter-spacing: normal; -webkit-text-fill-color: var(--campus-text);
+}
+body.portal-auth .login-card .portal-form input:focus { border-color: var(--campus-green); outline: 4px solid rgba(24,167,121,.13); }
+body.portal-auth .password-input-row button {
+	border: 0; border-radius: 12px; background: #e7f3ee; color: var(--campus-green-dark);
+}
+body.portal-auth .password-input-row button:hover,
+body.portal-auth .password-input-row button:focus-visible { color: #fff; background: var(--campus-green-dark); }
+body.portal-auth .button.primary {
+	border-radius: 12px; background: var(--campus-navy); color: #fff; box-shadow: 0 10px 24px rgba(16,44,39,.18);
+}
+body.portal-auth .button.primary:hover { background: var(--campus-green-dark); transform: translateY(-1px); box-shadow: 0 13px 28px rgba(8,116,86,.2); }
+body.portal-auth .turnstile-panel { border-radius: 12px; background: #f7faf8; }
+
+body.portal-app .portal-header {
+	min-height: 72px; padding: 12px clamp(18px, 3vw, 42px); border: 0;
+	background: rgba(255,255,255,.92); box-shadow: 0 1px 0 rgba(16,44,39,.08); color: var(--campus-text);
+}
+body.portal-app .portal-header .portal-brand .brand-mark { border-radius: 11px; background: var(--campus-navy); box-shadow: none; }
+body.portal-app .portal-header .portal-brand small { color: var(--campus-green-dark); letter-spacing: .1em; }
+body.portal-app .portal-header .portal-session { color: var(--campus-muted); }
+body.portal-app .portal-header .portal-ghost { border: 1px solid var(--campus-line); border-radius: 10px; background: #fff; color: var(--campus-text); }
+body.portal-app .portal-layout { grid-template-columns: 280px minmax(0,1fr); max-width: 1920px; }
+body.portal-app .portal-sidebar {
+	top: 72px; min-height: calc(100vh - 72px); padding: 40px 28px; border: 0; border-right: 1px solid rgba(255,255,255,.08);
+	background: linear-gradient(165deg, var(--campus-navy-soft), #0b211d); color: #fff;
+}
+body.portal-app .portal-sidebar::before { width: 48px; height: 5px; background: var(--campus-lime); }
+body.portal-app .portal-sidebar .portal-title {
+	color: #fff; font-family: inherit; font-size: clamp(34px, 3vw, 48px); font-weight: 850;
+	line-height: .98; letter-spacing: -.045em; text-transform: none;
+}
+body.portal-app .portal-sidebar p:not(.eyebrow) { color: #b8cec6; }
+body.portal-app .portal-sidebar .eyebrow { color: var(--campus-lime); }
+body.portal-app .portal-sidebar .identity-list { border-color: rgba(255,255,255,.12); }
+body.portal-app .portal-main {
+	gap: 20px; padding: clamp(24px, 3.5vw, 52px); background:
+		radial-gradient(circle at 90% 4%, rgba(52,120,246,.055), transparent 24rem), var(--campus-canvas);
+}
+body.portal-app .workspace-head {
+	padding: 0 0 22px; border: 0; border-bottom: 1px solid var(--campus-line); border-radius: 0; background: transparent; box-shadow: none;
+}
+body.portal-app .workspace-head h2 {
+	font-family: inherit; font-size: clamp(30px, 3.4vw, 48px); font-weight: 850; line-height: 1; letter-spacing: -.045em; text-transform: none;
+}
+body.portal-app .status-chip { border: 1px solid rgba(24,167,121,.2); border-radius: 999px; background: #e6f7f0; color: var(--campus-green-dark); }
+body.portal-app .teacher-page-tabs {
+	top: 84px; gap: 5px; padding: 6px; border: 1px solid var(--campus-line); border-radius: 14px;
+	background: rgba(255,255,255,.94); box-shadow: 0 8px 24px rgba(16,44,39,.06);
+}
+body.portal-app .teacher-page-tabs a,
+body.portal-app .teacher-page-tabs button { border-radius: 10px; }
+body.portal-app .teacher-page-tabs a:hover,
+body.portal-app .teacher-page-tabs a.is-active,
+body.portal-app .teacher-page-tabs button:hover,
+body.portal-app .teacher-page-tabs button.is-active { border-color: transparent; background: var(--campus-navy); color: #fff; box-shadow: none; }
+body.portal-app .portal-panel,
+body.portal-app .portal-grid article,
+body.portal-app .portal-metrics article,
+body.portal-app .activity-ai-panel,
+body.portal-app .activity-builder {
+	border: 1px solid rgba(16,44,39,.08); border-radius: var(--campus-radius); background: #fff; box-shadow: var(--campus-shadow);
+}
+body.portal-app .portal-panel:hover,
+body.portal-app .portal-grid article:hover { border-color: rgba(24,167,121,.2); }
+body.portal-app .portal-metrics { gap: 12px; }
+body.portal-app .portal-metrics article { min-height: 124px; border-top: 0; overflow: hidden; }
+body.portal-app .portal-metrics article::before {
+	position: absolute; inset: 0 auto 0 0; width: 4px; border-radius: 4px; background: var(--campus-green); content: "";
+}
+body.portal-app .portal-metrics article:nth-child(2)::before { background: var(--campus-blue); }
+body.portal-app .portal-metrics article:nth-child(3)::before { background: #e0a536; }
+body.portal-app .portal-metrics article:nth-child(4)::before { background: #8b6be8; }
+body.portal-app .portal-metrics article::after { opacity: .55; border-radius: 18px; }
+body.portal-app .portal-metrics strong { color: var(--campus-text); font-family: inherit; font-size: 38px; font-weight: 850; letter-spacing: -.04em; }
+body.portal-app .portal-grid article h2,
+body.portal-app .portal-panel h2 { color: var(--campus-text); font-size: 20px; letter-spacing: -.02em; }
+body.portal-app .portal-form fieldset,
+body.portal-app .portal-form input,
+body.portal-app .portal-form select,
+body.portal-app .portal-form textarea,
+body.portal-app .compact-rack span,
+body.portal-app .segmented-filters button,
+body.portal-app .class-server-item,
+body.portal-app .class-server-actions button,
+body.portal-app .teacher-actions button,
+body.portal-app .minecraft-action,
+body.portal-app .portal-ghost,
+body.portal-app .portal-table button { border-color: var(--campus-line); border-radius: 10px; background: #fbfdfc; color: var(--campus-text); }
+body.portal-app .portal-form input:focus,
+body.portal-app .portal-form select:focus,
+body.portal-app .portal-form textarea:focus { border-color: var(--campus-green); outline: 4px solid rgba(24,167,121,.12); }
+body.portal-app .button.primary { border-radius: 10px; background: var(--campus-navy); color: #fff; box-shadow: 0 8px 20px rgba(16,44,39,.15); }
+body.portal-app .button.primary:hover { background: var(--campus-green-dark); box-shadow: 0 10px 24px rgba(8,116,86,.18); }
+body.portal-app .portal-table { border-color: var(--campus-line); border-radius: 12px; }
+body.portal-app .portal-table th { background: #f1f6f3; color: #4e655d; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+body.portal-app .portal-table tbody tr:hover { background: #f4faf7; }
+body.portal-app .class-server-item { border-left: 4px solid var(--campus-green); }
+body.portal-app .sys-console { border-radius: 12px; }
+body.portal-app .dashboard-settings-button { border: 0; background: var(--campus-navy); box-shadow: var(--campus-shadow-raised); }
+
+@media (max-width: 980px) {
+	body.portal-auth .auth-layout { grid-template-columns: 1fr; padding: 18px; }
+	body.portal-auth .auth-visual { min-height: 440px; }
+	body.portal-app .portal-layout { grid-template-columns: 1fr; }
+	body.portal-app .portal-sidebar { top: 0; min-height: auto; padding: 30px 22px; }
+	body.portal-app .portal-sidebar .portal-title { font-size: 40px; }
+}
+
+@media (max-width: 660px) {
+	body.portal-auth .auth-visual { min-height: 390px; padding: 24px; border-radius: 20px; }
+	body.portal-auth .auth-card { border-radius: 18px; }
+	body.portal-auth .login-visual-rack { grid-template-columns: 1fr; }
+	body.portal-auth .login-visual-rack span { display: none; }
+	body.portal-auth .login-visual-rack span:first-child { display: grid; min-height: 54px; }
+	body.portal-app .portal-header { min-height: 64px; }
+	body.portal-app .portal-main { padding: 18px 12px 76px; }
+	body.portal-app .portal-panel,
+	body.portal-app .portal-grid article,
+	body.portal-app .portal-metrics article { border-radius: 13px; }
+	body.portal-app .teacher-page-tabs { top: 64px; border-radius: 0; }
+}
