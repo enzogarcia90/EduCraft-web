@@ -256,7 +256,25 @@ function initRegisterTurnstile(attempt = 0) {
 		else node.textContent = "No se pudo cargar la verificacion. Recarga la pagina.";
 		return;
 	}
-	registerTurnstileWidgetId = window.turnstile.render(node, { sitekey, action: "register", theme: "dark" });
+	node.replaceChildren();
+	registerTurnstileWidgetId = window.turnstile.render(node, {
+		sitekey,
+		action: "register",
+		theme: "dark",
+		appearance: "always",
+		execution: "render",
+		"refresh-expired": "auto",
+		callback: () => setTurnstileStatus("Verificacion completada automaticamente.", "ok"),
+		"error-callback": (code) => setTurnstileStatus(`Cloudflare no pudo verificar (${code || "error"}). Recarga la pagina.`, "error"),
+		"expired-callback": () => setTurnstileStatus("La verificacion caduco; se renovara automaticamente.", "")
+	});
+}
+
+function setTurnstileStatus(message, tone) {
+	const node = $("#registerTurnstileStatus");
+	if (!node) return;
+	node.textContent = message;
+	node.dataset.tone = tone || "";
 }
 
 function registerTurnstileToken() {

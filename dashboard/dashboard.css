@@ -2726,6 +2726,10 @@ body.portal-auth .login-card .portal-form input:-webkit-autofill:focus {
 
 .turnstile-panel strong { color: var(--portal-ink); font-size: 13px; }
 .turnstile-panel small { color: var(--portal-muted); line-height: 1.4; }
+.turnstile-panel #registerTurnstile { display: grid; min-height: 65px; align-items: center; justify-content: start; }
+.turnstile-loading { color: var(--portal-muted); font-size: 13px; font-weight: 700; }
+#registerTurnstileStatus[data-tone="ok"] { color: #cdff55; }
+#registerTurnstileStatus[data-tone="error"] { color: var(--portal-error); }
 
 .integrity-warning {
 	margin: 18px 0 0;
