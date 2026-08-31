@@ -426,6 +426,7 @@ function bindDashboard() {
 		setMessage($("#activityMessage"), "Borrador listo para revisar y guardar.", "ok");
 	});
 	$("#activityReset")?.addEventListener("click", () => fillActivityTemplate(activityTemplates[0], true));
+	$("#passwordVisibilityButton")?.addEventListener("click", togglePasswordVisibility);
 	$("#sysRefreshButton")?.addEventListener("click", loadSysAdmin);
 	$("#sysVelocityConsoleButton")?.addEventListener("click", loadVelocityConsole);
 	$("#sysBackendConsoleButton")?.addEventListener("click", () => loadBackendConsole());
@@ -443,6 +444,17 @@ function bindDashboard() {
 	document.addEventListener("change", (event) => {
 		if (event.target.matches("[data-client-policy-setting]")) updateClientPolicySetting(event.target);
 	});
+}
+
+function togglePasswordVisibility() {
+	const input = $("#passwordInput");
+	const button = $("#passwordVisibilityButton");
+	if (!input || !button) return;
+	const visible = input.type === "text";
+	input.type = visible ? "password" : "text";
+	button.textContent = visible ? "Mostrar" : "Ocultar";
+	button.setAttribute("aria-pressed", String(!visible));
+	input.focus();
 }
 
 function enhanceCentreDashboard() {
