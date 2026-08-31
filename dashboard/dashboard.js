@@ -428,6 +428,7 @@ function bindDashboard() {
 	$("#activityReset")?.addEventListener("click", () => fillActivityTemplate(activityTemplates[0], true));
 	$("#sysRefreshButton")?.addEventListener("click", loadSysAdmin);
 	$("#sysVelocityConsoleButton")?.addEventListener("click", loadVelocityConsole);
+	$("#sysBackendConsoleButton")?.addEventListener("click", () => loadBackendConsole());
 	$("#billingCheckoutButton")?.addEventListener("click", startBillingCheckout);
 	$("#billingPortalButton")?.addEventListener("click", openBillingPortal);
 	$("#billingReloadButton")?.addEventListener("click", loadBilling);
@@ -1216,6 +1217,7 @@ async function loadSysAdmin() {
 		setMessage($("#sysAdminMessage"), `Datos de backend cargados. Servidores: ${error.message}`, "error");
 	}
 	renderSysAdmin(null, serverError);
+	loadBackendConsole();
 	if (!serverError && !state.sysServerConsoleId && state.classServers.length) {
 		loadServerConsole(state.classServers[0].id);
 		loadVelocityConsole();
@@ -2730,6 +2732,18 @@ async function loadVelocityConsole(quiet = false) {
 	}
 }
 
+async function loadBackendConsole(quiet = false) {
+	const node = $("#sysBackendConsole");
+	if (!node) return;
+	if (!quiet) node.textContent = "Leyendo logs del backend...";
+	try {
+		const response = await request("/dashboard/sysadmin/backend-logs?lines=220");
+		updateConsoleNode(node, response.lines, "Todavia no hay logs del backend.");
+	} catch (error) {
+		node.textContent = error.message;
+	}
+}
+
 function updateConsoleNode(node, lines, emptyText) {
 	const followTail = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
 	const cleanLines = (lines || []).map((line) => {
@@ -2772,6 +2786,7 @@ function startConsoleTail() {
 		if (document.hidden) return;
 		if (state.sysServerConsoleId) loadServerConsole(state.sysServerConsoleId, true);
 		loadVelocityConsole(true);
+		loadBackendConsole(true);
 	}, 5000);
 }
 
