@@ -2902,3 +2902,18 @@ body.portal-auth .login-card .portal-form input:-webkit-autofill:focus {
 	body.portal-app .portal-ghost:hover,
 	body.portal-app .teacher-actions button:hover { transform: none; box-shadow: none; }
 }
+
+.oauth-divider {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 18px 0 14px;
+	color: #91a49e;
+	font-size: 12px;
+	font-weight: 800;
+	text-transform: uppercase;
+}
+.oauth-divider::before,
+.oauth-divider::after { content: ""; flex: 1; height: 1px; background: rgba(145, 164, 158, .35); }
+.google-signin { display: flex; min-height: 44px; align-items: center; justify-content: center; color: #91a49e; font-size: 13px; }
+.google-signin > div { max-width: 100%; }

@@ -193,17 +193,13 @@ async function init() {
 
 function bindLogin() {
 	initLoginTurnstile();
+	initGoogleSignIn();
 	$("#loginForm")?.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const message = $("#authMessage");
 		try {
-			const checkoutPlan = new URLSearchParams(location.search).get("checkout");
-			await login($("#emailInput").value, $("#passwordInput").value, message, { redirect: !checkoutPlan });
-			if (checkoutPlan) {
-				const checkout = await request("/api/billing/checkout", { method: "POST", body: { plan: checkoutPlan } });
-				if (!safeHTTPSURL(checkout.url)) throw new Error("Stripe no devolvio una URL segura.");
-				location.assign(checkout.url);
-			}
+			const response = await login($("#emailInput").value, $("#passwordInput").value, message, { redirect: false });
+			await finishLogin(response);
 		} catch (error) {
 			resetLoginTurnstile();
 			setMessage(message, friendlyLoginError(error), "error");
@@ -213,6 +209,66 @@ function bindLogin() {
 	if (email && $("#emailInput")) {
 		$("#emailInput").value = email;
 	}
+}
+
+function initGoogleSignIn(attempt = 0) {
+	const container = $("#googleSignInButton");
+	const clientId = window.EDUCRAFT_GOOGLE_CLIENT_ID || "";
+	if (!container || !clientId) return;
+	if (!window.google?.accounts?.id) {
+		if (attempt < 40) window.setTimeout(() => initGoogleSignIn(attempt + 1), 250);
+		else container.textContent = "No se pudo cargar el acceso con Google.";
+		return;
+	}
+	container.textContent = "";
+	window.google.accounts.id.initialize({
+		client_id: clientId,
+		callback: handleGoogleCredential,
+		ux_mode: "popup"
+	});
+	window.google.accounts.id.renderButton(container, {
+		type: "standard",
+		theme: "outline",
+		size: "large",
+		text: "continue_with",
+		shape: "rectangular",
+		width: Math.min(390, Math.max(240, container.clientWidth || 390))
+	});
+}
+
+async function handleGoogleCredential(googleResponse) {
+	const message = $("#authMessage");
+	try {
+		const turnstileToken = loginTurnstileToken();
+		if (!turnstileToken) throw new Error("Completa la verificacion de seguridad.");
+		setMessage(message, "Verificando cuenta de Google...", "");
+		const response = await request("/auth/google", {
+			method: "POST",
+			auth: false,
+			body: { credential: googleResponse.credential, turnstileToken }
+		});
+		storeSession(response);
+		await finishLogin(response);
+	} catch (error) {
+		resetLoginTurnstile();
+		setMessage(message, friendlyGoogleLoginError(error), "error");
+	}
+}
+
+async function finishLogin(response) {
+	const destination = pageForRole(response.role);
+	if (!destination) {
+		clearSession();
+		throw new Error("portal_access_denied");
+	}
+	const checkoutPlan = new URLSearchParams(location.search).get("checkout");
+	if (!checkoutPlan) {
+		location.replace(destination);
+		return;
+	}
+	const checkout = await request("/api/billing/checkout", { method: "POST", body: { plan: checkoutPlan } });
+	if (!safeHTTPSURL(checkout.url)) throw new Error("Stripe no devolvio una URL segura.");
+	location.assign(checkout.url);
 }
 
 function bindRegister() {
@@ -3366,6 +3422,20 @@ function friendlyLoginError(error) {
 		return "No se pudo conectar. Intentalo de nuevo.";
 	}
 	return "No se pudo iniciar sesion.";
+}
+
+function friendlyGoogleLoginError(error) {
+	const message = String(error?.message || "");
+	if (message.includes("invalid email or password") || message.includes("HTTP 401")) {
+		return "Tu correo de Google no corresponde a una cuenta activa de EduCraft.";
+	}
+	if (message.includes("verificacion de seguridad") || message.includes("HTTP 403")) {
+		return "Espera a que termine la verificacion de seguridad e intentalo otra vez.";
+	}
+	if (message.includes("Failed to fetch") || message.includes("NetworkError")) {
+		return "No se pudo conectar. Intentalo de nuevo.";
+	}
+	return "No se pudo iniciar sesion con Google.";
 }
 
 function pageName(path) {
