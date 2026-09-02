@@ -25,13 +25,20 @@ jobs:
           HEALTH_URL: https://educraftes.duckdns.org/health
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error \
+          http_status="$(curl --silent --show-error \
             --connect-timeout 10 --max-time 25 \
             --retry 2 --retry-all-errors \
-            "$HEALTH_URL" > health-source.json
+            --output health-source.json --write-out '%{http_code}' \
+            "$HEALTH_URL")"
+
+          if [[ "$http_status" != "200" && "$http_status" != "503" ]]; then
+            echo "Respuesta HTTP inesperada: $http_status" >&2
+            exit 1
+          fi
 
           jq -e '
-            .status == "ok" and
+            (.status == "ok" or .status == "degraded" or .status == "down") and
+            (.timestamp | type == "string" and length > 0) and
             (.version | type == "string" and length > 0) and
             (.uptime_seconds | type == "number") and
             (.services | type == "object" and length > 0)

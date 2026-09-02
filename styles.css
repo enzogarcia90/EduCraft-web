@@ -1585,6 +1585,35 @@ body[data-page="empresa"] .value-grid article {
 .form-field select,
 .form-field textarea { border-radius: var(--radius-sm); }
 
+.status-monitor [data-health-overall]::before {
+	content: "";
+	display: inline-block;
+	width: .72rem;
+	height: .72rem;
+	margin-right: .55rem;
+	border-radius: 50%;
+	background: #d5a92f;
+	box-shadow: 0 0 0 4px rgba(213,169,47,.14);
+}
+
+.status-monitor[data-health-state="ok"] [data-health-overall]::before { background: #15986f; box-shadow: 0 0 0 4px rgba(21,152,111,.14); }
+.status-monitor[data-health-state="degraded"] [data-health-overall]::before,
+.status-monitor[data-health-state="stale"] [data-health-overall]::before { background: #d5a92f; }
+.status-monitor[data-health-state="down"] [data-health-overall]::before { background: #bd6149; box-shadow: 0 0 0 4px rgba(189,97,73,.14); }
+
+.status-refresh {
+	font: inherit;
+	font-weight: 700;
+	color: inherit;
+	background: transparent;
+	border: 1px solid currentColor;
+	border-radius: var(--radius-xs);
+	padding: .35rem .65rem;
+	cursor: pointer;
+}
+
+.status-refresh:disabled { cursor: wait; opacity: .55; }
+
 .notice-band { border-radius: 0 0 var(--radius-md) var(--radius-md); }
 
 .page-hero::after { border-radius: var(--radius-lg); }

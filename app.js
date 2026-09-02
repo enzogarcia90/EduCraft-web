@@ -4,6 +4,103 @@ const reducePageMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 initPageMotion();
 initMobileNavigation();
 initContactForm();
+initHealthMonitor();
+
+function initHealthMonitor() {
+	const monitor = document.querySelector("[data-health-monitor]");
+	if (!monitor) return;
+
+	const fields = {
+		overall: monitor.querySelector("[data-health-overall]"),
+		checked: monitor.querySelector("[data-health-checked]"),
+		source: monitor.querySelector("[data-health-source]"),
+		runtime: monitor.querySelector("[data-health-runtime]"),
+		services: monitor.querySelector("[data-health-services]")
+	};
+	const refresh = monitor.querySelector("[data-health-refresh]");
+	let loading = false;
+
+	function validHealth(data) {
+		return data && ["ok", "degraded", "down"].includes(data.status) &&
+			typeof data.timestamp === "string" && data.services && typeof data.services === "object";
+	}
+
+	async function requestHealth(url) {
+		const controller = new AbortController();
+		const timeout = window.setTimeout(() => controller.abort(), 8000);
+		try {
+			const separator = url.includes("?") ? "&" : "?";
+			const response = await fetch(`${url}${separator}t=${Date.now()}`, {
+				cache: "no-store",
+				headers: { Accept: "application/json" },
+				signal: controller.signal
+			});
+			const data = await response.json();
+			if (!response.ok && response.status !== 503) throw new Error(`HTTP ${response.status}`);
+			if (!validHealth(data)) throw new Error("Respuesta de estado no válida");
+			return data;
+		} finally {
+			window.clearTimeout(timeout);
+		}
+	}
+
+	function duration(seconds) {
+		const total = Math.max(0, Number(seconds) || 0);
+		const days = Math.floor(total / 86400);
+		const hours = Math.floor((total % 86400) / 3600);
+		return days ? `${days} d ${hours} h` : `${hours} h ${Math.floor((total % 3600) / 60)} min`;
+	}
+
+	function render(data, source) {
+		const timestamp = new Date(data.mirrored_at || data.timestamp);
+		const ageMinutes = Math.max(0, Math.floor((Date.now() - timestamp.getTime()) / 60000));
+		const stale = source === "mirror" && (!Number.isFinite(timestamp.getTime()) || ageMinutes > 30);
+		const services = Object.values(data.services);
+		const affected = services.filter((service) => service.status !== "ok");
+		const labels = { ok: "Operativo", degraded: "Degradado", down: "Incidencia crítica" };
+
+		monitor.dataset.healthState = stale ? "stale" : data.status;
+		fields.overall.textContent = stale ? "Sin datos recientes" : (labels[data.status] || data.status);
+		fields.checked.textContent = Number.isFinite(timestamp.getTime())
+			? `${timestamp.toLocaleString("es-ES")} (${ageMinutes === 0 ? "ahora" : `hace ${ageMinutes} min`})`
+			: "Fecha no disponible";
+		fields.source.textContent = source === "direct"
+			? "Backend en directo"
+			: stale ? "Copia de respaldo desactualizada" : "Copia de respaldo de GitHub";
+		fields.runtime.textContent = `Versión ${data.version || "sin identificar"} · activo ${duration(data.uptime_seconds)}`;
+		fields.services.textContent = affected.length
+			? `${affected.length} de ${services.length} requieren atención: ${affected.map((service) => service.category || "servicio").join(", ")}`
+			: `${services.length} de ${services.length} operativos`;
+	}
+
+	async function update() {
+		if (loading) return;
+		loading = true;
+		if (refresh) refresh.disabled = true;
+		fields.source.textContent = "Consultando el backend...";
+		try {
+			render(await requestHealth(monitor.dataset.healthDirect), "direct");
+		} catch (_) {
+			try {
+				render(await requestHealth(monitor.dataset.healthMirror), "mirror");
+			} catch (_) {
+				monitor.dataset.healthState = "down";
+				fields.overall.textContent = "No se puede verificar";
+				fields.checked.textContent = new Date().toLocaleString("es-ES");
+				fields.source.textContent = "Backend y copia de respaldo inaccesibles";
+				fields.runtime.textContent = "Sin datos verificables";
+				fields.services.textContent = "Estado desconocido";
+			}
+		} finally {
+			loading = false;
+			if (refresh) refresh.disabled = false;
+		}
+	}
+
+	refresh?.addEventListener("click", update);
+	update();
+	window.setInterval(update, 60000);
+}
 
 function initContactForm() {
 	const form = document.querySelector("[data-contact-form]");
