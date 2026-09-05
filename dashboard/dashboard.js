@@ -3426,11 +3426,20 @@ function friendlyLoginError(error) {
 
 function friendlyGoogleLoginError(error) {
 	const message = String(error?.message || "");
-	if (message.includes("invalid email or password") || message.includes("HTTP 401")) {
+	if (message.includes("invalid email or password") || message.includes("invalid credentials")) {
 		return "Tu correo de Google no corresponde a una cuenta activa de EduCraft.";
 	}
-	if (message.includes("verificacion de seguridad") || message.includes("HTTP 403")) {
+	if (message.includes("google identity could not be verified")) {
+		return "Google no pudo validar esta cuenta. Comprueba que educraft.es este autorizado en el cliente OAuth.";
+	}
+	if (message.includes("account is disabled")) {
+		return "Esta cuenta de EduCraft esta desactivada.";
+	}
+	if (message.includes("verificacion de seguridad") || message.includes("human verification")) {
 		return "Espera a que termine la verificacion de seguridad e intentalo otra vez.";
+	}
+	if (message === "portal_access_denied" || message.includes("access denied")) {
+		return "Esta cuenta no tiene un rol de acceso en EduCraft.";
 	}
 	if (message.includes("Failed to fetch") || message.includes("NetworkError")) {
 		return "No se pudo conectar. Intentalo de nuevo.";
