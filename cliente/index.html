@@ -14,8 +14,6 @@
 		<meta name="twitter:image" content="educraft-client-preview.png" />
 		<link type="image/png" rel="shortcut icon" href="favicon.png" />
 		<script type="text/javascript" src="educraft-config.js"></script>
-		<link rel="stylesheet" href="login-turnstile.css" />
-		<script type="text/javascript" src="login-turnstile.js" defer></script>
 		<script type="text/javascript" src="bootstrap.js"></script>
 		<script type="text/javascript">
 			"use strict";
@@ -57,11 +55,5 @@
 			});
 		</script>
 	</head>
-	<body style="margin:0px;width:100%;height:100%;overflow:hidden;background-color:black;" id="game_frame">
-		<!-- Turnstile panel injected above the canvas; hidden until `EDUCRAFT_showTurnstile` is called -->
-		<div id="educraft_turnstile_panel" hidden>
-			<div id="educraft_turnstile"></div>
-			<div id="educraft_turnstile_status">Preparando verificación…</div>
-		</div>
-	</body>
+	<body style="margin:0px;width:100%;height:100%;overflow:hidden;background-color:black;" id="game_frame"></body>
 </html>
