@@ -83,7 +83,11 @@
  window.EDUCRAFT_showTurnstile = function (x, y, width, height, guiWidth, guiHeight) {
   bounds = { x: x, y: y, width: width, height: height, guiWidth: guiWidth, guiHeight: guiHeight };
   active = true;
-  panel().hidden = false;
+    var p = panel();
+    p.hidden = false;
+    // ensure it's on top of the game canvas
+    try { p.style.zIndex = 2147483647; p.style.pointerEvents = 'auto'; } catch (e) {}
+    console.log('[EduCraft] showTurnstile', bounds);
   position();
   load();
  };
