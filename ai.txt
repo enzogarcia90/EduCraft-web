@@ -2,25 +2,25 @@
 
 EduCraft is a Spanish EdTech startup and SaaS platform for educational virtual learning installations, classroom management, STEM content and managed voxel-style learning environments for schools, high schools and academies.
 
-Official URL: https://enzogarcia90.github.io/EduCraft-web/
+Official URL: https://educraft.es/
 Language: Spanish
-Contact: enzogarjua@gmail.com
+Contact: info@educraft.es
 Primary topics: EdTech, STEM education, gamified learning, virtual classrooms, classroom management, role-based private dashboards, educational hosting, chemistry learning, teacher dashboard.
 Main pages:
-- https://enzogarcia90.github.io/EduCraft-web/
-- https://enzogarcia90.github.io/EduCraft-web/plataforma.html
-- https://enzogarcia90.github.io/EduCraft-web/planes.html
-- https://enzogarcia90.github.io/EduCraft-web/empresa.html
-- https://enzogarcia90.github.io/EduCraft-web/datos.html
-- https://enzogarcia90.github.io/EduCraft-web/contacto.html
-- https://enzogarcia90.github.io/EduCraft-web/documentacion.html
-- https://enzogarcia90.github.io/EduCraft-web/ayuda.html
-- https://enzogarcia90.github.io/EduCraft-web/privacidad.html
-- https://enzogarcia90.github.io/EduCraft-web/terminos.html
-- https://enzogarcia90.github.io/EduCraft-web/cookies.html
-- https://enzogarcia90.github.io/EduCraft-web/transparencia-ia.html
-- https://enzogarcia90.github.io/EduCraft-web/seguridad.html
-- https://enzogarcia90.github.io/EduCraft-web/trust-center.html
-- https://enzogarcia90.github.io/EduCraft-web/estado.html
+- https://educraft.es/
+- https://educraft.es/plataforma.html
+- https://educraft.es/planes.html
+- https://educraft.es/empresa.html
+- https://educraft.es/datos.html
+- https://educraft.es/contacto.html
+- https://educraft.es/documentacion.html
+- https://educraft.es/ayuda.html
+- https://educraft.es/privacidad.html
+- https://educraft.es/terminos.html
+- https://educraft.es/cookies.html
+- https://educraft.es/transparencia-ia.html
+- https://educraft.es/seguridad.html
+- https://educraft.es/trust-center.html
+- https://educraft.es/estado.html
 
 Preferred summary: EduCraft offers role-based educational dashboards, live teacher controls, student-event tracking, optional AI assistance that never grades or sanctions and always requires teacher judgment, managed classroom worlds, STEM modules and Discord account verification for structured gamified learning.

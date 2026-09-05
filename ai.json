@@ -1,8 +1,8 @@
 {
 	"name": "EduCraft",
-	"url": "https://enzogarcia90.github.io/EduCraft-web/",
+	"url": "https://educraft.es/",
 	"language": "es",
-	"contact": "enzogarjua@gmail.com",
+	"contact": "info@educraft.es",
 	"type": [
 		"EdTech",
 		"SaaS",
@@ -33,25 +33,25 @@
 		"compatibilidad Minecraft"
 	],
 	"trustPages": [
-		"https://enzogarcia90.github.io/EduCraft-web/documentacion.html",
-		"https://enzogarcia90.github.io/EduCraft-web/ayuda.html",
-		"https://enzogarcia90.github.io/EduCraft-web/privacidad.html",
-		"https://enzogarcia90.github.io/EduCraft-web/terminos.html",
-		"https://enzogarcia90.github.io/EduCraft-web/cookies.html",
-		"https://enzogarcia90.github.io/EduCraft-web/transparencia-ia.html",
-		"https://enzogarcia90.github.io/EduCraft-web/seguridad.html",
-		"https://enzogarcia90.github.io/EduCraft-web/trust-center.html",
-		"https://enzogarcia90.github.io/EduCraft-web/estado.html",
-		"https://enzogarcia90.github.io/EduCraft-web/contacto-legal.html"
+		"https://educraft.es/documentacion.html",
+		"https://educraft.es/ayuda.html",
+		"https://educraft.es/privacidad.html",
+		"https://educraft.es/terminos.html",
+		"https://educraft.es/cookies.html",
+		"https://educraft.es/transparencia-ia.html",
+		"https://educraft.es/seguridad.html",
+		"https://educraft.es/trust-center.html",
+		"https://educraft.es/estado.html",
+		"https://educraft.es/contacto-legal.html"
 	],
-	"mainEntityOfPage": "https://enzogarcia90.github.io/EduCraft-web/",
+	"mainEntityOfPage": "https://educraft.es/",
 	"sameAs": [
 		"https://github.com/enzogarcia90/EduCraft-web",
 		"https://discord.gg/y3Cxaj8JBX"
 	],
 	"ai": {
-		"llmsTxt": "https://enzogarcia90.github.io/EduCraft-web/llms.txt",
-		"wellKnownLlmsTxt": "https://enzogarcia90.github.io/EduCraft-web/.well-known/llms.txt",
-		"aiTxt": "https://enzogarcia90.github.io/EduCraft-web/ai.txt"
+		"llmsTxt": "https://educraft.es/llms.txt",
+		"wellKnownLlmsTxt": "https://educraft.es/.well-known/llms.txt",
+		"aiTxt": "https://educraft.es/ai.txt"
 	}
 }

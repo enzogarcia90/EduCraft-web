@@ -37,8 +37,8 @@ Allow: /
 
 
 # AI discovery files
-LLMs: https://enzogarcia90.github.io/EduCraft-web/llms.txt
-AI: https://enzogarcia90.github.io/EduCraft-web/ai.txt
-AI-JSON: https://enzogarcia90.github.io/EduCraft-web/ai.json
+LLMs: https://educraft.es/llms.txt
+AI: https://educraft.es/ai.txt
+AI-JSON: https://educraft.es/ai.json
 
-Sitemap: https://enzogarcia90.github.io/EduCraft-web/sitemap.xml
+Sitemap: https://educraft.es/sitemap.xml

@@ -2,4 +2,4 @@
 
 El archivo principal para modelos de IA esta en:
 
-https://enzogarcia90.github.io/EduCraft-web/llms.txt
+https://educraft.es/llms.txt

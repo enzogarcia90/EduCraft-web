@@ -4,21 +4,21 @@
 
 ## Sitio
 
-- URL oficial: https://enzogarcia90.github.io/EduCraft-web/
+- URL oficial: https://educraft.es/
 - Idioma principal: español
-- Contacto: enzogarjua@gmail.com
+- Contacto: info@educraft.es
 - Tipo de proyecto: plataforma educativa, EdTech, STEM y entornos compatibles con Minecraft
 - Estado: cliente web en desarrollo activo, apto para demos y pruebas tempranas
 
 ## Paginas principales
 
-- [Inicio](https://enzogarcia90.github.io/EduCraft-web/): resumen de EduCraft, propuesta educativa y acceso al cliente.
-- [Plataforma](https://enzogarcia90.github.io/EduCraft-web/plataforma.html): cliente web, perfiles, noticias, politicas por centro, servidores de aula y contenido STEM.
-- [Planes](https://enzogarcia90.github.io/EduCraft-web/planes.html): pilotos, centros educativos y despliegues gestionados.
-- [Empresa](https://enzogarcia90.github.io/EduCraft-web/empresa.html): ficha de empresa, origen, modelo y mision.
-- [Datos](https://enzogarcia90.github.io/EduCraft-web/datos.html): datos publicos del producto, audiencia y propuesta.
-- [Contacto](https://enzogarcia90.github.io/EduCraft-web/contacto.html): demos, pilotos educativos y colaboraciones.
-- [Dashboard](https://enzogarcia90.github.io/EduCraft-web/dashboard/): acceso privado no indexable para administracion, TIC y profesorado.
+- [Inicio](https://educraft.es/): resumen de EduCraft, propuesta educativa y acceso al cliente.
+- [Plataforma](https://educraft.es/plataforma.html): cliente web, perfiles, noticias, politicas por centro, servidores de aula y contenido STEM.
+- [Planes](https://educraft.es/planes.html): pilotos, centros educativos y despliegues gestionados.
+- [Empresa](https://educraft.es/empresa.html): ficha de empresa, origen, modelo y mision.
+- [Datos](https://educraft.es/datos.html): datos publicos del producto, audiencia y propuesta.
+- [Contacto](https://educraft.es/contacto.html): demos, pilotos educativos y colaboraciones.
+- [Dashboard](https://educraft.es/dashboard/): acceso privado no indexable para administracion, TIC y profesorado.
 
 ## Resumen para IA
 
