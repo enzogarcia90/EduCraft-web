@@ -3,17 +3,16 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
-		<meta name="description" content="Play minecraft 1.8 in your browser" />
-		<meta name="keywords" content="eaglercraft, eaglercraftx, minecraft, 1.8, 1.8.8" />
-		<title>EaglercraftX 1.8 WASM-GC</title>
+		<meta name="description" content="Cliente educativo EduCraft" />
+		<meta name="keywords" content="educraft, educacion, cliente educativo" />
+		<title>EduCraft WASM-GC</title>
 		<meta property="og:locale" content="en-US" />
 		<meta property="og:type" content="website" />
-		<meta property="og:title" content="EaglercraftX 1.8 WASM-GC" />
-		<meta property="og:description" content="Play minecraft 1.8 in your browser" />
+		<meta property="og:title" content="EduCraft WASM-GC" />
+		<meta property="og:description" content="Cliente educativo EduCraft" />
 		<meta property="og:image" content="educraft-client-preview.png" />
 		<meta name="twitter:image" content="educraft-client-preview.png" />
 		<link type="image/png" rel="shortcut icon" href="favicon.png" />
-		<script type="text/javascript" src="educraft-config.js"></script>
 		<script type="text/javascript" src="bootstrap.js"></script>
 		<script type="text/javascript">
 			"use strict";
@@ -21,15 +20,16 @@
 				if(window.location.href.indexOf("file:") === 0) {
 					alert("HTTP please, do not open this file locally, run a local HTTP server and load it via HTTP");
 				}else {
-
+					
 					// %%%%%%%%% launch options %%%%%%%%%%%%
-
+					
 					var relayId = Math.floor(Math.random() * 3);
 					window.eaglercraftXOpts = {
 						demoMode: false,
 						container: "game_frame",
 						assetsURI: "assets.epw?v=" + Date.now(),
 						worldsDB: "worlds",
+						localStorageNamespace: "educraft-runtime-local-202607152135",
 						servers: [
 							/* example: { addr: "ws://localhost:8081/", name: "Local test server" } */
 						],
@@ -39,18 +39,18 @@
 							{ addr: "wss://relay.shhnowisnottheti.me/", comment: "ayunami relay #1", primary: relayId == 2 }
 						]
 					};
-
+					
 					// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+					
 					var q = window.location.search;
 					if((typeof q === "string") && q[0] === "?" && (typeof window.URLSearchParams !== "undefined")) {
 						q = new window.URLSearchParams(q);
 						var s = q.get("server");
 						if(s) window.eaglercraftXOpts.joinServer = s;
 					}
-
+					
 					main();
-
+					
 				}
 			});
 		</script>
