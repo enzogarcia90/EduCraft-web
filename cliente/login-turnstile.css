@@ -1,6 +1,7 @@
 /* Positioned from GuiEduCraftLogin's reserved rectangle, in canvas coordinates. */
 #educraft_turnstile_panel[hidden] { display: none !important; }
 #educraft_turnstile_panel {
+ margin: 0; padding: 0; border: 0; right: auto; bottom: auto;
  position: fixed; z-index: 10000; width: 300px; height: 65px;
  transform-origin: top left; color: #ddd; background: #161616;
  font: 12px Arial, sans-serif;

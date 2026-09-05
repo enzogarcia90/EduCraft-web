@@ -19,6 +19,17 @@
   var sx = rect.width / bounds.guiWidth, sy = rect.height / bounds.guiHeight;
   var scale = Math.min(bounds.width * sx / 300, bounds.height * sy / 65);
   var node = panel();
+  // Minecraft fullscreens the canvas itself. Keep the login widget in the
+  // browser's top layer so it remains visible above that canvas.
+  if (typeof node.showPopover === "function") {
+   if (document.fullscreenElement) {
+    node.setAttribute("popover", "manual");
+    if (!node.matches(":popover-open")) node.showPopover();
+   } else if (node.hasAttribute("popover")) {
+    node.hidePopover();
+    node.removeAttribute("popover");
+   }
+  }
   node.style.left = (rect.left + bounds.x * sx + (bounds.width * sx - 300 * scale) / 2) + "px";
   node.style.top = (rect.top + bounds.y * sy + (bounds.height * sy - 65 * scale) / 2) + "px";
   node.style.transform = "scale(" + scale + ")";
@@ -86,6 +97,10 @@
   active = false;
   token = "";
   ++generation;
+  if (panel().hasAttribute("popover")) {
+   panel().hidePopover();
+   panel().removeAttribute("popover");
+  }
   panel().hidden = true;
   if (window.turnstile && widgetId !== null) window.turnstile.remove(widgetId);
   widgetId = null;
