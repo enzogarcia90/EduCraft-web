@@ -17,7 +17,8 @@
   var frame = canvas || document.getElementById("game_frame");
   var rect = frame.getBoundingClientRect();
   var sx = rect.width / bounds.guiWidth, sy = rect.height / bounds.guiHeight;
-  var scale = Math.min(bounds.width * sx / 300, bounds.height * sy / 65);
+  // Keep the widget small in CSS pixels, independent of Minecraft GUI scaling.
+  var scale = Math.min(0.85, bounds.width * sx / 300, bounds.height * sy / 65);
   var node = panel();
   // Minecraft fullscreens the canvas itself. Keep the login widget in the
   // browser's top layer so it remains visible above that canvas.
