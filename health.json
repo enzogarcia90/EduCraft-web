@@ -1,0 +1,322 @@
+{
+  "status": "ok",
+  "timestamp": "2026-09-06T22:52:50.8014384Z",
+  "uptime_seconds": 6245,
+  "version": "dev",
+  "services": {
+    "activity_generation": {
+      "status": "ok",
+      "critical": false,
+      "category": "education",
+      "check": "configuration",
+      "enabled": true,
+      "mode": "gemini",
+      "latency_ms": 0
+    },
+    "ai_integrity": {
+      "status": "ok",
+      "critical": false,
+      "category": "education",
+      "check": "configuration",
+      "enabled": true,
+      "mode": "sapling",
+      "latency_ms": 0
+    },
+    "api": {
+      "status": "ok",
+      "critical": true,
+      "category": "core",
+      "check": "self",
+      "enabled": true,
+      "latency_ms": 0
+    },
+    "authentication": {
+      "status": "ok",
+      "critical": true,
+      "category": "core",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres"
+      ],
+      "latency_ms": 0
+    },
+    "billing": {
+      "status": "ok",
+      "critical": false,
+      "category": "integrations",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres"
+      ],
+      "latency_ms": 0
+    },
+    "class_scheduler": {
+      "status": "ok",
+      "critical": false,
+      "category": "minecraft",
+      "check": "derived",
+      "enabled": false,
+      "depends_on": [
+        "postgres",
+        "redis"
+      ],
+      "latency_ms": 0
+    },
+    "class_server_management": {
+      "status": "ok",
+      "critical": false,
+      "category": "minecraft",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres"
+      ],
+      "latency_ms": 0
+    },
+    "client_policy": {
+      "status": "ok",
+      "critical": true,
+      "category": "education",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres",
+        "redis"
+      ],
+      "latency_ms": 0
+    },
+    "client_profile": {
+      "status": "ok",
+      "critical": true,
+      "category": "education",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres"
+      ],
+      "latency_ms": 0
+    },
+    "contact_email": {
+      "status": "ok",
+      "critical": false,
+      "category": "integrations",
+      "check": "configuration",
+      "enabled": true,
+      "latency_ms": 0
+    },
+    "contact_storage": {
+      "status": "ok",
+      "critical": false,
+      "category": "integrations",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres"
+      ],
+      "latency_ms": 0
+    },
+    "dashboard": {
+      "status": "ok",
+      "critical": true,
+      "category": "education",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres"
+      ],
+      "latency_ms": 0
+    },
+    "discord_notifications": {
+      "status": "ok",
+      "critical": false,
+      "category": "integrations",
+      "check": "configuration",
+      "enabled": false,
+      "latency_ms": 0
+    },
+    "discord_verification": {
+      "status": "ok",
+      "critical": false,
+      "category": "integrations",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres"
+      ],
+      "latency_ms": 0
+    },
+    "institutions": {
+      "status": "ok",
+      "critical": true,
+      "category": "core",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres"
+      ],
+      "latency_ms": 0
+    },
+    "live_policy": {
+      "status": "ok",
+      "critical": false,
+      "category": "education",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "redis"
+      ],
+      "latency_ms": 0
+    },
+    "news": {
+      "status": "ok",
+      "critical": false,
+      "category": "education",
+      "check": "configuration",
+      "enabled": true,
+      "mode": "memory",
+      "latency_ms": 0
+    },
+    "plugin_actions": {
+      "status": "ok",
+      "critical": false,
+      "category": "plugins",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres",
+        "redis"
+      ],
+      "latency_ms": 0
+    },
+    "plugin_activities": {
+      "status": "ok",
+      "critical": false,
+      "category": "plugins",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres",
+        "redis"
+      ],
+      "latency_ms": 0
+    },
+    "plugin_authentication": {
+      "status": "ok",
+      "critical": true,
+      "category": "plugins",
+      "check": "configuration",
+      "enabled": true,
+      "latency_ms": 0
+    },
+    "plugin_blocks": {
+      "status": "ok",
+      "critical": false,
+      "category": "plugins",
+      "check": "configuration",
+      "enabled": true,
+      "latency_ms": 0
+    },
+    "plugin_moderation": {
+      "status": "ok",
+      "critical": false,
+      "category": "plugins",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres"
+      ],
+      "latency_ms": 0
+    },
+    "plugin_student_events": {
+      "status": "ok",
+      "critical": false,
+      "category": "plugins",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres"
+      ],
+      "latency_ms": 0
+    },
+    "plugin_world_view": {
+      "status": "ok",
+      "critical": false,
+      "category": "plugins",
+      "check": "configuration",
+      "enabled": true,
+      "mode": "memory",
+      "latency_ms": 0
+    },
+    "postgres": {
+      "status": "ok",
+      "critical": true,
+      "category": "core",
+      "check": "ping",
+      "enabled": true,
+      "latency_ms": 0
+    },
+    "proxy_handoff": {
+      "status": "ok",
+      "critical": true,
+      "category": "minecraft",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres",
+        "redis"
+      ],
+      "latency_ms": 0
+    },
+    "redis": {
+      "status": "ok",
+      "critical": false,
+      "category": "core",
+      "check": "ping",
+      "enabled": true,
+      "latency_ms": 0
+    },
+    "session_routing": {
+      "status": "ok",
+      "critical": true,
+      "category": "minecraft",
+      "check": "derived",
+      "enabled": true,
+      "depends_on": [
+        "postgres",
+        "redis"
+      ],
+      "latency_ms": 0
+    },
+    "telemetry": {
+      "status": "ok",
+      "critical": false,
+      "category": "education",
+      "check": "configuration",
+      "enabled": true,
+      "mode": "memory",
+      "latency_ms": 0
+    },
+    "vps_agent": {
+      "status": "ok",
+      "critical": false,
+      "category": "integrations",
+      "check": "configuration",
+      "enabled": true,
+      "latency_ms": 0
+    },
+    "world_view": {
+      "status": "ok",
+      "critical": false,
+      "category": "education",
+      "check": "configuration",
+      "enabled": true,
+      "mode": "memory",
+      "latency_ms": 0
+    }
+  },
+  "mirrored_at": "2026-09-06T22:52:50Z",
+  "mirror_source": "github-actions",
+  "source_url": "https://educraftes.duckdns.org/health"
+}
