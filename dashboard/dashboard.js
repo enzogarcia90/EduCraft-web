@@ -202,6 +202,7 @@ function bindLogin() {
 			const response = await login($("#emailInput").value, $("#passwordInput").value, message, { redirect: false });
 			await finishLogin(response);
 		} catch (error) {
+			showIPVerificationCodeIfNeeded(error);
 			resetLoginTurnstile();
 			setMessage(message, friendlyLoginError(error), "error");
 		}
@@ -246,11 +247,12 @@ async function handleGoogleCredential(googleResponse) {
 		const response = await request("/auth/google", {
 			method: "POST",
 			auth: false,
-			body: { credential: googleResponse.credential, turnstileToken }
+			body: { credential: googleResponse.credential, turnstileToken, ipVerificationCode: $("#ipVerificationCodeInput")?.value.trim() || "" }
 		});
 		storeSession(response);
 		await finishLogin(response);
 	} catch (error) {
+		showIPVerificationCodeIfNeeded(error);
 		resetLoginTurnstile();
 		setMessage(message, friendlyGoogleLoginError(error), "error");
 	}
@@ -929,7 +931,7 @@ async function login(email, password, messageNode, options = {}) {
 	const response = await request("/login", {
 		method: "POST",
 		auth: false,
-		body: { email: email.trim(), password, turnstileToken }
+		body: { email: email.trim(), password, turnstileToken, ipVerificationCode: $("#ipVerificationCodeInput")?.value.trim() || "" }
 	});
 	storeSession(response);
 	const destination = pageForRole(response.role);
@@ -939,6 +941,14 @@ async function login(email, password, messageNode, options = {}) {
 	}
 	if (options.redirect !== false) location.replace(destination);
 	return response;
+}
+
+function showIPVerificationCodeIfNeeded(error) {
+	if (!String(error?.message || "").includes("codigo de 10 digitos")) return;
+	const field = $("#ipVerificationCodeField");
+	const input = $("#ipVerificationCodeInput");
+	if (field) field.hidden = false;
+	if (input) input.focus();
 }
 
 async function restoreAndRedirect() {
