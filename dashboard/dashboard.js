@@ -572,6 +572,7 @@ function bindDashboard() {
 	$("#sysRefreshButton")?.addEventListener("click", loadSysAdmin);
 	$("#sysVelocityConsoleButton")?.addEventListener("click", loadVelocityConsole);
 	$("#sysBackendConsoleButton")?.addEventListener("click", () => loadBackendConsole());
+	$("#sysIISConsoleButton")?.addEventListener("click", () => loadIISConsole());
 	$("#billingCheckoutButton")?.addEventListener("click", startBillingCheckout);
 	$("#billingPortalButton")?.addEventListener("click", openBillingPortal);
 	$("#billingReloadButton")?.addEventListener("click", loadBilling);
@@ -1382,6 +1383,7 @@ async function loadSysAdmin() {
 	}
 	renderSysAdmin(null, serverError);
 	loadBackendConsole();
+	loadIISConsole();
 	if (!serverError && !state.sysServerConsoleId && state.classServers.length) {
 		loadServerConsole(state.classServers[0].id);
 		loadVelocityConsole();
@@ -2908,6 +2910,18 @@ async function loadBackendConsole(quiet = false) {
 	}
 }
 
+async function loadIISConsole(quiet = false) {
+	const node = $("#sysIISConsole");
+	if (!node) return;
+	if (!quiet) node.textContent = "Leyendo logs de IIS...";
+	try {
+		const response = await request("/dashboard/sysadmin/iis-logs?lines=220");
+		updateConsoleNode(node, response.lines, "Todavía no hay accesos registrados por IIS.");
+	} catch (error) {
+		node.textContent = error.message;
+	}
+}
+
 function updateConsoleNode(node, lines, emptyText) {
 	const followTail = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
 	const cleanLines = (lines || []).map((line) => {
@@ -2951,6 +2965,7 @@ function startConsoleTail() {
 		if (state.sysServerConsoleId) loadServerConsole(state.sysServerConsoleId, true);
 		loadVelocityConsole(true);
 		loadBackendConsole(true);
+		loadIISConsole(true);
 	}, 5000);
 }
 
