@@ -15,7 +15,7 @@ function initClientCompatibility() {
 		if (destination.origin !== window.location.origin || !/^\/cliente\/(?:index\.html)?$/.test(destination.pathname) || supportsEduCraftClient()) return;
 		event.preventDefault();
 		window.location.assign(`navegador-no-compatible.html?browser=${encodeURIComponent(detectBrowserName())}`);
-	});
+	}, true);
 }
 
 function supportsEduCraftClient() {
