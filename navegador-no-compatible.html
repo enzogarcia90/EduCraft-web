@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="robots" content="noindex,follow">
+		<meta name="theme-color" content="#15986f">
+		<link rel="icon" type="image/png" sizes="32x32" href="assets/educraft-icon-32.png">
+		<link rel="stylesheet" href="styles.css">
+		<title>Navegador no compatible | EduCraft</title>
+	</head>
+	<body>
+		<main>
+			<section class="page-hero compact">
+				<p class="eyebrow">Cliente web</p>
+				<h1>Navegador no permitido</h1>
+				<p id="browser-message">El cliente de EduCraft requiere un navegador basado en Chromium para ofrecer la experiencia web prevista.</p>
+				<p>Prueba cualquiera de estos navegadores compatibles y vuelve a abrir el cliente.</p>
+			</section>
+			<section class="section">
+				<div class="browser-options" aria-label="Navegadores compatibles">
+					<a class="browser-option" href="https://www.google.com/chrome/" target="_blank" rel="noopener noreferrer"><img src="assets/browser-googlechrome.svg" alt="Logotipo de Google Chrome"><strong>Google Chrome</strong></a>
+					<a class="browser-option" href="https://www.opera.com/" target="_blank" rel="noopener noreferrer"><img src="assets/browser-opera.svg" alt="Logotipo de Opera"><strong>Opera</strong></a>
+					<a class="browser-option" href="https://brave.com/download/" target="_blank" rel="noopener noreferrer"><img src="assets/browser-brave.svg" alt="Logotipo de Brave"><strong>Brave</strong></a>
+				</div>
+			</section>
+			<section class="section teaser"><h2>¿Usas Firefox u otro navegador?</h2><p>Firefox y Safari no se bloquean para navegar por la web pública, pero no son compatibles con el cliente web de EduCraft. Puedes continuar consultando la plataforma desde este navegador.</p><a class="button secondary" href="index.html">Volver a EduCraft</a></section>
+		</main>
+		<script>const browser=new URLSearchParams(location.search).get("browser");if(browser)document.querySelector("#browser-message").textContent=`${browser} no es compatible con el cliente de EduCraft. El cliente requiere un navegador basado en Chromium.`;</script>
+	</body>
+</html>

@@ -5,6 +5,31 @@ initPageMotion();
 initMobileNavigation();
 initContactForm();
 initHealthMonitor();
+initClientCompatibility();
+
+function initClientCompatibility() {
+	document.addEventListener("click", (event) => {
+		const link = event.target.closest('a[href]');
+		if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+		const destination = new URL(link.getAttribute("href"), window.location.href);
+		if (destination.origin !== window.location.origin || !/^\/cliente\/(?:index\.html)?$/.test(destination.pathname) || supportsEduCraftClient()) return;
+		event.preventDefault();
+		window.location.assign(`navegador-no-compatible.html?browser=${encodeURIComponent(detectBrowserName())}`);
+	});
+}
+
+function supportsEduCraftClient() {
+	const brands = navigator.userAgentData?.brands || [];
+	if (brands.some(({ brand }) => /Chromium|Google Chrome|Microsoft Edge|Opera|Brave/i.test(brand))) return true;
+	return /(?:Chrome|Chromium|Edg|OPR|Brave)\//.test(navigator.userAgent);
+}
+
+function detectBrowserName() {
+	const ua = navigator.userAgent;
+	if (/Firefox|FxiOS/i.test(ua)) return "Firefox";
+	if (/Safari/i.test(ua) && !/Chrome|Chromium|Edg|OPR|Brave/i.test(ua)) return "Safari";
+	return "este navegador";
+}
 
 function initHealthMonitor() {
 	const monitor = document.querySelector("[data-health-monitor]");
