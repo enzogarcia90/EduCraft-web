@@ -13,6 +13,17 @@
 		<meta property="og:image" content="educraft-client-preview.png" />
 		<meta name="twitter:image" content="educraft-client-preview.png" />
 		<link type="image/png" rel="shortcut icon" href="favicon.png" />
+		<script>
+			(function () {
+				const ua = navigator.userAgent;
+				const brands = navigator.userAgentData?.brands || [];
+				const supported = brands.some(({ brand }) => /Chromium|Google Chrome|Microsoft Edge|Opera|Brave/i.test(brand)) || /(?:Chrome|Chromium|Edg|OPR|Brave)\//.test(ua);
+				if (!supported) {
+					const browser = /Firefox|FxiOS/i.test(ua) ? "Firefox" : (/Safari/i.test(ua) ? "Safari" : "este navegador");
+					window.location.replace(`../navegador-no-compatible.html?browser=${encodeURIComponent(browser)}`);
+				}
+			})();
+		</script>
 		<script type="text/javascript" src="educraft-config.js?v=20260905-api1"></script>
 		<link rel="stylesheet" href="login-turnstile.css?v=20260905-3" />
 		<script src="login-turnstile.js?v=20260905-3" defer></script>
