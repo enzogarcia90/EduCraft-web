@@ -119,11 +119,24 @@ function initContactForm() {
 		const payload = Object.fromEntries(["name", "email", "organization", "profile", "message", "website"].map((key) => [key, String(data.get(key) || "")]));
 		try {
 			const response = await fetch(form.action, {method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json"}, body: JSON.stringify(payload)});
-			if (!response.ok) throw new Error(`request failed: ${response.status}`);
+			if (!response.ok) {
+				let detail = {};
+				try { detail = await response.json(); } catch (_) {}
+				const retryAfter = response.headers.get("Retry-After");
+				throw Object.assign(new Error(`request failed: ${response.status}`), {status: response.status, detail, retryAfter});
+			}
 			window.location.assign("gracias.html");
-		} catch (_) {
+		} catch (error) {
 			status.classList.add("is-error");
-			status.textContent = "No hemos podido enviar la solicitud. Inténtalo de nuevo en unos minutos o escríbenos por correo.";
+			if (error.status === 429) {
+				status.textContent = error.retryAfter ? `Has alcanzado el límite de envíos. Vuelve a intentarlo en aproximadamente ${Math.ceil(Number(error.retryAfter) / 60)} minutos o escríbenos por correo.` : "Has alcanzado el límite temporal de envíos. Inténtalo más tarde o escríbenos por correo.";
+			} else if (error.status === 400 && error.detail?.message) {
+				status.textContent = `Revisa el formulario: ${error.detail.message}.`;
+			} else if (error.status === 502 || error.status === 503) {
+				status.textContent = "La recepción de solicitudes está temporalmente no disponible. Escríbenos a contacto@educraft.es mientras lo resolvemos.";
+			} else {
+				status.textContent = "No hemos podido enviar la solicitud. Inténtalo de nuevo en unos minutos o escríbenos por correo.";
+			}
 			button.disabled = false;
 		}
 	});
