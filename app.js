@@ -105,6 +105,8 @@ function initHealthMonitor() {
 function initContactForm() {
 	const form = document.querySelector("[data-contact-form]");
 	if (!form) return;
+	if (form.dataset.contactBound === "true") return;
+	form.dataset.contactBound = "true";
 	const button = form.querySelector('button[type="submit"]');
 	const status = form.querySelector(".form-status");
 	form.addEventListener("submit", async (event) => {
