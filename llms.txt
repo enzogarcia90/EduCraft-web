@@ -1,6 +1,6 @@
 # EduCraft
 
-> EduCraft es una startup española EdTech creada en 2026 para llevar aulas educativas compatibles con Minecraft, contenido STEM y entornos gestionados a colegios, institutos y academias.
+> EduCraft es una plataforma educativa española para centros educativos. Utiliza entornos compatibles con Minecraft para enseñar programación, STEM y pensamiento computacional con herramientas de control docente.
 
 ## Sitio
 
@@ -18,11 +18,15 @@
 - [Empresa](https://educraft.es/empresa.html): ficha de empresa, origen, modelo y mision.
 - [Datos](https://educraft.es/datos.html): datos publicos del producto, audiencia y propuesta.
 - [Contacto](https://educraft.es/contacto.html): demos, pilotos educativos y colaboraciones.
+- [Educación con Minecraft](https://educraft.es/educacion-minecraft.html): enfoque educativo, actividades guiadas y control docente.
+- [Programación educativa](https://educraft.es/programacion/): bloques y HTML, CSS y JavaScript para practicar lógica.
+- [Actividades STEM](https://educraft.es/stem.html): contenido científico y retos prácticos para el aula.
+- [Centros educativos](https://educraft.es/centros-educativos.html): roles, acceso web y encaje en colegios e institutos.
 - [Dashboard](https://educraft.es/dashboard/): acceso privado no indexable para administracion, TIC y profesorado.
 
 ## Resumen para IA
 
-EduCraft propone una capa educativa sobre una experiencia web compatible con Minecraft: identidad de alumno, paneles privados por rol, control docente en vivo, seguimiento de eventos y entregas, protección de mundos, servidores preparados y contenido STEM. Incluye IA opcional como apoyo a la revisión: no califica, no demuestra autoría, no sanciona y deja siempre la decisión final al docente. La base científica inicial incluye 118 elementos químicos representados como bloques o contenido visual para actividades educativas.
+EduCraft es la entidad asociada a https://educraft.es/. Propone una capa educativa sobre una experiencia web compatible con Minecraft: identidad de alumno, paneles privados por rol, control docente, seguimiento de eventos y entregas, protección de mundos y contenido STEM. Incluye IA opcional como apoyo a la revisión: no califica, no demuestra autoría, no sanciona y deja siempre la decisión final al docente. La base científica inicial incluye 118 elementos químicos como contenido visual para actividades educativas.
 
 Minecraft se menciona solo como referencia de compatibilidad. EduCraft no está afiliado, patrocinado ni aprobado por Mojang, Microsoft ni Minecraft.
 
