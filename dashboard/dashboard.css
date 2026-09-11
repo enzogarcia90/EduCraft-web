@@ -1773,6 +1773,8 @@ body.portal-app {
 .policy-control strong { color: var(--portal-ink); font-size: 14px; }
 .policy-control small { color: var(--portal-muted); font-size: 12px; line-height: 1.35; }
 #clientPolicyMessage { margin-top: 12px; }
+.local-worlds-warning { display: grid; gap: 4px; margin: 10px 0 4px; padding: 12px 13px; border: 1px solid #efbf69; border-radius: 12px; background: #fff2d9; color: #754800; font-size: 12px; line-height: 1.45; }
+.local-worlds-warning strong { color: #9a5600; font-size: 13px; }
 .resource-pack-config { display: grid; gap: 11px; margin-top: 14px; padding: 15px; border: 1px solid var(--portal-line); background: #f7faf8; }
 .resource-pack-config > div { display: grid; gap: 4px; }
 .resource-pack-config small { color: var(--portal-muted); font-size: 12px; line-height: 1.4; }
