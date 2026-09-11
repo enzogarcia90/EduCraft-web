@@ -2159,9 +2159,14 @@ function renderPolicyPanel() {
 	if (!node) return;
 	const settings = state.clientPolicySettings || {};
 	const teacher = currentPage === "profesor";
+	const localWorldsAllowed = Boolean(settings.allowSingleplayerWorlds);
+	const localWorldsLive = Boolean(live.allowSingleplayerWorlds) && !localWorldsAllowed && Boolean(live.localWorldsExpiresAt);
+	const localWorldsHint = localWorldsLive
+		? `Permiso temporal activo hasta ${escapeHtml(live.localWorldsExpiresAt)}`
+		: "Permite abrir mundos de un jugador";
 	node.innerHTML = `
 		<label class="policy-control"><span><strong>Paquetes de recursos</strong><small>${resourcePack.url ? "Paquete oficial de EduCraft" : "Sin paquete configurado"}</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowResourcePacks" ${(settings.allowResourcePacks ?? resourcePack.enabled) ? "checked" : ""}><span></span></span></label>
-		<label class="policy-control"><span><strong>Mundos locales</strong><small>Permite abrir mundos de un jugador</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowSingleplayerWorlds" ${(settings.allowSingleplayerWorlds ?? live.allowSingleplayerWorlds ?? policy.allowSingleplayerWorlds) ? "checked" : ""}><span></span></span></label>
+		<label class="policy-control"><span><strong>Mundos locales</strong><small>${localWorldsHint}</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowSingleplayerWorlds" ${localWorldsAllowed ? "checked" : ""}><span></span></span></label>
 		${teacher ? "" : `<label class="policy-control"><span><strong>Skins personalizadas</strong><small>${skin.forceCommon ? "Actualmente se usa la skin comun" : "Los usuarios pueden elegir skin"}</small></span><span class="switch"><input type="checkbox" data-client-policy-setting="allowCustomSkins" ${settings.allowCustomSkins ? "checked" : ""}><span></span></span></label>`}
 		${teacher ? "" : `<form id="resourcePackUploadForm" class="resource-pack-config"><div><strong>Subir paquete del centro</strong><small>Selecciona el archivo .zip. EduCraft calcula y configura todo automaticamente (maximo 100 MB).</small></div><label class="resource-pack-drop"><span>Archivo ZIP</span><input id="resourcePackFile" name="resourcePack" type="file" accept=".zip,application/zip" required></label><button class="button primary" type="submit">Subir y activar</button></form><details class="resource-pack-advanced"><summary>Configuracion avanzada por URL</summary><form id="resourcePackConfigForm" class="resource-pack-config"><label><span>URL HTTPS del paquete</span><input id="resourcePackUrl" type="url" inputmode="url" placeholder="https://centro.example/pack.zip" value="${escapeHtml(settings.resourcePackUrl || "")}"></label><label><span>Hash SHA-1</span><input id="resourcePackHash" type="text" maxlength="40" pattern="[a-fA-F0-9]{40}" placeholder="40 caracteres hexadecimales" value="${escapeHtml(settings.resourcePackHash || "")}"></label><button class="portal-ghost" type="submit">Guardar URL</button></form></details>`}
 		<p id="clientPolicyMessage" class="portal-message" role="status"></p>`;
@@ -2230,9 +2235,10 @@ async function updateClientPolicySetting(input) {
 		showToast("Politica del cliente actualizada.", "ok");
 	} catch (error) {
 		input.checked = previous;
-		input.disabled = false;
 		setMessage($("#clientPolicyMessage"), error.message, "error");
 		showToast(`No se pudo actualizar la politica: ${error.message}`, "error");
+	} finally {
+		input.disabled = false;
 	}
 }
 
@@ -3420,7 +3426,7 @@ function pageForRole(role) {
 
 function clientUrlWithSession(path) {
 	const destination = new URL(path, location.href);
-	destination.searchParams.set("server", "wss://play.educraftes.duckdns.org/");
+	destination.searchParams.set("server", "wss://play.educraft.es/");
 	if (!state.token || !state.refreshToken) {
 		return destination.href;
 	}

@@ -59,7 +59,7 @@ Config publica de API:
 
 ```text
 cliente/educraft-config.js
-window.EDUCRAFT_API_BASE_URL = "https://educraftes.duckdns.org";
+window.EDUCRAFT_API_BASE_URL = "https://api.educraft.es";
 ```
 
 No declares el cliente actualizado si solo cambiaste imagenes sueltas. Compara hashes/tamanos de `assets.epw` contra el build original y Pages.
