@@ -262,7 +262,7 @@ async function finishLogin(response) {
 	const destination = pageForRole(response.role);
 	if (!destination) {
 		clearSession();
-		throw new Error("portal_access_denied");
+		throw new Error(response.role === "student" ? "student_client_only" : "portal_access_denied");
 	}
 	const checkoutPlan = new URLSearchParams(location.search).get("checkout");
 	if (!checkoutPlan) {
@@ -938,7 +938,7 @@ async function login(email, password, messageNode, options = {}) {
 	const destination = pageForRole(response.role);
 	if (!destination) {
 		clearSession();
-		throw new Error("portal_access_denied");
+		throw new Error(response.role === "student" ? "student_client_only" : "portal_access_denied");
 	}
 	if (options.redirect !== false) location.replace(destination);
 	return response;
@@ -3420,7 +3420,7 @@ function pageForRole(role) {
 		return "profesor-clases.html";
 	}
 	if (role === "student") {
-		return clientUrlWithSession("../cliente/index.html");
+		return "";
 	}
 	return "";
 }
@@ -3444,6 +3444,9 @@ function clientUrlWithSession(path) {
 
 function friendlyLoginError(error) {
 	const message = String(error?.message || "");
+	if (message === "student_client_only") {
+		return "Las cuentas de alumno no acceden al dashboard. Abre el cliente desde la web principal con un navegador Chromium compatible.";
+	}
 	if (message === "portal_access_denied" || message.includes("access denied")) {
 		return "Esta cuenta no puede acceder aqui.";
 	}
@@ -3458,6 +3461,9 @@ function friendlyLoginError(error) {
 
 function friendlyGoogleLoginError(error) {
 	const message = String(error?.message || "");
+	if (message === "student_client_only") {
+		return "Las cuentas de alumno no acceden al dashboard. Abre el cliente desde la web principal con un navegador Chromium compatible.";
+	}
 	if (message.includes("invalid email or password") || message.includes("invalid credentials")) {
 		return "Tu correo de Google no corresponde a una cuenta activa de EduCraft.";
 	}
