@@ -12,6 +12,8 @@ const state = {
 	runTimer: null,
 	project: defaultProject(),
 	activityId: new URLSearchParams(location.search).get("activity") || "",
+	returnUrl: new URLSearchParams(location.search).get("return") || "",
+	student: false,
 	apiBase: (window.EDUCRAFT_API_BASE_URL || "").replace(/\/+$/, ""),
 	token: localStorage.getItem("educraft.dashboard.accessToken") || "",
 	simulation: { x: 0, y: 0, direction: 90, placed: [] }
@@ -100,13 +102,18 @@ function bindEvents() {
 	$("#newProject").addEventListener("click", newProject);
 	$("#downloadProject").addEventListener("click", downloadProject);
 	$("#cloudSave").addEventListener("click", saveCloudProject);
+	$("#submitProject").addEventListener("click", submitCloudProject);
 	$("#openProject").addEventListener("change", importProject);
 	window.addEventListener("message", receivePreviewMessage);
 }
 
 async function initCloudProject() {
 	if (!state.activityId || !state.apiBase || !state.token) return;
+	const me = await fetch(`${state.apiBase}/me`, {headers:{Authorization:`Bearer ${state.token}`}}).then((response) => response.ok ? response.json() : null);
+	state.student = me?.role === "student";
+	if (state.returnUrl) { const back=$("#backToDashboard"); back.hidden=false; back.href=state.returnUrl; }
 	$("#cloudSave").hidden = false;
+	$("#submitProject").hidden = !state.student;
 	try {
 		const response = await cloudRequest("GET");
 		if (!validProject(response.projectData)) return;
@@ -118,6 +125,7 @@ async function initCloudProject() {
 		showFile(state.activeFile);
 		refreshPreview();
 		toast("Proyecto de la clase cargado");
+		if (response.submissionStatus === "submitted") $("#submitProject").textContent = "Entregado";
 	} catch (error) {
 		if (error.status !== 404) toast(error.message || "No se pudo cargar el proyecto de la clase");
 	}
@@ -141,8 +149,17 @@ async function saveCloudProject() {
 	}
 }
 
-async function cloudRequest(method, body) {
-	const response = await fetch(`${state.apiBase}/dashboard/activities/${encodeURIComponent(state.activityId)}/programming-project`, {
+async function submitCloudProject() {
+	if (!state.student || !state.activityId) return;
+	await saveCloudProject();
+	const button = $("#submitProject"); button.disabled=true;
+	try { await cloudRequest("POST", null, "/dashboard/student/activities/" + encodeURIComponent(state.activityId) + "/programming-project/submit"); button.textContent="Entregado"; toast("Proyecto entregado"); }
+	catch(error) { toast(error.message || "No se pudo entregar el proyecto"); }
+	finally { button.disabled=false; }
+}
+
+async function cloudRequest(method, body, path = `/dashboard/activities/${encodeURIComponent(state.activityId)}/programming-project`) {
+	const response = await fetch(`${state.apiBase}${path}`, {
 		method,
 		headers: {Authorization:`Bearer ${state.token}`,...(body?{"Content-Type":"application/json"}:{})},
 		body: body ? JSON.stringify(body) : undefined

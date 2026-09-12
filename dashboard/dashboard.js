@@ -3420,7 +3420,7 @@ function pageForRole(role) {
 		return "profesor-clases.html";
 	}
 	if (role === "student") {
-		return "";
+		return "alumno.html";
 	}
 	return "";
 }
@@ -3444,9 +3444,6 @@ function clientUrlWithSession(path) {
 
 function friendlyLoginError(error) {
 	const message = String(error?.message || "");
-	if (message === "student_client_only") {
-		return "Las cuentas de alumno no acceden al dashboard. Abre el cliente desde la web principal con un navegador Chromium compatible.";
-	}
 	if (message === "portal_access_denied" || message.includes("access denied")) {
 		return "Esta cuenta no puede acceder aqui.";
 	}
