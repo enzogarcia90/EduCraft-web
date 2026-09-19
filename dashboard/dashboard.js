@@ -35,6 +35,7 @@ const state = {
 	sysAdmin: null,
 	dashboardSocket: null,
 	dashboardLiveRetry: 0,
+	classStatusRefreshTimer: 0,
 	dashboardSyncRunning: false,
 	dashboardSyncPending: false,
 	sysAdminServerError: null,
@@ -1017,6 +1018,7 @@ async function requireDashboardSession() {
 			await loadSysAdmin();
 		}
 		connectDashboardLive();
+		startClassStatusPolling();
 	} catch (_) {
 		logout();
 	}
@@ -1430,6 +1432,20 @@ function connectDashboardLive() {
 	socket.addEventListener("error", () => {
 		socket.close();
 	});
+}
+
+function startClassStatusPolling() {
+	if (state.classStatusRefreshTimer || currentPage === "login" || currentPage === "registro") {
+		return;
+	}
+	state.classStatusRefreshTimer = window.setInterval(() => {
+		if (document.visibilityState !== "visible" || !state.token) {
+			return;
+		}
+		// The route tells us which class is currently scheduled; the server list
+		// supplies the Agent's actual running state for visible class controls.
+		void Promise.allSettled([loadPortalContext(), loadClassServers()]);
+	}, 10_000);
 }
 
 function applyWorldViewSnapshot(snapshot) {
@@ -3511,6 +3527,10 @@ function clearSession() {
 	if (state.dashboardLiveRetry) {
 		clearTimeout(state.dashboardLiveRetry);
 		state.dashboardLiveRetry = 0;
+	}
+	if (state.classStatusRefreshTimer) {
+		clearInterval(state.classStatusRefreshTimer);
+		state.classStatusRefreshTimer = 0;
 	}
 	state.token = "";
 	state.refreshToken = "";
