@@ -296,9 +296,7 @@ function bindRegister() {
 				auth: false,
 				body: payload
 			});
-			accountCreated = true;
-			const plan = document.querySelector('input[name="registerPlan"]:checked')?.value || "school";
-			location.replace(`login.html?email=${encodeURIComponent(email)}&registered=1&checkout=${encodeURIComponent(plan)}`);
+			setMessage(message, "Solicitud recibida. Verificaremos el centro antes de activar la cuenta.", "ok");
 			return;
 		} catch (error) {
 			resetRegisterTurnstile();
