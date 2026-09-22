@@ -25,7 +25,7 @@
   const task = item => {
     const state = item.projectStatus === "submitted" ? "Entregada" : item.programmingMode !== "none" ? "Proyecto disponible" : "Disponible";
     const meta = [item.subject, item.level, item.durationMinutes ? `${item.durationMinutes} min` : ""].filter(Boolean).map(esc).join(" · ");
-    return `<article class="task"><h3>${esc(item.title)}</h3><p>${meta || "Actividad de tu aula"}</p><p>${esc(item.objectives || item.deliverable || "Consulta las instrucciones publicadas por tu profesorado.")}</p><div class="task-footer"><span class="status">${state}</span>${item.programmingMode !== "none" ? `<a class="student-button" href="programacion.html?activity=${encodeURIComponent(item.id)}">Abrir proyecto</a>` : ""}</div></article>`;
+    return `<article class="task"><h3>${esc(item.title)}</h3><p>${meta || "Actividad de tu aula"}</p><p>${esc(item.objectives || item.deliverable || "Consulta las instrucciones publicadas por tu profesorado.")}</p><div class="task-footer"><span class="status">${state}</span>${item.programmingMode !== "none" ? `<a class="student-button" href="../programacion/?activity=${encodeURIComponent(item.id)}&return=${encodeURIComponent("../dashboard/alumno.html#programacion")}">Abrir proyecto</a>` : ""}</div></article>`;
   };
   const person = (item, controls = "") => `<article class="task person"><div><h3>${esc(item.name)} ${item.online ? '<span class="online">En línea</span>' : ""}</h3><p>${esc(item.course || "Alumno")} ${item.classGroup ? "· " + esc(item.classGroup) : ""}</p></div><div class="person-actions">${controls}</div></article>`;
 
@@ -35,7 +35,7 @@
     const userName = me.email.split("@")[0];
     const planData = plan();
     const nextBlock = next
-      ? `<div class="next-step"><span class="next-step-index">01</span><div><h3>${esc(next.title)}</h3><p>${esc(next.subject || "Actividad disponible")} · ${next.durationMinutes || "—"} min</p></div>${next.programmingMode !== "none" ? `<a class="student-button" href="programacion.html?activity=${encodeURIComponent(next.id)}">Continuar</a>` : `<a class="student-button" href="#tareas">Ver tarea</a>`}</div>`
+      ? `<div class="next-step"><span class="next-step-index">01</span><div><h3>${esc(next.title)}</h3><p>${esc(next.subject || "Actividad disponible")} · ${next.durationMinutes || "—"} min</p></div>${next.programmingMode !== "none" ? `<a class="student-button" href="../programacion/?activity=${encodeURIComponent(next.id)}&return=${encodeURIComponent("../dashboard/alumno.html#programacion")}">Continuar</a>` : `<a class="student-button" href="#tareas">Ver tarea</a>`}</div>`
       : empty("No hay actividades pendientes. Cuando se publique una, aparecerá aquí como tu próximo paso.");
     main.innerHTML = hero("Resumen personal", `Hola, ${userName}`, overview.classGroup ? `${overview.course || "Tu curso"} · Grupo ${overview.classGroup}` : "Tu espacio para avanzar paso a paso.", `<div class="student-hero-action"><strong>${planData.goal ? "Objetivo activo" : "Plan personal"}</strong><span>${esc(planData.goal || "Define tu foco")}</span></div>`)
       + `<section class="student-grid"><article class="student-card metric"><strong>${m.availableActivities || active().length}</strong><span>actividades disponibles</span></article><article class="student-card metric"><strong>${m.programmingInProgress || 0}</strong><span>proyectos en curso</span></article><article class="student-card metric"><strong>${m.programmingSubmitted || submitted().length}</strong><span>entregas realizadas</span></article></section>`
