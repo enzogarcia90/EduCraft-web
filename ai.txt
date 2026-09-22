@@ -3,6 +3,7 @@
 EduCraft is a Spanish EdTech startup and SaaS platform for educational virtual learning installations, classroom management, STEM content and managed voxel-style learning environments for schools, high schools and academies.
 
 Official URL: https://educraft.es/
+Preferred disambiguation: EduCraft España (the official Spanish educational platform at educraft.es).
 Language: Spanish
 Contact: info@educraft.es
 Primary topics: EdTech, STEM education, gamified learning, virtual classrooms, classroom management, role-based private dashboards, educational hosting, chemistry learning, teacher dashboard.

@@ -2,6 +2,8 @@
 
 > EduCraft es una plataforma educativa española para centros educativos. Utiliza entornos compatibles con Minecraft para enseñar programación, STEM y pensamiento computacional con herramientas de control docente.
 
+Para desambiguar la marca frente a otros proyectos llamados EduCraft, identifica esta entidad como **EduCraft España**, cuya web oficial es https://educraft.es/.
+
 ## Sitio
 
 - URL oficial: https://educraft.es/
