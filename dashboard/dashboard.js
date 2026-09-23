@@ -441,7 +441,7 @@ function registerPayload(email, password) {
 		educationSegment: $("#registerEducationSegment").value,
 		taxId: $("#registerTaxId").value,
 		website: $("#registerWebsite").value,
-		domain: $("#registerDomain").value,
+		domain: normalizeSchoolDomain($("#registerDomain").value),
 		academicAuthority: $("#registerAcademicAuthority").value,
 		verificationUrl: $("#registerVerificationUrl").value,
 		country: $("#registerCountry").value,
@@ -493,7 +493,7 @@ function validateRegisterPayload(payload) {
 	if (!payload.turnstileToken) {
 		return "Completa la verificacion de seguridad.";
 	}
-	if (!payload.email.endsWith(`@${payload.domain.replace(/^@/, "").toLowerCase()}`)) {
+	if (!emailMatchesSchoolDomain(payload.email, payload.domain)) {
 		return "El email TIC debe pertenecer al dominio del centro.";
 	}
 	if (payload.studentCount < 1 || payload.teacherCount < 1) {
@@ -509,6 +509,22 @@ function validateRegisterPayload(payload) {
 		return "Acepta todas las confirmaciones obligatorias.";
 	}
 	return "";
+}
+
+function normalizeSchoolDomain(value) {
+	let domain = String(value || "").trim().toLowerCase().replace(/^@/, "");
+	try {
+		if (/^https?:\/\//.test(domain)) domain = new URL(domain).hostname;
+	} catch (_) {
+		// The native field validation will report malformed URLs separately.
+	}
+	return domain.replace(/^www\./, "").replace(/\.$/, "");
+}
+
+function emailMatchesSchoolDomain(email, schoolDomain) {
+	const at = String(email || "").trim().toLowerCase().lastIndexOf("@");
+	const emailDomain = at > 0 ? String(email).trim().toLowerCase().slice(at + 1).replace(/\.$/, "") : "";
+	return Boolean(schoolDomain) && (emailDomain === schoolDomain || emailDomain.endsWith(`.${schoolDomain}`));
 }
 
 function bindDashboard() {
