@@ -438,9 +438,12 @@ function registerPayload(email, password) {
 		institutionName: $("#registerInstitution").value,
 		legalName: $("#registerLegalName").value,
 		institutionType: $("#registerInstitutionType").value,
+		educationSegment: $("#registerEducationSegment").value,
 		taxId: $("#registerTaxId").value,
 		website: $("#registerWebsite").value,
 		domain: $("#registerDomain").value,
+		academicAuthority: $("#registerAcademicAuthority").value,
+		verificationUrl: $("#registerVerificationUrl").value,
 		country: $("#registerCountry").value,
 		region: $("#registerRegion").value,
 		city: $("#registerCity").value,
@@ -454,11 +457,16 @@ function registerPayload(email, password) {
 		contactTitle: $("#registerContactTitle").value,
 		contactPhone: $("#registerContactPhone").value,
 		email,
+		technicalContactName: $("#registerTechnicalContactName").value,
 		technicalEmail: $("#registerTechnicalEmail").value,
+		billingContactName: $("#registerBillingContactName").value,
+		billingEmail: $("#registerBillingEmail").value,
 		dataProtectionName: $("#registerDataProtectionName").value,
 		dataProtectionEmail: $("#registerDataProtectionEmail").value,
 		sisProvider: $("#registerSIS").value,
 		ssoProvider: $("#registerSSO").value,
+		rosterSource: $("#registerRosterSource").value,
+		requiresPurchaseOrder: $("#registerPurchaseOrder").checked,
 		authorityConfirmed: $("#registerAuthority").checked,
 		domainOwnershipConfirmed: $("#registerDomainOwnership").checked,
 		minorsConfirmed: $("#registerMinors").checked,
@@ -473,9 +481,9 @@ function registerPayload(email, password) {
 
 function validateRegisterPayload(payload) {
 	const required = [
-		"institutionName", "legalName", "institutionType", "taxId", "website", "domain", "country", "region", "city",
+		"institutionName", "legalName", "institutionType", "educationSegment", "taxId", "website", "domain", "academicAuthority", "verificationUrl", "country", "region", "city",
 		"postalCode", "addressLine", "timezone", "grades", "contactName", "contactTitle", "contactPhone", "email",
-		"technicalEmail", "dataProtectionName", "dataProtectionEmail", "sisProvider", "ssoProvider", "password"
+		"technicalContactName", "technicalEmail", "billingContactName", "billingEmail", "dataProtectionName", "dataProtectionEmail", "sisProvider", "ssoProvider", "rosterSource", "password"
 	];
 	for (const field of required) {
 		if (!String(payload[field] || "").trim()) {

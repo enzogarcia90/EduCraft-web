@@ -3039,7 +3039,8 @@ body.portal-auth[data-dashboard-page="registro"] .register-plan-step {
 
 body.portal-auth[data-dashboard-page="registro"] .register-plan-intro,
 body.portal-auth[data-dashboard-page="registro"] .register-plan-options,
-body.portal-auth[data-dashboard-page="registro"] .register-trial-consent {
+body.portal-auth[data-dashboard-page="registro"] .register-trial-consent,
+body.portal-auth[data-dashboard-page="registro"] .register-purchase-order {
 	grid-column: 1 / -1;
 }
 
@@ -3084,13 +3085,15 @@ body.portal-auth[data-dashboard-page="registro"] input[type="radio"] {
 }
 
 body.portal-auth[data-dashboard-page="registro"] .register-plan-options label,
-body.portal-auth[data-dashboard-page="registro"] .register-trial-consent {
+body.portal-auth[data-dashboard-page="registro"] .register-trial-consent,
+body.portal-auth[data-dashboard-page="registro"] .register-purchase-order {
 	border-color: var(--campus-line);
 	background: #fff;
 }
 
 body.portal-auth[data-dashboard-page="registro"] .register-plan-options label > span,
-body.portal-auth[data-dashboard-page="registro"] .register-trial-consent > span {
+body.portal-auth[data-dashboard-page="registro"] .register-trial-consent > span,
+body.portal-auth[data-dashboard-page="registro"] .register-purchase-order > span {
 	margin: 0;
 	color: var(--campus-text);
 	font-size: 14px;
@@ -3110,7 +3113,8 @@ body.portal-auth[data-dashboard-page="registro"] .register-plan-options label:ha
 }
 
 body.portal-auth[data-dashboard-page="registro"] .register-plan-options input,
-body.portal-auth[data-dashboard-page="registro"] .register-trial-consent input {
+body.portal-auth[data-dashboard-page="registro"] .register-trial-consent input,
+body.portal-auth[data-dashboard-page="registro"] .register-purchase-order input {
 	margin: 2px 0 0;
 }
 

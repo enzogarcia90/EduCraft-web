@@ -23,7 +23,7 @@
 		<link rel="sitemap" type="application/xml" href="https://educraft.es/sitemap.xml">
 		<title>Registro | EduCraft</title>
 		<link rel="stylesheet" href="../styles.css?v=20260901-rounded1">
-		<link rel="stylesheet" href="dashboard.css?v=20260923-register2">
+		<link rel="stylesheet" href="dashboard.css?v=20260923-register3">
 	</head>
 	<body class="portal-auth" data-dashboard-page="registro">
 		<main class="auth-layout">
@@ -48,9 +48,12 @@
 						<label><span>Nombre publico del centro</span><input id="registerInstitution" type="text" autocomplete="organization" required></label>
 						<label><span>Nombre legal completo</span><input id="registerLegalName" type="text" required></label>
 						<label><span>Tipo de institucion</span><select id="registerInstitutionType" required><option value="">Seleccionar</option><option value="colegio">Colegio</option><option value="instituto">Instituto</option><option value="formacion_profesional">Formacion profesional</option><option value="universidad">Universidad</option><option value="academia">Academia</option><option value="otro">Otro centro educativo</option></select></label>
+						<label><span>Segmento educativo</span><select id="registerEducationSegment" required><option value="">Seleccionar</option><option value="k12">Infantil, primaria o secundaria</option><option value="vocational">Formacion profesional</option><option value="higher_education">Educacion superior</option><option value="adult_learning">Educacion de personas adultas</option><option value="other">Otro segmento educativo</option></select></label>
 						<label><span>CIF/NIF o identificador fiscal</span><input id="registerTaxId" type="text" required></label>
 						<label><span>Web oficial</span><input id="registerWebsite" type="url" placeholder="https://centro.edu" required></label>
 						<label><span>Dominio educativo</span><input id="registerDomain" type="text" placeholder="centro.edu" required></label>
+						<label><span>Autoridad educativa o acreditadora</span><input id="registerAcademicAuthority" type="text" placeholder="Consejeria, ministerio o entidad acreditadora" required></label>
+						<label><span>URL de verificacion oficial</span><input id="registerVerificationUrl" type="url" placeholder="https://registro-oficial.example/centro" required></label>
 					</fieldset>
 					<fieldset class="register-step" data-register-step="1">
 						<legend>Ubicacion</legend>
@@ -67,7 +70,10 @@
 						<label><span>Cargo del responsable</span><input id="registerContactTitle" type="text" placeholder="Direccion, TIC, coordinacion..." required></label>
 						<label><span>Telefono del centro</span><input id="registerContactPhone" type="tel" autocomplete="tel" required></label>
 						<label><span>Email institucional TIC</span><input id="registerEmail" type="email" autocomplete="username" required></label>
+						<label><span>Nombre del responsable tecnico</span><input id="registerTechnicalContactName" type="text" required></label>
 						<label><span>Email tecnico</span><input id="registerTechnicalEmail" type="email" required></label>
+						<label><span>Responsable de facturacion</span><input id="registerBillingContactName" type="text" required></label>
+						<label><span>Email de facturacion</span><input id="registerBillingEmail" type="email" required></label>
 						<label><span>Responsable proteccion de datos</span><input id="registerDataProtectionName" type="text" required></label>
 						<label><span>Email proteccion de datos</span><input id="registerDataProtectionEmail" type="email" required></label>
 					</fieldset>
@@ -78,6 +84,7 @@
 						<label><span>Etapas o cursos</span><input id="registerGrades" type="text" placeholder="ESO, Bachillerato, FP..." required></label>
 						<label><span>SIS o gestion academica</span><input id="registerSIS" type="text" placeholder="Alexia, Educamos, Google Classroom..." required></label>
 						<label><span>SSO previsto</span><input id="registerSSO" type="text" placeholder="Google, Microsoft, LDAP, ninguno..." required></label>
+						<label><span>Origen previsto de alumnado</span><select id="registerRosterSource" required><option value="">Seleccionar</option><option value="manual">Alta manual o CSV</option><option value="google_workspace">Google Workspace for Education</option><option value="microsoft_365">Microsoft 365 Education</option><option value="sis">SIS o plataforma academica</option><option value="clever">Clever</option><option value="other">Otro origen</option></select></label>
 					</fieldset>
 					<fieldset class="register-step register-plan-step" data-register-step="4">
 						<legend>Plan y prueba de 30 dias</legend>
@@ -88,6 +95,7 @@
 							<label><input name="registerPlan" type="radio" value="school_plus"><span><strong>EduCraft Campus</strong><small>999 € al año despues de la prueba</small></span></label>
 						</div>
 						<label class="register-trial-consent"><input id="registerTrialConsent" type="checkbox" required><span>Entiendo que la suscripcion se renovara automaticamente y Stripe cobrara el plan elegido al finalizar los 30 dias, salvo que el centro cancele antes desde Facturacion.</span></label>
+						<label class="register-purchase-order"><input id="registerPurchaseOrder" type="checkbox"><span>El centro necesita orden de compra antes de cualquier cobro. EduCraft lo tendra en cuenta durante la revision.</span></label>
 					</fieldset>
 					<fieldset class="register-step confirmations" data-register-step="5">
 						<legend>Confirmaciones obligatorias</legend>
@@ -112,6 +120,6 @@
 		</main>
 		<script src="../cliente/educraft-config.js?v=20260911-api1"></script>
 		<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
-		<script src="dashboard.js?v=20260831-turnstile3"></script>
+		<script src="dashboard.js?v=20260923-register3"></script>
 	</body>
 </html>
