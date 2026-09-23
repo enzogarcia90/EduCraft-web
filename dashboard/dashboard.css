@@ -3023,6 +3023,95 @@ body.portal-auth .button.primary {
 body.portal-auth .button.primary:hover { background: var(--campus-green-dark); transform: translateY(-1px); box-shadow: 0 13px 28px rgba(8,116,86,.2); }
 body.portal-auth .turnstile-panel { border-radius: 12px; background: #f7faf8; }
 
+/* Centre registration has a denser form than sign-in, so it needs its own light form surface. */
+body.portal-auth[data-dashboard-page="registro"] .auth-layout {
+	grid-template-columns: minmax(320px, .95fr) minmax(560px, 680px);
+}
+
+body.portal-auth[data-dashboard-page="registro"] .register-card {
+	width: 100%;
+	min-width: 0;
+}
+
+body.portal-auth[data-dashboard-page="registro"] .portal-form fieldset {
+	min-width: 0;
+	padding: 20px;
+	border-color: var(--campus-line);
+	background: #f7faf8;
+}
+
+body.portal-auth[data-dashboard-page="registro"] .portal-form label,
+body.portal-auth[data-dashboard-page="registro"] .portal-form input,
+body.portal-auth[data-dashboard-page="registro"] .portal-form select {
+	min-width: 0;
+}
+
+body.portal-auth[data-dashboard-page="registro"] .portal-form input,
+body.portal-auth[data-dashboard-page="registro"] .portal-form select,
+body.portal-auth[data-dashboard-page="registro"] .portal-form textarea,
+body.portal-auth[data-dashboard-page="registro"] .portal-ghost {
+	border-color: #c8d8d0;
+	background: #fff;
+	color: var(--campus-text);
+	-webkit-text-fill-color: var(--campus-text);
+}
+
+body.portal-auth[data-dashboard-page="registro"] .portal-form input:focus,
+body.portal-auth[data-dashboard-page="registro"] .portal-form select:focus,
+body.portal-auth[data-dashboard-page="registro"] .portal-form textarea:focus {
+	border-color: var(--campus-green);
+	outline: 4px solid rgba(24, 167, 121, .13);
+}
+
+body.portal-auth[data-dashboard-page="registro"] input[type="checkbox"],
+body.portal-auth[data-dashboard-page="registro"] input[type="radio"] {
+	accent-color: var(--campus-green);
+}
+
+body.portal-auth[data-dashboard-page="registro"] .register-plan-options label,
+body.portal-auth[data-dashboard-page="registro"] .register-trial-consent {
+	border-color: var(--campus-line);
+	background: #fff;
+}
+
+body.portal-auth[data-dashboard-page="registro"] .register-plan-options label > span,
+body.portal-auth[data-dashboard-page="registro"] .register-trial-consent > span {
+	margin: 0;
+	color: var(--campus-text);
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.45;
+	text-transform: none;
+}
+
+body.portal-auth[data-dashboard-page="registro"] .register-plan-options small {
+	color: var(--campus-muted);
+	font-weight: 600;
+}
+
+body.portal-auth[data-dashboard-page="registro"] .register-plan-options label:has(input:checked) {
+	border-color: var(--campus-green);
+	box-shadow: 0 0 0 3px rgba(24, 167, 121, .12);
+}
+
+body.portal-auth[data-dashboard-page="registro"] .register-trial-consent {
+	border-color: #dfbd61;
+	background: #fff9e8;
+}
+
+body.portal-auth[data-dashboard-page="registro"] .portal-ghost:hover {
+	border-color: var(--campus-green);
+	color: var(--campus-green-dark);
+}
+
+@media (max-width: 1180px) {
+	body.portal-auth[data-dashboard-page="registro"] .auth-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 620px) {
+	body.portal-auth[data-dashboard-page="registro"] .portal-form fieldset { padding: 16px; }
+}
+
 body.portal-app .portal-header {
 	min-height: 72px; padding: 12px clamp(18px, 3vw, 42px); border: 0;
 	background: rgba(255,255,255,.92); box-shadow: 0 1px 0 rgba(16,44,39,.08); color: var(--campus-text);
