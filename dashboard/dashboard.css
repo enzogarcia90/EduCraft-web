@@ -3033,6 +3033,16 @@ body.portal-auth[data-dashboard-page="registro"] .register-card {
 	min-width: 0;
 }
 
+body.portal-auth[data-dashboard-page="registro"] .register-plan-step {
+	grid-template-columns: 1fr;
+}
+
+body.portal-auth[data-dashboard-page="registro"] .register-plan-intro,
+body.portal-auth[data-dashboard-page="registro"] .register-plan-options,
+body.portal-auth[data-dashboard-page="registro"] .register-trial-consent {
+	grid-column: 1 / -1;
+}
+
 body.portal-auth[data-dashboard-page="registro"] .portal-form fieldset {
 	min-width: 0;
 	padding: 20px;
@@ -3065,6 +3075,11 @@ body.portal-auth[data-dashboard-page="registro"] .portal-form textarea:focus {
 
 body.portal-auth[data-dashboard-page="registro"] input[type="checkbox"],
 body.portal-auth[data-dashboard-page="registro"] input[type="radio"] {
+	width: 18px;
+	min-width: 18px;
+	height: 18px;
+	min-height: 18px;
+	padding: 0;
 	accent-color: var(--campus-green);
 }
 
@@ -3092,6 +3107,11 @@ body.portal-auth[data-dashboard-page="registro"] .register-plan-options small {
 body.portal-auth[data-dashboard-page="registro"] .register-plan-options label:has(input:checked) {
 	border-color: var(--campus-green);
 	box-shadow: 0 0 0 3px rgba(24, 167, 121, .12);
+}
+
+body.portal-auth[data-dashboard-page="registro"] .register-plan-options input,
+body.portal-auth[data-dashboard-page="registro"] .register-trial-consent input {
+	margin: 2px 0 0;
 }
 
 body.portal-auth[data-dashboard-page="registro"] .register-trial-consent {
