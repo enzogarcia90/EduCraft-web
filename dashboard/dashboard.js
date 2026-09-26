@@ -11,8 +11,7 @@ const defaultPreferences = {
 	realtime: true,
 	compactMode: false,
 	reducedMotion: false,
-	showHints: true,
-	experimentalBlockViewer: false
+	showHints: true
 };
 
 const state = {
@@ -740,11 +739,7 @@ function bindDashboardSettings() {
 				${settingsToggle("reducedMotion", "Reducir movimiento", "Desactiva transiciones y animaciones decorativas.")}
 				${settingsToggle("showHints", "Ayudas contextuales", "Muestra explicaciones y avisos de uso.")}
 			</div>
-			<section class="experimental-settings">
-				<div class="experimental-title"><span>Experimental</span><strong>Funciones en pruebas</strong></div>
-				${settingsToggle("experimentalBlockViewer", "Visor 3D de bloques", "Activa un visor WebGL 2 para observar construcciones. Puede consumir más GPU.", true)}
-			</section>
-			<p class="settings-note">Los ajustes se guardan solo en este navegador. Las funciones experimentales están desactivadas por defecto.</p>
+			<p class="settings-note">Los ajustes se guardan solo en este navegador.</p>
 		</form>`;
 	document.body.append(dialog);
 	button.addEventListener("click", () => dialog.showModal());
@@ -777,24 +772,14 @@ function applyDashboardPreferences(preferences) {
 		state.dashboardSocket = null;
 	}
 	if (preferences.realtime && state.token) connectDashboardLive();
-	setExperimentalBlockViewer(Boolean(preferences.experimentalBlockViewer));
 }
 
-function setExperimentalBlockViewer(enabled) {
-	let host = $("#experimentalBlockViewer");
-	if (!enabled || currentPage !== "profesor") {
+function renderWorldBlockViewer() {
+	const host = $("#worldBlockViewer");
+	if (!host || currentPage !== "profesor") {
 		if (blockViewer?.destroy) blockViewer.destroy();
 		blockViewer = null;
-		host?.remove();
 		return;
-	}
-	if (!host) {
-		host = document.createElement("section");
-		host.id = "experimentalBlockViewer";
-		host.className = "experimental-block-viewer";
-		host.innerHTML = `<div class="block-viewer-head"><div><p class="eyebrow">Experimental</p><h2>Visor 3D de bloques</h2><p>Arrastra para girar · rueda para acercar · WASD o flechas para desplazarte</p></div><div><button type="button" class="portal-ghost" data-viewer-reset>Ver todo</button><button type="button" class="portal-ghost" data-viewer-fullscreen>Pantalla completa</button></div></div><div class="block-viewer-stage" data-viewer-stage><div class="block-viewer-loading">Preparando WebGL 2…</div></div><p class="block-viewer-disclaimer"><strong>Experimental · Esperando Paper:</strong> inicia un servidor y entra con un alumno para recibir el mundo real.</p>`;
-		const main = $(".portal-main");
-		main?.insertBefore(host, main.children[2] || null);
 	}
 	loadBlockViewer().then(() => {
 		if (!blockViewer && window.EduCraftBlockViewer && document.body.contains(host)) {
@@ -829,6 +814,7 @@ function bindTeacherPages() {
 	}
 	for (const button of buttons) {
 		button.addEventListener("click", (event) => {
+			if (button.dataset.teacherPage === "visor" || document.body.dataset.teacherStandalone === "true") return;
 			event.preventDefault();
 			setTeacherPage(button.dataset.teacherPage, true);
 		});
@@ -839,7 +825,7 @@ function bindTeacherPages() {
 }
 
 function setTeacherPage(page, persist) {
-	const validPages = new Set(["info", "clases", "control", "seguimiento", "integridad"]);
+	const validPages = new Set(["info", "clases", "control", "seguimiento", "integridad", "visor"]);
 	const nextPage = validPages.has(page) ? page : "clases";
 	for (const button of document.querySelectorAll("[data-teacher-page]")) {
 		const active = button.dataset.teacherPage === nextPage;
@@ -865,6 +851,9 @@ function setTeacherPage(page, persist) {
 	}
 	if (nextPage === "integridad") {
 		renderAIIntegrity();
+	}
+	if (nextPage === "visor") {
+		renderWorldBlockViewer();
 	}
 	if (persist) {
 		localStorage.setItem(STORAGE_KEYS.teacherPage, nextPage);
@@ -1473,13 +1462,13 @@ function startClassStatusPolling() {
 function applyWorldViewSnapshot(snapshot) {
 	if (!blockViewer?.setSnapshot || !blockViewer.setSnapshot(snapshot)) return;
 	const server = snapshot.servers?.[0];
-	const disclaimer = $("#experimentalBlockViewer .block-viewer-disclaimer");
+	const disclaimer = $("#worldBlockViewer .block-viewer-disclaimer");
 	if (!disclaimer || !server) return;
 	const players = server.players?.length || 0;
 	const blocks = server.blocks?.length || 0;
 	disclaimer.innerHTML = players
-		? `<strong>Experimental · En directo:</strong> ${escapeHtml(server.serverName || "Paper")} · ${players} alumno${players === 1 ? "" : "s"} · ${blocks} bloques recibidos.`
-		: `<strong>Experimental · Paper conectado:</strong> esperando a que entre un alumno en ${escapeHtml(server.serverName || "Paper")}.`;
+		? `<strong>En directo:</strong> ${escapeHtml(server.serverName || "Paper")} · ${players} alumno${players === 1 ? "" : "s"} · ${blocks} bloques recibidos.`
+		: `<strong>Paper conectado:</strong> esperando actividad en ${escapeHtml(server.serverName || "Paper")}.`;
 }
 
 function scheduleDashboardLiveReconnect() {

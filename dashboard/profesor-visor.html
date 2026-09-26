@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex,nofollow">
+	<meta name="theme-color" content="#15986f">
+	<link rel="icon" type="image/png" href="../assets/educraft-icon-32.png">
+	<title>Visor WebGL | EduCraft</title>
+	<link rel="stylesheet" href="../styles.css?v=20260901-rounded1">
+	<link rel="stylesheet" href="dashboard.css?v=20260901-rounded1">
+</head>
+<body class="portal-app" data-dashboard-page="profesor" data-teacher-default="visor" data-teacher-standalone="true">
+	<header class="portal-header"><a class="portal-brand" href="../index.html"><span class="brand-mark"><img src="../assets/educraft-icon-192.png" alt="Logotipo de EduCraft"></span><span><strong>EduCraft</strong><small>Profesor</small></span></a><div class="portal-session"><span id="sessionLabel">Validando sesion</span><button id="logoutButton" class="portal-ghost" type="button">Salir</button></div></header>
+	<main class="portal-layout"><aside class="portal-sidebar"><p class="eyebrow">Aula</p><h1 class="portal-title">Panel del profesor</h1><p>Observa el aula en directo desde una vista tridimensional.</p><div id="identityPanel" class="identity-list"></div></aside><section class="portal-main">
+		<div class="workspace-head"><div><p class="eyebrow">Aula en directo</p><h2>Visor WebGL</h2></div><span class="status-chip">WebGL 2</span></div>
+		<nav class="teacher-page-tabs" aria-label="Secciones del profesor"><a href="profesor-info.html" data-teacher-page="info">Informacion juego</a><a href="profesor-clases.html" data-teacher-page="clases">Clases</a><a href="profesor-control.html" data-teacher-page="control">Control de clase</a><a href="profesor.html?vista=seguimiento" data-teacher-page="seguimiento">Seguimiento</a><a href="profesor-integridad.html" data-teacher-page="integridad">Integridad IA</a><a href="profesor-visor.html" data-teacher-page="visor">Visor WebGL</a></nav>
+		<section class="teacher-page-panel" data-teacher-panel="visor"><section id="worldBlockViewer" class="official-block-viewer"><div class="block-viewer-head"><div><p class="eyebrow">Vista oficial</p><h2>Mundo de la clase</h2><p>Arrastra para girar · rueda para acercar · WASD o flechas para desplazarte</p></div><div><button type="button" class="portal-ghost" data-viewer-reset>Ver todo</button><button type="button" class="portal-ghost" data-viewer-fullscreen>Pantalla completa</button></div></div><div class="block-viewer-stage" data-viewer-stage><div class="block-viewer-loading">Preparando WebGL 2…</div></div><p class="block-viewer-disclaimer"><strong>Esperando señal del aula:</strong> el visor se actualizará cuando Paper publique el estado del mundo.</p></section></section>
+	</section></main>
+	<script src="../cliente/educraft-config.js?v=20260911-api1"></script><script src="dashboard.js?v=20260926-webgl-official1"></script>
+</body>
+</html>
