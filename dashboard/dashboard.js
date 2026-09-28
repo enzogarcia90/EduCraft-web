@@ -784,6 +784,18 @@ function renderWorldBlockViewer() {
 	loadBlockViewer().then(() => {
 		if (!blockViewer && window.EduCraftBlockViewer && document.body.contains(host)) {
 			blockViewer = new window.EduCraftBlockViewer(host.querySelector("[data-viewer-stage]"));
+			const scale = host.querySelector("[data-viewer-scale]");
+			const scaleValue = host.querySelector("[data-viewer-scale-value]");
+			const savedScale = Number(localStorage.getItem("educraft.dashboard.worldViewScale")) || 1.35;
+			if (scale) scale.value = String(savedScale);
+			blockViewer.setModelScale(savedScale);
+			const applyScale = () => {
+				const value = blockViewer.setModelScale(scale?.value);
+				if (scaleValue) scaleValue.textContent = `${value.toFixed(2)}×`;
+				localStorage.setItem("educraft.dashboard.worldViewScale", String(value));
+			};
+			applyScale();
+			scale?.addEventListener("input", applyScale);
 			if (state.worldView) applyWorldViewSnapshot(state.worldView);
 			host.querySelector("[data-viewer-reset]")?.addEventListener("click", () => blockViewer?.reset());
 			host.querySelector("[data-viewer-fullscreen]")?.addEventListener("click", () => host.requestFullscreen?.());
@@ -799,7 +811,7 @@ function loadBlockViewer() {
 	if (window.educraftBlockViewerPromise) return window.educraftBlockViewerPromise;
 	window.educraftBlockViewerPromise = new Promise((resolve, reject) => {
 		const script = document.createElement("script");
-		script.src = "block-viewer.js?v=20260928-viewer8";
+		script.src = "block-viewer.js?v=20260928-viewer9";
 		script.onload = resolve;
 		script.onerror = reject;
 		document.head.append(script);

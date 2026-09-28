@@ -2791,6 +2791,9 @@ body.portal-auth .login-card .portal-form input:-webkit-autofill:focus {
 .block-viewer-head { margin-bottom: 14px; }
 .block-viewer-head p { margin: 5px 0 0; color: #64736d; }
 .block-viewer-head > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
+.block-viewer-scale { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 10px; border: 1px solid #cfe1d8; border-radius: 9px; background: #f6faf8; color: #355348; font-size: 12px; font-weight: 800; }
+.block-viewer-scale input { width: 112px; accent-color: #15986f; }
+.block-viewer-scale output { min-width: 30px; color: #087653; font-variant-numeric: tabular-nums; }
 .block-viewer-stage { position: relative; width: 100%; height: min(56vh, 540px); min-height: 340px; overflow: hidden; border: 1px solid #29463d; border-radius: 12px; background: radial-gradient(circle at 50% 36%, #284d56 0, #142b31 48%, #0b1a20 100%); box-shadow: inset 0 0 0 1px rgba(205,255,85,.08); }
 .block-viewer-canvas { display: block; width: 100%; height: 100%; outline: none; cursor: grab; touch-action: none; background: radial-gradient(circle at 50% 36%, #284d56 0, #142b31 48%, #0b1a20 100%); }
 .block-viewer-canvas:focus-visible { box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 6px #176b55; }

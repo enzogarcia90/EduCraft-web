@@ -10,12 +10,14 @@
 		in float aTexture;
 		uniform mat4 uProjection;
 		uniform mat4 uView;
+		uniform vec3 uSceneCenter;
+		uniform float uModelScale;
 		out vec3 vColor;
 		out float vLight;
 		out vec2 vUV;
 		flat out int vTexture;
 		void main() {
-			vec3 world = aPosition + aOffset;
+			vec3 world = (aPosition + aOffset - uSceneCenter) * uModelScale + uSceneCenter;
 			gl_Position = uProjection * uView * vec4(world, 1.0);
 			vColor = aColor;
 			vUV = aTexCoord;
@@ -53,6 +55,7 @@
 			this.sceneRadius = 12;
 			this.sceneOrigin = null;
 			this.sceneKey = "";
+			this.modelScale = 1.35;
 			this.resizeObserver = new ResizeObserver(() => this.resize());
 			this.resizeObserver.observe(host);
 			this.bindEvents();
@@ -117,6 +120,8 @@
 			this.textureIndexBuffer = attribute(gl, this.program, "aTexture", blocks.map((block) => block.texture || 0), 1, 1);
 			this.projectionLocation = gl.getUniformLocation(this.program, "uProjection");
 			this.viewLocation = gl.getUniformLocation(this.program, "uView");
+			this.sceneCenterLocation = gl.getUniformLocation(this.program, "uSceneCenter");
+			this.modelScaleLocation = gl.getUniformLocation(this.program, "uModelScale");
 			this.initTextures();
 			gl.enable(gl.DEPTH_TEST);
 			gl.disable(gl.CULL_FACE);
@@ -155,6 +160,12 @@
 			this.yaw = .72;
 			this.pitch = .72;
 			this.canvas.focus();
+		}
+
+		setModelScale(value) {
+			this.modelScale = clamp(Number(value) || 1, .65, 2.2);
+			this.host.dataset.modelScale = this.modelScale.toFixed(2);
+			return this.modelScale;
 		}
 
 		setSnapshot(snapshot) {
@@ -256,6 +267,8 @@
 			const camera = orbitPosition(this.target, this.distance, this.yaw, this.pitch);
 			gl.uniformMatrix4fv(this.projectionLocation, false, perspective(Math.PI / 3, this.canvas.width / this.canvas.height, .1, Math.max(240, this.distance + this.sceneRadius * 4)));
 			gl.uniformMatrix4fv(this.viewLocation, false, lookAt(camera, this.target));
+			gl.uniform3fv(this.sceneCenterLocation, this.sceneCenter);
+			gl.uniform1f(this.modelScaleLocation, this.modelScale);
 			gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, this.instanceCount);
 			this.frame = requestAnimationFrame((next) => this.render(next));
 		}
