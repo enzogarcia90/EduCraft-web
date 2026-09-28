@@ -51,6 +51,8 @@
 			this.lastPointer = [0, 0];
 			this.sceneCenter = [0, 0, 0];
 			this.sceneRadius = 12;
+			this.sceneOrigin = null;
+			this.sceneKey = "";
 			this.resizeObserver = new ResizeObserver(() => this.resize());
 			this.resizeObserver.observe(host);
 			this.bindEvents();
@@ -149,14 +151,14 @@
 
 		reset() {
 			this.target = this.sceneCenter.slice();
-			this.distance = Math.max(8, this.sceneRadius * 2.35);
+			this.distance = Math.max(7, this.sceneRadius * 1.5);
 			this.yaw = .72;
-			this.pitch = .58;
+			this.pitch = .72;
 			this.canvas.focus();
 		}
 
 		setSnapshot(snapshot) {
-			const server = snapshot?.servers?.[0];
+			const server = bestServer(snapshot?.servers);
 			if (!server) return false;
 			this.host.dataset.server = server.serverName || "paper";
 			this.host.dataset.live = "true";
@@ -166,14 +168,23 @@
 			}
 			const focus = server.players?.[0] || server.blocks?.[0];
 			const world = focus.world;
-			const visibleBlocks = (server.blocks || []).filter((block) => block.world === world && !block.removed).slice(0, 24000);
+			const visibleBlocks = closestBlocks((server.blocks || []).filter((block) => block.world === world && !block.removed), focus, 24000);
 			const points = visibleBlocks.concat((server.players || []).filter((player) => player.world === world));
 			if (!points.length) {
 				this.uploadBlocks([]);
 				return true;
 			}
 			const bounds = boundsOf(points);
-			const origin = [Math.floor((bounds.min[0] + bounds.max[0]) / 2), bounds.min[1], Math.floor((bounds.min[2] + bounds.max[2]) / 2)];
+			const origin = [Math.floor((bounds.min[0] + bounds.max[0]) / 2), Math.floor(bounds.min[1]), Math.floor((bounds.min[2] + bounds.max[2]) / 2)];
+			const sceneKey = `${server.serverName || "paper"}:${world}`;
+			const isNewScene = this.sceneKey !== sceneKey || !this.sceneOrigin;
+			if (!isNewScene) {
+				this.target[0] += this.sceneOrigin[0] - origin[0];
+				this.target[1] += this.sceneOrigin[1] - origin[1];
+				this.target[2] += this.sceneOrigin[2] - origin[2];
+			}
+			this.sceneOrigin = origin;
+			this.sceneKey = sceneKey;
 			const blocks = [];
 			for (const block of visibleBlocks) {
 				const position = [block.x-origin[0], block.y-origin[1], block.z-origin[2]];
@@ -193,7 +204,8 @@
 			const localBounds = boundsOf(blocks.map((block) => ({ x: block.position[0], y: block.position[1], z: block.position[2] })));
 			this.sceneCenter = localBounds.center;
 			this.sceneRadius = Math.max(3, localBounds.radius);
-			this.reset();
+			if (isNewScene) this.reset();
+			this.distance = clamp(this.distance, 3, Math.max(220, this.sceneRadius * 8));
 			return true;
 		}
 
@@ -269,6 +281,14 @@
 	}
 
 	function attribute(gl, program, name, data, size, divisor) { const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW); const location = gl.getAttribLocation(program, name); gl.enableVertexAttribArray(location); gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0); gl.vertexAttribDivisor(location, divisor); return buffer; }
+	function bestServer(servers) {
+		return (servers || []).slice().sort((left, right) => ((right.players?.length || 0) * 100000 + (right.blocks?.length || 0)) - ((left.players?.length || 0) * 100000 + (left.blocks?.length || 0)))[0] || null;
+	}
+	function closestBlocks(blocks, focus, limit) {
+		if (blocks.length <= limit) return blocks;
+		const x = Number(focus.x) || 0, y = Number(focus.y) || 0, z = Number(focus.z) || 0;
+		return blocks.slice().sort((left, right) => ((left.x-x)**2 + (left.y-y)**2 + (left.z-z)**2) - ((right.x-x)**2 + (right.y-y)**2 + (right.z-z)**2)).slice(0, limit);
+	}
 	function materialAppearance(material) {
 		const value=(material||"").toUpperCase();
 		if(value.includes("GRASS")||value.includes("LEAVES"))return {texture:0,color:[.72,1,.68]};
