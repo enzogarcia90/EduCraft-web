@@ -151,7 +151,7 @@
 
 		reset() {
 			this.target = this.sceneCenter.slice();
-			this.distance = Math.max(7, this.sceneRadius * 1.5);
+			this.distance = Math.max(7, this.sceneRadius * 1.32);
 			this.yaw = .72;
 			this.pitch = .72;
 			this.canvas.focus();

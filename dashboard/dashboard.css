@@ -2787,12 +2787,12 @@ body.portal-auth .login-card .portal-form input:-webkit-autofill:focus {
 .settings-toggle > span:first-child { display: grid; gap: 5px; }
 .settings-toggle small, .settings-note { color: #64736d; line-height: 1.45; }
 .settings-note { margin: 18px 0 0; font-size: 12px; }
-.official-block-viewer { padding: 20px; border: 2px solid #15986f; border-radius: 5px; background: #f4fbf7; box-shadow: var(--portal-shadow); }
+.official-block-viewer { padding: 18px; border: 1px solid #cfe1d8; border-radius: 16px; background: #fff; box-shadow: var(--portal-shadow); }
 .block-viewer-head { margin-bottom: 14px; }
 .block-viewer-head p { margin: 5px 0 0; color: #64736d; }
 .block-viewer-head > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
-.block-viewer-stage { position: relative; width: 100%; height: min(62vh, 620px); min-height: 360px; overflow: hidden; border: 3px solid #13211d; background: linear-gradient(#69afe5 0 66%, #c8dfaa 66%); }
-.block-viewer-canvas { display: block; width: 100%; height: 100%; outline: none; cursor: grab; touch-action: none; background: linear-gradient(#69afe5 0 66%, #c8dfaa 66%); }
+.block-viewer-stage { position: relative; width: 100%; height: min(56vh, 540px); min-height: 340px; overflow: hidden; border: 1px solid #29463d; border-radius: 12px; background: radial-gradient(circle at 50% 36%, #284d56 0, #142b31 48%, #0b1a20 100%); box-shadow: inset 0 0 0 1px rgba(205,255,85,.08); }
+.block-viewer-canvas { display: block; width: 100%; height: 100%; outline: none; cursor: grab; touch-action: none; background: radial-gradient(circle at 50% 36%, #284d56 0, #142b31 48%, #0b1a20 100%); }
 .block-viewer-canvas:focus-visible { box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 6px #176b55; }
 .block-viewer-canvas:active { cursor: grabbing; }
 .block-viewer-loading { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-weight: 900; }
