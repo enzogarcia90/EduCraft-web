@@ -34,6 +34,17 @@
 		uniform sampler2DArray uTextures;
 		out vec4 outColor;
 		void main() { vec4 texel = texture(uTextures, vec3(vUV, float(vTexture))); if (texel.a < .12) discard; outColor = vec4(texel.rgb * vColor * vLight, texel.a); }`;
+	const playerVertexSource = `#version 300 es
+		in vec3 aPlayerPosition;
+		uniform mat4 uProjection;
+		uniform mat4 uView;
+		uniform vec3 uSceneCenter;
+		uniform float uModelScale;
+		void main() { vec3 world = (aPlayerPosition - uSceneCenter) * uModelScale + uSceneCenter; gl_Position = uProjection * uView * vec4(world, 1.0); gl_PointSize = 22.0; }`;
+	const playerFragmentSource = `#version 300 es
+		precision mediump float;
+		out vec4 outColor;
+		void main() { vec2 p = gl_PointCoord * 2.0 - 1.0; float d = dot(p,p); if (d > 1.0) discard; float light = .72 + max(0.0, 1.0 - d) * .28; outColor = vec4(vec3(.78, 1.0, .22) * light, 1.0); }`;
 	const textureFiles = ["grass_top", "dirt", "stone", "cobblestone", "planks_oak", "glass", "water_still", "sand"];
 
 	class EduCraftBlockViewer {
@@ -107,6 +118,7 @@
 		initScene() {
 			const gl = this.gl;
 			this.program = createProgram(gl, vertexSource, fragmentSource);
+			this.playerProgram = createProgram(gl, playerVertexSource, playerFragmentSource);
 			const cube = cubeGeometry();
 			const blocks = [];
 			this.instanceCount = blocks.length;
@@ -122,6 +134,14 @@
 			this.viewLocation = gl.getUniformLocation(this.program, "uView");
 			this.sceneCenterLocation = gl.getUniformLocation(this.program, "uSceneCenter");
 			this.modelScaleLocation = gl.getUniformLocation(this.program, "uModelScale");
+			this.playerVao = gl.createVertexArray();
+			gl.bindVertexArray(this.playerVao);
+			this.playerBuffer = attribute(gl, this.playerProgram, "aPlayerPosition", [], 3, 0);
+			this.playerProjectionLocation = gl.getUniformLocation(this.playerProgram, "uProjection");
+			this.playerViewLocation = gl.getUniformLocation(this.playerProgram, "uView");
+			this.playerSceneCenterLocation = gl.getUniformLocation(this.playerProgram, "uSceneCenter");
+			this.playerModelScaleLocation = gl.getUniformLocation(this.playerProgram, "uModelScale");
+			this.playerCount = 0;
 			this.initTextures();
 			gl.enable(gl.DEPTH_TEST);
 			gl.disable(gl.CULL_FACE);
@@ -175,14 +195,16 @@
 			this.host.dataset.live = "true";
 			if (!server.blocks?.length && !server.players?.length) {
 				this.uploadBlocks([]);
+				this.uploadPlayers([]);
 				return true;
 			}
 			const focus = server.players?.[0] || server.blocks?.[0];
 			const world = focus.world;
-			const visibleBlocks = closestBlocks((server.blocks || []).filter((block) => block.world === world && !block.removed), focus, 24000);
+			const visibleBlocks = closestBlocks((server.blocks || []).filter((block) => block.world === world && !block.removed), focus, 50000);
 			const points = visibleBlocks.concat((server.players || []).filter((player) => player.world === world));
 			if (!points.length) {
 				this.uploadBlocks([]);
+				this.uploadPlayers([]);
 				return true;
 			}
 			const bounds = boundsOf(points);
@@ -202,16 +224,13 @@
 				const appearance = materialAppearance(block.material);
 				blocks.push({ position, color: appearance.color, texture: appearance.texture });
 			}
-			for (const player of server.players || []) {
-				if (player.world !== world) continue;
-				blocks.push({ position:[player.x-origin[0], player.y-origin[1], player.z-origin[2]], color:[.25,.5,1], texture:4 });
-				blocks.push({ position:[player.x-origin[0], player.y-origin[1]+1, player.z-origin[2]], color:[1,.8,.3], texture:4 });
-			}
+			const players = (server.players || []).filter((player) => player.world === world).map((player) => [player.x-origin[0], player.y-origin[1]+1.35, player.z-origin[2]]);
 			if (!blocks.length) {
 				this.uploadBlocks([]);
 				return true;
 			}
 			this.uploadBlocks(blocks);
+			this.uploadPlayers(players);
 			const localBounds = boundsOf(blocks.map((block) => ({ x: block.position[0], y: block.position[1], z: block.position[2] })));
 			this.sceneCenter = localBounds.center;
 			this.sceneRadius = Math.max(3, localBounds.radius);
@@ -229,6 +248,13 @@
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.textureIndexBuffer);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(blocks.map((block) => block.texture || 0)), gl.DYNAMIC_DRAW);
 			this.instanceCount = blocks.length;
+		}
+
+		uploadPlayers(players) {
+			const gl = this.gl;
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.playerBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(players.flat()), gl.DYNAMIC_DRAW);
+			this.playerCount = players.length;
 		}
 
 		resize() {
@@ -270,6 +296,17 @@
 			gl.uniform3fv(this.sceneCenterLocation, this.sceneCenter);
 			gl.uniform1f(this.modelScaleLocation, this.modelScale);
 			gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, this.instanceCount);
+			if (this.playerCount) {
+				gl.useProgram(this.playerProgram);
+				gl.bindVertexArray(this.playerVao);
+				gl.uniformMatrix4fv(this.playerProjectionLocation, false, perspective(Math.PI / 3, this.canvas.width / this.canvas.height, .1, Math.max(240, this.distance + this.sceneRadius * 4)));
+				gl.uniformMatrix4fv(this.playerViewLocation, false, lookAt(camera, this.target));
+				gl.uniform3fv(this.playerSceneCenterLocation, this.sceneCenter);
+				gl.uniform1f(this.playerModelScaleLocation, this.modelScale);
+				gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+				gl.drawArrays(gl.POINTS, 0, this.playerCount);
+				gl.depthMask(true); gl.disable(gl.BLEND);
+			}
 			this.frame = requestAnimationFrame((next) => this.render(next));
 		}
 

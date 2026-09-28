@@ -811,7 +811,7 @@ function loadBlockViewer() {
 	if (window.educraftBlockViewerPromise) return window.educraftBlockViewerPromise;
 	window.educraftBlockViewerPromise = new Promise((resolve, reject) => {
 		const script = document.createElement("script");
-		script.src = "block-viewer.js?v=20260928-viewer9";
+		script.src = "block-viewer.js?v=20260928-viewer10";
 		script.onload = resolve;
 		script.onerror = reject;
 		document.head.append(script);
