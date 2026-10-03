@@ -1,5 +1,7 @@
 # EduCraft Web Agent Guide
 
+Antes de cualquier edición o publicación, lee también el `../AGENTS.md` raíz completo. Sus límites de repositorio, secretos y checklist de publicación son obligatorios.
+
 Este repo es publico y estatico. Solo contiene la web publica, el dashboard shell, el cliente ya compilado y assets publicos para GitHub Pages.
 
 ## Limites duros
