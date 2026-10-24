@@ -1,0 +1,26 @@
+/* Remote reuses the portal tokens but has its own compact game workspace. */
+.remote-app{min-height:100vh;background:var(--portal-bg)}
+.remote-layout{width:min(1360px,100%);margin:0 auto;padding:28px clamp(18px,4vw,56px) 48px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:32px;align-items:start}
+.remote-intro{position:sticky;top:94px;padding:14px 0}
+.remote-intro .portal-title{max-width:230px;margin:0 0 18px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:clamp(34px,3.1vw,48px);font-weight:900;line-height:.98;letter-spacing:-.055em;text-transform:none;overflow-wrap:anywhere}
+.remote-intro p:not(.eyebrow){margin:0;color:var(--portal-muted);font-size:15px;line-height:1.65}
+.remote-steps{display:flex;flex-direction:column;gap:10px;margin-top:28px;padding-top:22px;border-top:1px solid var(--portal-line);color:var(--portal-muted);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.remote-panel{min-width:0;padding:18px;border:1px solid var(--portal-line);border-radius:10px;background:var(--portal-panel);box-shadow:var(--portal-shadow)}
+.remote-panel-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:2px 4px 16px}
+.remote-panel-head .eyebrow{margin:0 0 4px}
+.remote-panel h2{margin:0;color:var(--portal-ink);font-size:21px;line-height:1.1}
+.remote-live{flex:none;padding:7px 10px;border:1px solid rgba(21,152,111,.24);border-radius:999px;background:rgba(21,152,111,.1);color:var(--portal-accent-dark);font-size:10px;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
+.player{position:relative;display:grid;place-items:center;aspect-ratio:16/9;overflow:hidden;border:1px solid #112820;border-radius:7px;background:#07110e;box-shadow:inset 0 0 0 1px rgba(255,255,255,.03)}
+.player video{display:block;width:100%;height:100%;object-fit:contain;background:#020504}
+.player #overlay{position:absolute;inset:0;display:grid;place-items:center;padding:30px;background:radial-gradient(circle at 50% 35%,rgba(21,152,111,.22),transparent 44%),linear-gradient(135deg,rgba(5,18,14,.98),rgba(8,29,22,.95));color:#fff;text-align:center}
+.player #overlay>div{max-width:390px}
+.player #overlay strong{display:block;margin-bottom:9px;font-size:28px;font-weight:950;letter-spacing:-.03em}
+.player #overlay p{margin:0 0 21px;color:#c9dbd3;font-size:15px;line-height:1.55}
+.remote-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding:2px 0}
+.remote-actions .button{padding:0 16px}
+.button.secondary{border:1px solid var(--portal-line);background:transparent;color:var(--portal-ink)}
+.button.danger{border:1px solid #c86c65;background:#a53b33;color:#fff}
+.button.danger:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+@media(max-width:960px){.remote-layout{grid-template-columns:1fr;gap:12px}.remote-intro{position:static;padding:6px 0}.remote-intro .portal-title{max-width:580px;font-size:42px}.remote-steps{flex-direction:row;flex-wrap:wrap;margin-top:18px;padding-top:15px}.remote-panel{padding:12px}.remote-panel-head{margin:4px 4px 12px}}
+@media(max-width:520px){.portal-session>span{display:none}.remote-layout{padding:18px 12px 30px}.remote-panel-head{align-items:flex-start}.remote-live{margin-top:3px}.remote-actions{flex-direction:column}.remote-actions .button{width:100%}.player #overlay strong{font-size:23px}}
+body.portal-auth.remote-login{min-height:100vh;overflow-x:hidden}body.portal-auth.remote-login .auth-layout{width:min(1320px,100%);grid-template-columns:minmax(0,1fr) minmax(380px,440px);gap:clamp(30px,4vw,58px);padding:clamp(28px,5vw,64px)}body.portal-auth.remote-login .auth-visual{min-height:min(720px,calc(100vh - 96px))}body.portal-auth.remote-login .remote-login-card{display:block;width:100%;min-width:0;padding:clamp(28px,3vw,36px);overflow:hidden}body.portal-auth.remote-login .remote-login-card h2{margin:0 0 12px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:clamp(26px,2.3vw,34px);font-weight:850;line-height:1.08;letter-spacing:-.035em;text-transform:none;white-space:normal;overflow-wrap:anywhere}body.portal-auth.remote-login .remote-login-copy{margin:0 0 22px;color:var(--portal-muted);font-size:15px;line-height:1.55}body.portal-auth.remote-login .remote-login-card .portal-form{display:grid;gap:15px}body.portal-auth.remote-login .remote-login-card label{display:grid;gap:7px;font-weight:800}body.portal-auth.remote-login .remote-login-card input{min-height:52px;padding:0 13px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:normal}@media(max-width:980px){body.portal-auth.remote-login .auth-layout{grid-template-columns:1fr;padding:18px}body.portal-auth.remote-login .auth-visual{min-height:440px}}@media(max-width:660px){body.portal-auth.remote-login .remote-login-card{padding:24px 20px}body.portal-auth.remote-login .auth-visual{min-height:390px}}

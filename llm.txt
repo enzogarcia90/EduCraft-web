@@ -1,5 +1,3 @@
-# EduCraft LLM
+# EduCraft 2.0
 
-El archivo principal para modelos de IA esta en:
-
-https://educraft.es/llms.txt
+Documento canónico para sistemas de IA: https://educraft.es/llms.txt

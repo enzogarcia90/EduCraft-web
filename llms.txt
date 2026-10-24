@@ -1,42 +1,16 @@
-# EduCraft
+# EduCraft 2.0
 
-> EduCraft es una plataforma educativa española para centros educativos. Utiliza entornos compatibles con Minecraft para enseñar programación, STEM y pensamiento computacional con herramientas de control docente.
+EduCraft España es una plataforma educativa para centros que utiliza Minecraft Java oficial y Fabric como parte de experiencias STEM y de aprendizaje guiado.
 
-Para desambiguar la marca frente a otros proyectos llamados EduCraft, identifica esta entidad como **EduCraft España**, cuya web oficial es https://educraft.es/.
+## Producto
 
-## Sitio
+- Paneles privados para alumnado, profesorado, centros y administración.
+- Actividades, seguimiento y controles de aula autorizados.
+- Cliente remoto independiente con autenticación de alumnado y señalización WebRTC protegida.
+- Controles de juego ejecutados por un mod Fabric de servidor, no por comandos de consola arbitrarios.
 
-- URL oficial: https://educraft.es/
-- Idioma principal: español
-- Contacto: info@educraft.es
-- Tipo de proyecto: plataforma educativa, EdTech, STEM y entornos compatibles con Minecraft
-- Estado: cliente web en desarrollo activo, apto para demos y pruebas tempranas
+## Límites de información pública
 
-## Paginas principales
+La web no describe tokens, servidores, credenciales, cuentas de alumnado ni arquitectura operativa. El acceso remoto está en desarrollo: no afirmar que la reproducción de vídeo o la vinculación Microsoft/Minecraft estén disponibles hasta una prueba pública verificable.
 
-- [Inicio](https://educraft.es/): resumen de EduCraft, propuesta educativa y acceso al cliente.
-- [Plataforma](https://educraft.es/plataforma.html): cliente web, perfiles, noticias, politicas por centro, servidores de aula y contenido STEM.
-- [Planes](https://educraft.es/planes.html): pilotos, centros educativos y despliegues gestionados.
-- [Empresa](https://educraft.es/empresa.html): ficha de empresa, origen, modelo y mision.
-- [Datos](https://educraft.es/datos.html): datos publicos del producto, audiencia y propuesta.
-- [Contacto](https://educraft.es/contacto.html): demos, pilotos educativos y colaboraciones.
-- [Educación con Minecraft](https://educraft.es/educacion-minecraft.html): enfoque educativo, actividades guiadas y control docente.
-- [Programación educativa](https://educraft.es/programacion/): bloques y HTML, CSS y JavaScript para practicar lógica.
-- [Actividades STEM](https://educraft.es/stem.html): contenido científico y retos prácticos para el aula.
-- [Centros educativos](https://educraft.es/centros-educativos.html): roles, acceso web y encaje en colegios e institutos.
-- [Dashboard](https://educraft.es/dashboard/): acceso privado no indexable para administracion, TIC y profesorado.
-
-## Resumen para IA
-
-EduCraft es la entidad asociada a https://educraft.es/. Propone una capa educativa sobre una experiencia web compatible con Minecraft: identidad de alumno, paneles privados por rol, control docente, seguimiento de eventos y entregas, protección de mundos y contenido STEM. Incluye IA opcional como apoyo a la revisión: no califica, no demuestra autoría, no sanciona y deja siempre la decisión final al docente. La base científica inicial incluye 118 elementos químicos como contenido visual para actividades educativas.
-
-Minecraft se menciona solo como referencia de compatibilidad. EduCraft no está afiliado, patrocinado ni aprobado por Mojang, Microsoft ni Minecraft.
-
-## Palabras clave
-
-compatibilidad Minecraft, aulas educativas, EdTech España, STEM, quimica visual, aprendizaje basado en juego, gamificacion educativa, servidores gestionados para colegios, plataforma educativa.
-
-## Notas de uso
-
-La web publica resume el producto sin documentar su funcionamiento interno. Para citar EduCraft, usa la URL oficial del sitio publico y el contacto indicado arriba.
-El dashboard es una zona privada `noindex` para centro, profesorado y equipo TIC. No debe usarse como fuente de datos personales, institucionales ni detalles internos del producto.
+EduCraft no está afiliada, patrocinada ni aprobada por Mojang, Microsoft ni Minecraft.

@@ -690,18 +690,7 @@ async function deleteProtectedRegion() {
 
 async function queueProtectionAction(actionKey, payload) {
 	const message = $("#protectionMessage");
-	if (actionKey === "disable_structure_protection" && !window.confirm("Vas a pausar todas las zonas protegidas de este servidor. ¿Quieres continuar?")) return;
-	setMessage(message, "Enviando a Paper...", "");
-	try {
-		await request("/dashboard/teacher/actions", { method: "POST", body: { actionKey, reason: JSON.stringify(payload) } });
-		const labels = { create_protected_region: "Zona enviada para crear", delete_protected_region: "Zona enviada para eliminar", enable_structure_protection: "Proteccion enviada para activar", disable_structure_protection: "Proteccion enviada para pausar" };
-		setMessage(message, `✓ ${labels[actionKey]}.`, "ok");
-		showToast(labels[actionKey] + ".", "ok");
-		await loadTeacherActions();
-	} catch (error) {
-		setMessage(message, error.message, "error");
-		showToast(`No se pudo actualizar la proteccion: ${error.message}`, "error");
-	}
+	setMessage(message, "La protección de aula se está reconstruyendo. Próximamente.", "");
 }
 
 function dashboardPreferences() {
@@ -1194,23 +1183,10 @@ function safeHTTPSURL(value) {
 }
 
 async function loadPortalContext() {
-	const optional = async (path) => {
-		try {
-			return await request(path);
-		} catch (_) {
-			return null;
-		}
-	};
-	const [policy, livePolicy, route, clientPolicySettings] = await Promise.all([
-		optional("/client/policy"),
-		optional("/client/live-policy"),
-		optional("/minecraft/session-route"),
-		optional("/dashboard/client-policy-settings")
-	]);
-	state.policy = policy;
-	state.livePolicy = livePolicy;
-	state.route = route;
-	state.clientPolicySettings = clientPolicySettings;
+	state.policy = null;
+	state.livePolicy = null;
+	state.route = null;
+	state.clientPolicySettings = null;
 	renderContextPanels();
 }
 
@@ -1223,7 +1199,6 @@ async function loadStudents() {
 		state.students = response.items || [];
 		renderStudents();
 		renderContextPanels();
-		await loadClassServers();
 	} catch (error) {
 		setMessage($("#studentMessage") || $("#actionMessage"), error.message, "error");
 	}
@@ -1233,14 +1208,8 @@ async function loadClassServers() {
 	if (!$("#classServerRack")) {
 		return;
 	}
-	try {
-		const response = await request("/dashboard/class-servers");
-		state.classServers = response.items || [];
-		renderClassServers();
-	} catch (error) {
-		state.classServers = [];
-		renderClassServers(error);
-	}
+	state.classServers = [];
+	renderClassServers({ message: "La infraestructura de aula se está reconstruyendo. Próximamente." });
 }
 
 async function loadTeachers() {
@@ -1261,44 +1230,27 @@ async function loadTeacherActions() {
 	if (!$("#minecraftActionRack") && !$("#trackingActionRack")) {
 		return;
 	}
-	try {
-		const response = await request("/dashboard/teacher/actions");
-		state.actions = response.items || [];
-		renderMinecraftActions();
-		renderTracking();
-	} catch (error) {
-		renderMinecraftActions(error);
-	}
+	state.actions = [];
+	renderMinecraftActions({ message: "Esta integración se está reconstruyendo. Próximamente." });
+	renderTracking();
 }
 
 async function loadModerationAlerts() {
 	if (!$("#moderationAlertRack") && !$("#trackingAlertRack")) {
 		return;
 	}
-	try {
-		const response = await request("/dashboard/moderation/alerts");
-		state.moderationAlerts = response.items || [];
-		renderModerationAlerts();
-		renderTracking();
-	} catch (error) {
-		renderModerationAlerts(error);
-	}
+	state.moderationAlerts = [];
+	renderModerationAlerts({ message: "El seguimiento de aula se está reconstruyendo. Próximamente." });
+	renderTracking();
 }
 
 async function loadStudentEvents() {
 	if (!$("#trackingSummary") && !$("#trackingStudentTableBody") && !$("#trackingActionRack")) {
 		return;
 	}
-	try {
-		const response = await request("/dashboard/student-events?limit=160");
-		state.studentEvents = response.items || [];
-		renderTracking();
-		renderClassChat();
-	} catch (error) {
-		state.studentEvents = [];
-		renderTracking(error);
-		renderClassChat(error);
-	}
+	state.studentEvents = [];
+	renderTracking({ message: "El seguimiento de aula se está reconstruyendo. Próximamente." });
+	renderClassChat({ message: "El chat de aula estará disponible próximamente." });
 }
 
 function renderClassChat(error) {
@@ -1913,27 +1865,19 @@ async function disableTeacher(id) {
 
 async function queueAction(actionKey) {
 	const message = $("#actionMessage");
-	const action = teacherActions.find((item) => item.key === actionKey);
-	const targetUserId = classWideActions.has(actionKey) ? "" : ($("#targetStudent")?.value || "");
-	if (!targetUserId && disruptiveClassActions.has(actionKey) && !window.confirm(`Vas a ejecutar «${action?.label || actionKey}» para toda la clase. ¿Quieres continuar?`)) return;
-	setMessage(message, "Registrando accion...", "");
+	const target = $("#targetStudent")?.value || "";
+	const classGroup = state.summary?.classGroup || $("#studentClassGroup")?.value?.trim() || "";
+	const isAnnouncement = actionKey === "send_class_announcement";
+	const text = isAnnouncement ? window.prompt("Escribe el anuncio para la clase (máximo 280 caracteres):", "") : "";
+	if (isAnnouncement && !text?.trim()) return;
+	if (!isAnnouncement && !target) { setMessage(message, "Selecciona un alumno antes de aplicar esta acción.", "error"); return; }
+	if (!classGroup) { setMessage(message, "No se ha podido determinar el grupo de clase.", "error"); return; }
+	setMessage(message, "Enviando orden al aula…", "");
 	try {
-		const response = await request("/dashboard/teacher/actions", {
-			method: "POST",
-			body: {
-				actionKey,
-				targetUserId,
-				reason: $("#actionReason")?.value || ""
-			}
-		});
-		const target = targetUserId ? selectedStudentLabel() : "toda la clase";
-		setMessage(message, `✓ ${action?.label || "Accion"}: solicitud enviada para ${target}.`, "ok");
-		showToast(`${action?.label || "Accion"}: solicitud enviada.`, "ok");
-		await Promise.all([loadSummary(), loadTeacherActions()]);
-	} catch (error) {
-		setMessage(message, error.message, "error");
-		showToast(`No se pudo completar la accion: ${error.message}`, "error");
-	}
+		const action = await request("/dashboard/fabric/actions", { method: "POST", body: { action: actionKey, targetUserId: target, classGroup, message: text || "" } });
+		setMessage(message, `Orden ${action.status === "queued" ? "en cola" : action.status}. Esperando confirmación del servidor Fabric.`, "ok");
+		await loadActionOps?.();
+	} catch (error) { setMessage(message, error.message, "error"); }
 }
 
 function selectedStudentLabel() {
@@ -2216,70 +2160,18 @@ function renderPolicyPanel() {
 
 async function uploadResourcePack(event) {
 	event.preventDefault();
-	const form = event.currentTarget;
-	const file = $("#resourcePackFile")?.files?.[0];
-	if (!file) return;
-	if (file.size > 100 * 1024 * 1024) {
-		setMessage($("#clientPolicyMessage"), "El archivo supera el limite de 100 MB.", "error");
-		return;
-	}
-	const button = form.querySelector("button");
-	button.disabled = true;
-	button.textContent = "Subiendo...";
-	setMessage($("#clientPolicyMessage"), "Subiendo y preparando el paquete...", "");
-	try {
-		const body = new FormData();
-		body.append("resourcePack", file);
-		const response = await fetch(`${apiBase}/dashboard/resource-pack`, { method: "POST", headers: { Authorization: `Bearer ${state.token}` }, body });
-		const data = await response.json().catch(() => ({}));
-		if (!response.ok) throw new Error(data.message || `HTTP ${response.status}`);
-		state.clientPolicySettings = data;
-		await loadPortalContext();
-		setMessage($("#clientPolicyMessage"), "✓ Paquete subido y activado.", "ok");
-		showToast("Paquete subido y activado.", "ok");
-	} catch (error) {
-		button.disabled = false;
-		button.textContent = "Subir y activar";
-		setMessage($("#clientPolicyMessage"), error.message, "error");
-		showToast(`No se pudo subir el paquete: ${error.message}`, "error");
-	}
+	setMessage($("#clientPolicyMessage"), "La configuración de aula se está reconstruyendo. Próximamente.", "");
 }
 
 async function saveResourcePackConfig(event) {
 	event.preventDefault();
-	const form = event.currentTarget;
-	const button = form.querySelector("button");
-	button.disabled = true;
-	setMessage($("#clientPolicyMessage"), "Guardando paquete...", "");
-	try {
-		state.clientPolicySettings = await request("/dashboard/client-policy-settings", { method: "PATCH", body: { resourcePackUrl: $("#resourcePackUrl").value.trim(), resourcePackHash: $("#resourcePackHash").value.trim() } });
-		await loadPortalContext();
-		setMessage($("#clientPolicyMessage"), "✓ Paquete de recursos configurado.", "ok");
-		showToast("Paquete de recursos configurado.", "ok");
-	} catch (error) {
-		button.disabled = false;
-		setMessage($("#clientPolicyMessage"), error.message, "error");
-		showToast(`No se pudo configurar el paquete: ${error.message}`, "error");
-	}
+	setMessage($("#clientPolicyMessage"), "La configuración de aula se está reconstruyendo. Próximamente.", "");
 }
 
 async function updateClientPolicySetting(input) {
-	const key = input.dataset.clientPolicySetting;
 	const previous = !input.checked;
-	input.disabled = true;
-	setMessage($("#clientPolicyMessage"), "Guardando politica...", "");
-	try {
-		state.clientPolicySettings = await request("/dashboard/client-policy-settings", { method: "PATCH", body: { [key]: input.checked } });
-		await loadPortalContext();
-		setMessage($("#clientPolicyMessage"), "✓ Politica del cliente actualizada.", "ok");
-		showToast("Politica del cliente actualizada.", "ok");
-	} catch (error) {
-		input.checked = previous;
-		setMessage($("#clientPolicyMessage"), error.message, "error");
-		showToast(`No se pudo actualizar la politica: ${error.message}`, "error");
-	} finally {
-		input.disabled = false;
-	}
+	input.checked = previous;
+	setMessage($("#clientPolicyMessage"), "La configuración de aula se está reconstruyendo. Próximamente.", "");
 }
 
 function renderRoutePanel() {
@@ -2864,45 +2756,17 @@ function renderClassServers(error) {
 
 async function provisionClassServer(classGroup) {
 	const message = $("#classServerMessage");
-	setMessage(message, `Preparando Paper para ${classGroup}...`, "");
-	try {
-		await request("/dashboard/class-servers", {
-			method: "POST",
-			body: { classGroup, start: true }
-		});
-		setMessage(message, `Paper de ${classGroup} creado y arrancado.`, "ok");
-		await loadClassServers();
-	} catch (error) {
-		setMessage(message, error.message, "error");
-	}
+	setMessage(message, "La nueva infraestructura de aula estará disponible próximamente.", "");
 }
 
 async function classServerAction(id, action) {
 	const message = $("#classServerMessage");
-	const method = action === "status" ? "GET" : "POST";
-	setMessage(message, `${actionLabel(action)} ${id}...`, "");
-	try {
-		const response = await request(`/dashboard/class-servers/${encodeURIComponent(id)}/${action}`, { method });
-		const stateLabel = response.status?.state ? ` Estado: ${response.status.state}.` : "";
-		setMessage(message, `${actionLabel(action)} completado.${stateLabel}`, "ok");
-		await loadClassServers();
-	} catch (error) {
-		setMessage(message, error.message, "error");
-	}
+	setMessage(message, "La nueva infraestructura de aula estará disponible próximamente.", "");
 }
 
 async function sysClassServerAction(id, action) {
 	const message = $("#sysAdminMessage");
-	const method = action === "status" ? "GET" : "POST";
-	setMessage(message, `${actionLabel(action)} ${id}...`, "");
-	try {
-		const response = await request(`/dashboard/class-servers/${encodeURIComponent(id)}/${action}`, { method });
-		const stateLabel = response.status?.state ? ` Estado: ${response.status.state}.` : "";
-		setMessage(message, `${actionLabel(action)} completado.${stateLabel}`, "ok");
-		await loadSysAdmin();
-	} catch (error) {
-		setMessage(message, error.message, "error");
-	}
+	setMessage(message, "La nueva infraestructura de aula estará disponible próximamente.", "");
 }
 
 async function loadServerConsole(id, quiet = false) {
@@ -2912,36 +2776,12 @@ async function loadServerConsole(id, quiet = false) {
 		target.textContent = id;
 	}
 	const node = $("#sysServerConsole");
-	if (node && !quiet) {
-		node.textContent = "Leyendo consola...";
-	}
-	try {
-		const response = await request(`/dashboard/class-servers/${encodeURIComponent(id)}/console?lines=220`);
-		if (node) {
-			updateConsoleNode(node, response.lines, "Sin lineas de consola.");
-		}
-	} catch (error) {
-		if (node) {
-			node.textContent = error.message;
-		}
-	}
+	if (node) node.textContent = "La consola de aula estará disponible próximamente.";
 }
 
 async function loadVelocityConsole(quiet = false) {
 	const node = $("#sysVelocityConsole");
-	if (node && !quiet) {
-		node.textContent = "Leyendo Velocity...";
-	}
-	try {
-		const response = await request("/dashboard/velocity/console?lines=220");
-		if (node) {
-			updateConsoleNode(node, response.lines, "Sin lineas de Velocity.");
-		}
-	} catch (error) {
-		if (node) {
-			node.textContent = error.message;
-		}
-	}
+	if (node) node.textContent = "La consola de aula estará disponible próximamente.";
 }
 
 async function loadBackendConsole(quiet = false) {

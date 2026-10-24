@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="Acceso al cliente remoto de EduCraft.">
+		<meta name="robots" content="noindex,nofollow">
+		<meta name="theme-color" content="#15986f">
+		<link rel="icon" type="image/png" sizes="32x32" href="../assets/educraft-icon-32.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="../assets/educraft-icon-180.png">
+		<title>Cliente | EduCraft</title>
+		<link rel="stylesheet" href="../styles.css?v=20260901-rounded1">
+		<link rel="stylesheet" href="../dashboard/dashboard.css?v=20260901-rounded1">
+		<link rel="stylesheet" href="remote.css?v=20261023-login2">
+	</head>
+	<body class="portal-auth remote-login">
+		<main class="auth-layout login-layout">
+			<section class="auth-visual login-visual remote-login-visual">
+				<a class="portal-brand" href="../index.html"><span class="brand-mark" aria-hidden="true"><img src="../assets/educraft-icon-192.png" alt="Logotipo de EduCraft"></span><span><strong>EduCraft</strong><small>Cliente remoto</small></span></a>
+				<div>
+					<p class="eyebrow">Acceso de alumnado</p>
+					<h1 class="auth-title">Explorar.<br>Aprender.<br>Conectar.</h1>
+					<p>Entra a tu actividad y conecta con tu entorno remoto seguro. Tus clases, profesores y la gestión del centro siguen en el portal general.</p>
+				</div>
+				<div class="login-visual-rack" aria-label="Ventajas del cliente EduCraft">
+					<span><strong>01</strong> Actividad asignada</span>
+					<span><strong>02</strong> Entorno protegido</span>
+					<span><strong>03</strong> Controles seguros</span>
+				</div>
+			</section>
+			<section class="auth-card login-card remote-login-card">
+				<p class="eyebrow">Cliente EduCraft</p>
+				<h2>Continúa tu actividad</h2>
+				<p class="remote-login-copy">Este acceso es para abrir tu sesión de aprendizaje. Si eres profesor/a o gestionas un centro, usa el portal general.</p>
+				<form id="remoteLoginForm" class="portal-form">
+					<label><span>Correo electrónico</span><input id="email" type="email" autocomplete="username" inputmode="email" spellcheck="false" placeholder="nombre@centro.es" required></label>
+					<label><span>Contraseña</span><input id="password" type="password" autocomplete="current-password" placeholder="Introduce tu contraseña" required></label>
+					<div class="turnstile-panel"><strong>Verificación de seguridad</strong><div id="remoteTurnstile"><span class="turnstile-loading">Preparando comprobación…</span></div><small id="turnstileStatus" role="status">Se completará automáticamente.</small></div>
+					<button id="submitButton" class="button primary" type="submit">Entrar al cliente</button>
+				</form>
+				<p id="message" class="portal-message" role="status"></p>
+				<div class="auth-links"><a href="../dashboard/login.html">Soy profesor/a o centro</a><a href="../index.html">Volver a la web</a></div>
+			</section>
+		</main>
+		<script src="../dashboard/educraft-config.js"></script>
+		<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+		<script src="login.js"></script>
+	</body>
+</html>
