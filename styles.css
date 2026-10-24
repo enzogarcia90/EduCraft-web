@@ -357,6 +357,18 @@ article p,
 	line-height: 1.45;
 }
 
+.notice-band a {
+	color: inherit;
+	font-weight: 900;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 3px;
+}
+
+.notice-band a:hover,
+.notice-band a:focus-visible {
+	color: var(--green-dark);
+}
+
 .stats-band {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
