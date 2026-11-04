@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Invitación familiar | EduCraft</title>
+  <link rel="stylesheet" href="../styles.css?v=20260901-rounded1">
+  <style>
+    :root{color-scheme:light}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#f3f8f5;color:#18372d;font:16px/1.55 Arial,sans-serif}.wrap{width:min(720px,calc(100% - 32px));margin:36px auto}.card{overflow:hidden;background:#fff;border:1px solid #dceae2;border-radius:22px;box-shadow:0 18px 48px #17332b18}.hero{padding:30px;background:#173d32;color:#fff}.brand{display:flex;align-items:center;gap:12px;font-size:24px;font-weight:800}.brand img{width:46px;height:46px;border-radius:12px}.hero h1{margin:24px 0 8px;font-size:30px;line-height:1.1}.hero p{margin:0;color:#d5eee2}.body{padding:30px}.body h2{font-size:20px;color:#173d32}.notice{padding:14px 16px;border-radius:12px;background:#f1f8f4;color:#315547}.notice.error{background:#fff1f1;color:#9e2c38}.actions{display:grid;gap:12px;margin-top:24px}.button{display:block;width:100%;padding:14px 18px;border:0;border-radius:11px;text-align:center;font:700 16px Arial;cursor:pointer}.primary{background:#15986f;color:#fff}.secondary{background:#eef6f1;color:#173d32;border:1px solid #c9ddd1}.danger{background:#fff1f1;color:#9e2c38;border:1px solid #e8bfc4}.button:disabled{opacity:.55;cursor:not-allowed}.small{font-size:13px;color:#61766a}.status{display:grid;gap:8px;margin:18px 0}.status div{display:flex;justify-content:space-between;gap:16px;padding:11px 14px;border:1px solid #e1ebe5;border-radius:10px}.status span{color:#61766a}.status strong{text-align:right}.hidden{display:none!important}@media(max-width:560px){.wrap{margin:16px auto}.hero,.body{padding:22px}.status div{display:block}.status strong{display:block;text-align:left;margin-top:4px}}
+  </style>
+</head>
+<body>
+  <main class="wrap"><article class="card">
+    <header class="hero"><div class="brand"><img src="../assets/educraft-icon-192.png" alt="EduCraft"><span>EduCraft</span></div><h1>Invitación familiar</h1><p>Revisa el acceso educativo y continúa solo cuando estés preparado.</p></header>
+    <section class="body">
+      <div id="message" class="notice">Comprobando la invitación…</div>
+      <section id="content" class="hidden">
+        <h2>¿Por qué recibes este mensaje?</h2>
+        <p>EduCraft utiliza Minecraft Java Edition en actividades organizadas por centros educativos. Esta página permite revisar la solicitud familiar y, cuando el servicio esté habilitado, iniciar la vinculación oficial con Microsoft.</p>
+        <div id="status" class="status"></div>
+        <p class="small">Nunca introduzcas tu contraseña de Microsoft en EduCraft. La autenticación se realiza únicamente en la página oficial de Microsoft. Abrir este enlace no demuestra por sí solo la tutela legal ni concede acceso al alumno.</p>
+        <div class="actions">
+          <button id="acknowledge" class="button secondary" type="button">He leído la información y continuaré</button>
+          <button id="microsoft" class="button primary" type="button">Continuar con Microsoft</button>
+          <button id="reject" class="button danger" type="button">Rechazar solicitud</button>
+        </div>
+        <p id="oauthNote" class="small">La vinculación Microsoft se habilitará cuando el registro oficial OAuth y la verificación de Minecraft Java estén disponibles.</p>
+      </section>
+    </section>
+  </article></main>
+  <script src="../dashboard/educraft-config.js?v=20260911-api1"></script>
+  <script>
+    (() => {
+      const token = new URLSearchParams(location.search).get("token") || "";
+      const api = String(window.EDUCRAFT_API_BASE_URL || location.origin).replace(/\/$/, "");
+      const message = document.querySelector("#message"), content = document.querySelector("#content"), status = document.querySelector("#status");
+      const acknowledge = document.querySelector("#acknowledge"), reject = document.querySelector("#reject"), microsoft = document.querySelector("#microsoft");
+      const esc = value => String(value || "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[char]));
+      const labels = {pending:"Pendiente",queued:"En cola",sent:"Enviada",opened:"Abierta",failed:"Fallida",expired:"Caducada",rejected:"Rechazada",cancelled:"Cancelada",link_opened:"Revisión iniciada",verified:"Verificada",not_required:"No necesaria",accepted:"Aceptada",not_linked:"Sin vincular",pending_verification:"Pendiente de verificación",linked:"Vinculada",reauth_required:"Reautenticación necesaria",not_verified:"Sin verificar",blocked:"Bloqueado",allowed:"Permitido"};
+      const label = value => labels[value] || "Pendiente de revisión";
+      function render(item){ status.innerHTML = [["Invitación",item.status],["Tutor",item.tutorVerificationStatus],["Autorización",item.parentalAuthorizationStatus],["Microsoft",item.microsoftLinkStatus],["Minecraft Java",item.minecraftOwnershipStatus],["Acceso remoto",item.remoteAccessStatus]].map(([name,value]) => `<div><span>${esc(name)}</span><strong>${esc(label(value))}</strong></div>`).join(""); }
+      async function load(){
+        if(!token){ message.textContent="El enlace de invitación no es válido."; message.classList.add("error"); return; }
+        try{ const response=await fetch(`${api}/api/family/invitations/${encodeURIComponent(token)}`,{headers:{Accept:"application/json"}}); if(!response.ok) throw new Error(response.status===410?"La invitación ha caducado.":"La invitación no existe o ya no está disponible."); const item=await response.json(); render(item); content.classList.remove("hidden"); message.textContent="Invitación cargada. Revisa la información antes de continuar."; }
+        catch(error){ message.textContent=error.message; message.classList.add("error"); }
+      }
+      async function decide(decision){
+        acknowledge.disabled=true; reject.disabled=true;
+        try{ const response=await fetch(`${api}/api/family/invitations/${encodeURIComponent(token)}/decision`,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({decision})}); if(!response.ok) throw new Error("No se pudo guardar la decisión."); const item=await response.json(); render(item); message.textContent=decision==="reject"?"La solicitud se ha rechazado.":"La apertura del enlace ha quedado registrada; no acredita por sí sola la tutela. La autorización y Microsoft se completan por separado."; }
+        catch(error){ message.textContent=error.message; message.classList.add("error"); acknowledge.disabled=false; reject.disabled=false; }
+      }
+      async function startMicrosoft(){
+        microsoft.disabled=true; message.classList.remove("error"); message.textContent="Comprobando la vinculación oficial…";
+        try{ const response=await fetch(`${api}/api/family/invitations/${encodeURIComponent(token)}/microsoft/start`,{method:"POST",headers:{Accept:"application/json"}}); const data=await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.message||"La vinculación Microsoft todavía no está disponible."); if(data.authorizationUrl) location.assign(data.authorizationUrl); }
+        catch(error){ message.textContent=error.message; message.classList.add("error"); microsoft.disabled=false; }
+      }
+      acknowledge.addEventListener("click",()=>decide("acknowledge")); reject.addEventListener("click",()=>decide("reject")); microsoft.addEventListener("click",startMicrosoft); load();
+    })();
+  </script>
+</body>
+</html>

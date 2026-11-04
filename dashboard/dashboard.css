@@ -484,6 +484,14 @@ body.portal-app * {
 	text-transform: uppercase;
 }
 
+.portal-form .field-hint {
+	display: block;
+	margin-top: 6px;
+	color: var(--portal-muted);
+	font-size: 12px;
+	line-height: 1.4;
+}
+
 .portal-form input,
 .portal-form select,
 .portal-form textarea {

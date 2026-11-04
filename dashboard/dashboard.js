@@ -542,6 +542,7 @@ function bindDashboard() {
 		}
 	});
 	$("#reloadStudents")?.addEventListener("click", loadStudents);
+	$("#sendFamilyBatch")?.addEventListener("click", sendFamilyInvitationsBatch);
 	$("#reloadClassServers")?.addEventListener("click", loadClassServers);
 	$("#studentImportPreview")?.addEventListener("click", previewStudentImport);
 	$("#studentImportFile")?.addEventListener("change", resetStudentImport);
@@ -1503,6 +1504,7 @@ async function createStudent() {
 			method: "POST",
 			body: {
 				email: $("#studentEmail").value,
+				guardianEmail: $("#studentGuardianEmail").value,
 				password: $("#studentPassword").value,
 				institutionId: $("#studentInstitution").value,
 				course: $("#studentCourse")?.value || "",
@@ -1523,11 +1525,11 @@ async function previewStudentImport() {
 		const text = await readImportText("studentImportFile", "studentImportText");
 		const rows = parseStudentRows(text);
 		state.studentImportRows = rows;
-		renderImportPreview("#studentImportPreviewTable", rows, ["email", "password", "course", "classGroup", "institutionId"], "Sin alumnos para importar.");
+		renderImportPreview("#studentImportPreviewTable", rows, ["email", "guardianEmail", "password", "course", "classGroup", "institutionId"], "Sin alumnos para importar.");
 		setMessage(message, `${rows.length} alumnos listos para crear.`, rows.length ? "ok" : "error");
 	} catch (error) {
 		state.studentImportRows = [];
-		renderImportPreview("#studentImportPreviewTable", [], ["email", "password", "course", "classGroup", "institutionId"], "Sin alumnos para importar.");
+		renderImportPreview("#studentImportPreviewTable", [], ["email", "guardianEmail", "password", "course", "classGroup", "institutionId"], "Sin alumnos para importar.");
 		setMessage(message, error.message, "error");
 	}
 }
@@ -1549,6 +1551,7 @@ async function submitStudentImport() {
 				method: "POST",
 				body: {
 					email: row.email,
+					guardianEmail: row.guardianEmail,
 					password: row.password,
 					institutionId: row.institutionId,
 					course: row.course,
@@ -1666,6 +1669,7 @@ async function readImportText(fileInputId, textAreaId) {
 function parseStudentRows(text) {
 	const table = parseDelimitedTable(text);
 	const emailIndex = findColumn(table.headers, ["email", "correo", "mail", "alumno", "usuario"]);
+	const guardianEmailIndex = findColumn(table.headers, ["guardianemail", "guardian", "tutor", "tutor legal", "padre", "madre", "familia", "correo tutor", "correo tutelaje"]);
 	const passwordIndex = findColumn(table.headers, ["password", "contrasena", "contraseña", "clave"]);
 	const institutionIndex = findColumn(table.headers, ["centro", "institution", "institutionid", "institucion", "institución"]);
 	const courseIndex = findColumn(table.headers, ["curso", "course", "nivel", "etapa"]);
@@ -1673,13 +1677,17 @@ function parseStudentRows(text) {
 	if (emailIndex < 0) {
 		throw new Error("No encuentro columna de email/correo.");
 	}
+	if (guardianEmailIndex < 0) {
+		throw new Error("No encuentro columna de correo del tutor legal.");
+	}
 	return table.rows.map((row, index) => ({
 		email: cleanCell(row[emailIndex]).toLowerCase(),
+		guardianEmail: cleanCell(row[guardianEmailIndex]).toLowerCase(),
 		password: cleanCell(row[passwordIndex]) || defaultStudentPassword(index),
 		course: cleanCell(row[courseIndex]),
 		classGroup: cleanCell(row[classGroupIndex]),
 		institutionId: cleanCell(row[institutionIndex])
-	})).filter((row) => row.email.includes("@") && row.password.length >= 4);
+	})).filter((row) => row.email.includes("@") && row.guardianEmail.includes("@") && row.password.length >= 4);
 }
 
 function parseScheduleRows(text) {
@@ -1832,6 +1840,7 @@ function renderImportPreview(selector, rows, columns, emptyText) {
 function importColumnLabel(column) {
 	const labels = {
 		email: "Email",
+		guardianEmail: "Tutor legal",
 		password: "Contrasena",
 		course: "Curso",
 		classGroup: "Clase",
@@ -1843,6 +1852,87 @@ function importColumnLabel(column) {
 		teacher: "Profesor"
 	};
 	return labels[column] || column;
+}
+
+function familyInvitationLabel(status) {
+	const labels = { pending: "Pendiente", queued: "En cola", sent: "Enviada", opened: "Abierta", failed: "Fallida", expired: "Caducada", rejected: "Rechazada", cancelled: "Cancelada" };
+	return labels[String(status || "pending")] || "Pendiente";
+}
+
+function accessGateLabel(student) {
+	const remote = String(student.remoteAccessStatus || "blocked");
+	if (remote === "allowed") return "Permitido";
+	if (student.tutorVerificationStatus === "rejected" || student.parentalAuthorizationStatus === "rejected") return "Bloqueado · Rechazado";
+	const gates = [];
+	if (student.tutorVerificationStatus !== "verified") gates.push("tutor");
+	if (!["accepted", "not_required"].includes(student.parentalAuthorizationStatus)) gates.push("autorización");
+	if (student.microsoftLinkStatus !== "linked") gates.push("Microsoft");
+	if (student.minecraftOwnershipStatus !== "verified") gates.push("licencia");
+	return `Bloqueado${gates.length ? ` · Falta ${gates.join(", ")}` : ""}`;
+}
+
+async function sendFamilyInvitation(id) {
+	if (!window.confirm("¿Enviar ahora la invitación al tutor legal? Se generará un enlace individual con caducidad.")) return;
+	const message = $("#studentMessage");
+	setMessage(message, "Encolando invitación…", "");
+	try {
+		const response = await request(`/dashboard/students/${encodeURIComponent(id)}/family-invitation/send`, { method: "POST" });
+		setMessage(message, `Invitación ${familyInvitationLabel(response.status).toLowerCase()}. El correo se entrega mediante la cola segura.`, "ok");
+		await loadStudents();
+	} catch (error) {
+		setMessage(message, error.message, "error");
+	}
+}
+
+async function sendFamilyInvitationsBatch() {
+	const students = state.students.filter((student) => student.guardianEmail && ["pending", "failed", "expired", "cancelled"].includes(student.invitationStatus));
+	if (!students.length) {
+		setMessage($("#studentMessage"), "No hay invitaciones pendientes para enviar.", "");
+		return;
+	}
+	if (!window.confirm(`¿Enviar ${students.length} invitaciones al tutor legal?`)) return;
+	setMessage($("#studentMessage"), `Encolando ${students.length} invitaciones…`, "");
+	try {
+		const response = await request("/dashboard/family-invitations/send-batch", { method: "POST", body: { studentIds: students.map((student) => student.id) } });
+		setMessage($("#studentMessage"), `${response.queued?.length || 0} encoladas; ${response.failed?.length || 0} con error.`, response.failed?.length ? "error" : "ok");
+		await loadStudents();
+	} catch (error) {
+		setMessage($("#studentMessage"), error.message, "error");
+	}
+}
+
+async function showFamilyInvitation(id) {
+	try {
+		const response = await request(`/dashboard/students/${encodeURIComponent(id)}/family-invitation`);
+		setMessage($("#studentMessage"), `Invitación: ${familyInvitationLabel(response.status)} · acceso remoto: ${accessGateLabel(response)}`, "ok");
+	} catch (error) {
+		setMessage($("#studentMessage"), error.message, "error");
+	}
+}
+
+async function cancelFamilyInvitation(id) {
+	if (!window.confirm("¿Cancelar la invitación pendiente y bloquear el acceso remoto de este alumno?")) return;
+	try {
+		await request(`/dashboard/students/${encodeURIComponent(id)}/family-invitation/cancel`, { method: "POST" });
+		setMessage($("#studentMessage"), "Invitación cancelada y acceso remoto bloqueado.", "ok");
+		await loadStudents();
+	} catch (error) {
+		setMessage($("#studentMessage"), error.message, "error");
+	}
+}
+
+async function editFamilyGuardian(id) {
+	const student = state.students.find((item) => item.id === id);
+	if (!student) return;
+	const guardianEmail = window.prompt("Correo del tutor legal", student.guardianEmail || "");
+	if (guardianEmail === null || !guardianEmail.trim()) return;
+	try {
+		await request(`/dashboard/students/${encodeURIComponent(id)}`, { method: "PATCH", body: { guardianEmail, course: student.course || "", classGroup: student.classGroup || "" } });
+		setMessage($("#studentMessage"), "Correo del tutor actualizado; la invitación anterior ha quedado invalidada.", "ok");
+		await loadStudents();
+	} catch (error) {
+		setMessage($("#studentMessage"), error.message, "error");
+	}
 }
 
 async function disableStudent(id) {
@@ -2679,13 +2769,19 @@ function renderStudents() {
 		$("#studentTableBody").innerHTML = state.students.length ? state.students.map((student) => `
 			<tr>
 				<td>${escapeHtml(student.email)}</td>
+				<td>${escapeHtml(student.guardianEmail || "-")}</td>
 				<td>${escapeHtml(student.course || "-")}</td>
 				<td>${escapeHtml(student.classGroup || "-")}</td>
 				<td>${escapeHtml(student.status)}</td>
+				<td><span class="student-row-status">${escapeHtml(accessGateLabel(student))}</span><small class="field-hint">Invitación: ${escapeHtml(familyInvitationLabel(student.invitationStatus))}</small></td>
 				<td>${escapeHtml(shortId(student.institutionId))}</td>
-				<td><button type="button" data-disable-student="${escapeHtml(student.id)}">Desactivar</button></td>
+				<td><button type="button" data-family-send="${escapeHtml(student.id)}">${student.invitationStatus === "sent" || student.invitationStatus === "failed" ? "Reenviar invitación" : "Enviar invitación"}</button><button type="button" data-family-status="${escapeHtml(student.id)}">Estado</button><button type="button" data-family-edit="${escapeHtml(student.id)}">Corregir correo</button>${["pending", "queued", "sent", "opened"].includes(student.invitationStatus) ? `<button type="button" data-family-cancel="${escapeHtml(student.id)}">Cancelar</button>` : ""}<button type="button" data-disable-student="${escapeHtml(student.id)}">Desactivar</button></td>
 			</tr>
-		`).join("") : `<tr><td colspan="6">Sin alumnos visibles para este rol.</td></tr>`;
+		`).join("") : `<tr><td colspan="8">Sin alumnos visibles para este rol.</td></tr>`;
+		for (const button of document.querySelectorAll("[data-family-send]")) button.addEventListener("click", () => sendFamilyInvitation(button.dataset.familySend));
+		for (const button of document.querySelectorAll("[data-family-status]")) button.addEventListener("click", () => showFamilyInvitation(button.dataset.familyStatus));
+		for (const button of document.querySelectorAll("[data-family-edit]")) button.addEventListener("click", () => editFamilyGuardian(button.dataset.familyEdit));
+		for (const button of document.querySelectorAll("[data-family-cancel]")) button.addEventListener("click", () => cancelFamilyInvitation(button.dataset.familyCancel));
 		for (const button of document.querySelectorAll("[data-disable-student]")) {
 			button.addEventListener("click", () => disableStudent(button.dataset.disableStudent));
 		}
