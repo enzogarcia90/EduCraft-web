@@ -65,6 +65,8 @@
 				<section class="portal-grid two">
 					<form id="studentForm" class="portal-panel portal-form">
 						<h2>Crear alumno</h2>
+						<label><span>Nombre</span><input id="studentFirstName" type="text" autocomplete="given-name" maxlength="80" required></label>
+						<label><span>Apellidos</span><input id="studentLastName" type="text" autocomplete="family-name" maxlength="80" required></label>
 						<label><span>Email</span><input id="studentEmail" type="email" placeholder="alumno@centro.edu" required></label>
 						<label><span>Correo del tutor legal</span><input id="studentGuardianEmail" type="email" placeholder="tutor@familia.es" required><small class="field-hint">Se usará para la invitación de vinculación Microsoft cuando el flujo oficial esté activo.</small></label>
 						<label><span>Contrasena inicial</span><input id="studentPassword" type="text" minlength="4" required></label>
@@ -76,10 +78,10 @@
 					</form>
 					<section class="portal-panel import-panel">
 						<div class="table-head"><h2>Subir lista de alumnos</h2><span class="status-chip">CSV / Sheets</span></div>
-						<p class="import-note">Sube un unico archivo con todos los alumnos del centro. Debe incluir cada alumno con su curso o grupo y su clase correspondiente.</p>
+						<p class="import-note">Sube un unico archivo con todos los alumnos del centro. Incluye nombre, apellidos, correo, curso y grupo.</p>
 						<form id="studentImportForm" class="portal-form">
 							<label><span>Archivo exportado</span><input id="studentImportFile" type="file" accept=".csv,.tsv,.txt,.xlsx,.xls,text/csv,text/tab-separated-values"></label>
-							<label><span>Pegar desde Excel o Google Sheets</span><textarea id="studentImportText" rows="5" placeholder="email,guardianEmail,password,centro&#10;alumno@centro.edu,tutor@familia.es,Clave1234,"></textarea></label>
+							<label><span>Pegar desde Excel o Google Sheets</span><textarea id="studentImportText" rows="5" placeholder="nombre,apellidos,email,guardianEmail,password,curso,grupo&#10;Enzo,Garcia Juarez,alumno@centro.edu,tutor@familia.es,Clave1234,1 ESO,1 ESO A"></textarea></label>
 							<div class="builder-actions"><button class="portal-ghost" type="button" id="studentImportPreview">Previsualizar</button><button class="button primary" type="submit">Crear lista</button></div>
 							<p id="studentImportMessage" class="portal-message"></p>
 						</form>
@@ -95,7 +97,7 @@
 					<section class="portal-panel">
 						<div class="table-head"><h2>Alumnos</h2><div class="builder-actions"><button id="sendFamilyBatch" class="portal-ghost" type="button">Enviar invitaciones pendientes</button><button id="reloadStudents" class="portal-ghost" type="button">Actualizar</button></div></div>
 						<div id="studentBreakdown" class="compact-rack"></div>
-						<table class="portal-table"><thead><tr><th>Email</th><th>Tutor legal</th><th>Curso</th><th>Clase</th><th>Estado</th><th>Acceso remoto</th><th>Centro</th><th></th></tr></thead><tbody id="studentTableBody"></tbody></table>
+						<table class="portal-table"><thead><tr><th>Alumno</th><th>Email</th><th>Tutor legal</th><th>Curso</th><th>Clase</th><th>Estado</th><th>Acceso remoto</th><th>Centro</th><th></th></tr></thead><tbody id="studentTableBody"></tbody></table>
 					</section>
 				</section>
 				</section>

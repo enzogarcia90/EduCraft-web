@@ -1503,6 +1503,8 @@ async function createStudent() {
 		await request("/dashboard/students", {
 			method: "POST",
 			body: {
+				firstName: $("#studentFirstName").value,
+				lastName: $("#studentLastName").value,
 				email: $("#studentEmail").value,
 				guardianEmail: $("#studentGuardianEmail").value,
 				password: $("#studentPassword").value,
@@ -1525,11 +1527,11 @@ async function previewStudentImport() {
 		const text = await readImportText("studentImportFile", "studentImportText");
 		const rows = parseStudentRows(text);
 		state.studentImportRows = rows;
-		renderImportPreview("#studentImportPreviewTable", rows, ["email", "guardianEmail", "password", "course", "classGroup", "institutionId"], "Sin alumnos para importar.");
+		renderImportPreview("#studentImportPreviewTable", rows, ["firstName", "lastName", "email", "guardianEmail", "password", "course", "classGroup", "institutionId"], "Sin alumnos para importar.");
 		setMessage(message, `${rows.length} alumnos listos para crear.`, rows.length ? "ok" : "error");
 	} catch (error) {
 		state.studentImportRows = [];
-		renderImportPreview("#studentImportPreviewTable", [], ["email", "guardianEmail", "password", "course", "classGroup", "institutionId"], "Sin alumnos para importar.");
+		renderImportPreview("#studentImportPreviewTable", [], ["firstName", "lastName", "email", "guardianEmail", "password", "course", "classGroup", "institutionId"], "Sin alumnos para importar.");
 		setMessage(message, error.message, "error");
 	}
 }
@@ -1550,6 +1552,8 @@ async function submitStudentImport() {
 			await request("/dashboard/students", {
 				method: "POST",
 				body: {
+					firstName: row.firstName,
+					lastName: row.lastName,
 					email: row.email,
 					guardianEmail: row.guardianEmail,
 					password: row.password,
@@ -1668,6 +1672,8 @@ async function readImportText(fileInputId, textAreaId) {
 
 function parseStudentRows(text) {
 	const table = parseDelimitedTable(text);
+	const firstNameIndex = findColumn(table.headers, ["nombre", "first name", "firstname", "given name", "givenname"]);
+	const lastNameIndex = findColumn(table.headers, ["apellidos", "apellido", "last name", "lastname", "family name", "familyname"]);
 	const emailIndex = findColumn(table.headers, ["email", "correo", "mail", "alumno", "usuario"]);
 	const guardianEmailIndex = findColumn(table.headers, ["guardianemail", "guardian", "tutor", "tutor legal", "padre", "madre", "familia", "correo tutor", "correo tutelaje"]);
 	const passwordIndex = findColumn(table.headers, ["password", "contrasena", "contraseña", "clave"]);
@@ -1680,14 +1686,19 @@ function parseStudentRows(text) {
 	if (guardianEmailIndex < 0) {
 		throw new Error("No encuentro columna de correo del tutor legal.");
 	}
+	if (firstNameIndex < 0 || lastNameIndex < 0) {
+		throw new Error("La lista necesita columnas de nombre y apellidos.");
+	}
 	return table.rows.map((row, index) => ({
+		firstName: cleanCell(row[firstNameIndex]),
+		lastName: cleanCell(row[lastNameIndex]),
 		email: cleanCell(row[emailIndex]).toLowerCase(),
 		guardianEmail: cleanCell(row[guardianEmailIndex]).toLowerCase(),
 		password: cleanCell(row[passwordIndex]) || defaultStudentPassword(index),
 		course: cleanCell(row[courseIndex]),
 		classGroup: cleanCell(row[classGroupIndex]),
 		institutionId: cleanCell(row[institutionIndex])
-	})).filter((row) => row.email.includes("@") && row.guardianEmail.includes("@") && row.password.length >= 4);
+	})).filter((row) => row.firstName && row.lastName && row.email.includes("@") && row.guardianEmail.includes("@") && row.password.length >= 4);
 }
 
 function parseScheduleRows(text) {
@@ -1939,6 +1950,25 @@ async function disableStudent(id) {
 	try {
 		await request(`/dashboard/students/${encodeURIComponent(id)}`, { method: "DELETE" });
 		await Promise.all([loadSummary(), loadStudents()]);
+	} catch (error) {
+		setMessage($("#studentMessage"), error.message, "error");
+	}
+}
+
+async function editStudentProfile(id) {
+	const student = state.students.find((item) => item.id === id);
+	if (!student) return;
+	const firstName = window.prompt("Nombre del alumno", student.firstName || "");
+	if (firstName === null) return;
+	const lastName = window.prompt("Apellidos del alumno", student.lastName || "");
+	if (lastName === null) return;
+	const course = window.prompt("Curso", student.course || "");
+	if (course === null) return;
+	const classGroup = window.prompt("Clase o grupo", student.classGroup || "");
+	if (classGroup === null) return;
+	try {
+		await request(`/dashboard/students/${encodeURIComponent(id)}`, { method: "PATCH", body: { firstName, lastName, course, classGroup, guardianEmail: student.guardianEmail || "" } });
+		await loadStudents();
 	} catch (error) {
 		setMessage($("#studentMessage"), error.message, "error");
 	}
@@ -2768,6 +2798,7 @@ function renderStudents() {
 	if ($("#studentTableBody")) {
 		$("#studentTableBody").innerHTML = state.students.length ? state.students.map((student) => `
 			<tr>
+				<td>${escapeHtml(student.displayName || `${student.firstName || ""} ${student.lastName || ""}`.trim() || "-")}</td>
 				<td>${escapeHtml(student.email)}</td>
 				<td>${escapeHtml(student.guardianEmail || "-")}</td>
 				<td>${escapeHtml(student.course || "-")}</td>
@@ -2775,10 +2806,11 @@ function renderStudents() {
 				<td>${escapeHtml(student.status)}</td>
 				<td><span class="student-row-status">${escapeHtml(accessGateLabel(student))}</span><small class="field-hint">Invitación: ${escapeHtml(familyInvitationLabel(student.invitationStatus))}</small></td>
 				<td>${escapeHtml(shortId(student.institutionId))}</td>
-				<td><button type="button" data-family-send="${escapeHtml(student.id)}">${student.invitationStatus === "sent" || student.invitationStatus === "failed" ? "Reenviar invitación" : "Enviar invitación"}</button><button type="button" data-family-status="${escapeHtml(student.id)}">Estado</button><button type="button" data-family-edit="${escapeHtml(student.id)}">Corregir correo</button>${["pending", "queued", "sent", "opened"].includes(student.invitationStatus) ? `<button type="button" data-family-cancel="${escapeHtml(student.id)}">Cancelar</button>` : ""}<button type="button" data-disable-student="${escapeHtml(student.id)}">Desactivar</button></td>
+				<td><button type="button" data-student-edit="${escapeHtml(student.id)}">Editar alumno</button><button type="button" data-family-send="${escapeHtml(student.id)}">${student.invitationStatus === "sent" || student.invitationStatus === "failed" ? "Reenviar invitación" : "Enviar invitación"}</button><button type="button" data-family-status="${escapeHtml(student.id)}">Estado</button><button type="button" data-family-edit="${escapeHtml(student.id)}">Corregir correo</button>${["pending", "queued", "sent", "opened"].includes(student.invitationStatus) ? `<button type="button" data-family-cancel="${escapeHtml(student.id)}">Cancelar</button>` : ""}<button type="button" data-disable-student="${escapeHtml(student.id)}">Desactivar</button></td>
 			</tr>
-		`).join("") : `<tr><td colspan="8">Sin alumnos visibles para este rol.</td></tr>`;
+		`).join("") : `<tr><td colspan="9">Sin alumnos visibles para este rol.</td></tr>`;
 		for (const button of document.querySelectorAll("[data-family-send]")) button.addEventListener("click", () => sendFamilyInvitation(button.dataset.familySend));
+		for (const button of document.querySelectorAll("[data-student-edit]")) button.addEventListener("click", () => editStudentProfile(button.dataset.studentEdit));
 		for (const button of document.querySelectorAll("[data-family-status]")) button.addEventListener("click", () => showFamilyInvitation(button.dataset.familyStatus));
 		for (const button of document.querySelectorAll("[data-family-edit]")) button.addEventListener("click", () => editFamilyGuardian(button.dataset.familyEdit));
 		for (const button of document.querySelectorAll("[data-family-cancel]")) button.addEventListener("click", () => cancelFamilyInvitation(button.dataset.familyCancel));
@@ -2790,7 +2822,7 @@ function renderStudents() {
 	if ($("#teacherStudentTableBody")) {
 		$("#teacherStudentTableBody").innerHTML = state.students.length ? state.students.slice(0, 12).map((student) => `
 			<tr>
-				<td>${escapeHtml(student.email)}</td>
+				<td>${escapeHtml(student.displayName || student.email)}</td>
 				<td><span class="student-row-status">${escapeHtml(readableStatus(student.status))}</span><button type="button" class="student-more-button" data-student-actions="${escapeHtml(student.id)}" aria-label="Acciones para ${escapeHtml(student.email)}">•••</button></td>
 			</tr>
 		`).join("") : `<tr><td colspan="2">Sin alumnos visibles.</td></tr>`;
@@ -2807,7 +2839,7 @@ function renderStudents() {
 
 	if ($("#targetStudent")) {
 		$("#targetStudent").innerHTML = `<option value="">Toda la clase</option>` + state.students.map((student) => `
-			<option value="${escapeHtml(student.id)}">${escapeHtml(student.email)}</option>
+			<option value="${escapeHtml(student.id)}">${escapeHtml(student.displayName || student.email)}</option>
 		`).join("");
 	}
 	renderStudentBreakdown();
